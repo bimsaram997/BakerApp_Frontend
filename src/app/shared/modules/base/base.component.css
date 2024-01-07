@@ -1,0 +1,13 @@
+mat-sidenav-container {
+  height: 100%;
+}
+
+mat-sidenav {
+  width: 240px;
+  min-width: 0;
+}
+
+mat-sidenav-content {
+  overflow: auto; /* Enable scrolling content within the content area if needed */
+  height: 100%;
+}

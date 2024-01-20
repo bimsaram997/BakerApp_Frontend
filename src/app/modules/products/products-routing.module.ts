@@ -4,7 +4,12 @@ import { AddFoodItemComponent } from './add-food-item/add-food-item.component';
 import { FoodListComponent } from './food-list/food-list.component';
 
 
-const routes: Routes = [{ path: '', component: FoodListComponent }, { path: 'addFoodItem', component: AddFoodItemComponent}];
+const routes: Routes = [
+  { path: 'product', component: FoodListComponent},
+  { path: 'add/:mode/:id', component: AddFoodItemComponent },
+
+
+];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],

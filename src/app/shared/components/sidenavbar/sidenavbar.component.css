@@ -1,3 +1,52 @@
+
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@300&family=Poppins:wght@300&family=Roboto:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300&display=swap');
+a {
+    text-decoration: none;
+    color: white;
+    padding: 10px;
+}
+
+a:hover,
+a:active {
+    color: black;
+}
+
+
+
+.heading-txt {
+    text-align: left;
+    font-size: 20px;
+    font-weight: bold;
+    padding-left: 10px;
+}
+
+
 .sidenav {
-  width: 200px;
+  width: 240px;
+}
+
+
+.menu-item {
+  display: flex;
+  align-items: center; /* Vertically center items */
+}
+
+.menu-image {
+  margin-right: 10px; /* Adjust this margin as needed */
+  width: 30px;
+  height: 30px;
+}
+
+.nav-caption {
+  display: inline-block; /* Ensures proper spacing between the image and the text */
+  padding-left: 6px;
+  font-weight: 500;
+  font-family: 'Roboto', sans-serif;
+  color: #03254c;
+  padding-top: 8px;
 }

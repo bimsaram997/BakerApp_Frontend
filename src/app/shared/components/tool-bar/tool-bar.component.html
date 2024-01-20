@@ -1,0 +1,22 @@
+<!-- toolbar.component.html -->
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-12">
+      <mat-toolbar class="mat-toolbar">
+        <div class="row w-100">
+          <div class="col-md-8 d-flex align-items-center content">
+            <span>{{ toolbarContent }}</span>
+          </div>
+          <div class="col-md-4 d-flex justify-content-end align-items-center content">
+            <ng-container *ngFor="let button of customButtons; let last = last">
+              <button mat-stroked-button (click)="handleButtonClick(button)" class="button-with-border">
+                {{ button }}
+              </button>
+              <span *ngIf="!last" class="ms-2"></span> <!-- Add a small margin between buttons -->
+            </ng-container>
+          </div>
+        </div>
+      </mat-toolbar>
+    </div>
+  </div>
+</div>

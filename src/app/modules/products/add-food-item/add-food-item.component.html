@@ -1,1 +1,31 @@
-<p>add-food-item works!</p>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-12">
+      <app-tool-bar></app-tool-bar>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <table class="skeleton-table">
+        <thead>
+          <tr>
+            <th *ngFor="let col of columns" class="skeleton-cell-th"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let row of rows; let i = index">
+            <tr>
+              <td *ngFor="let col of columns" class="skeleton-cell"></td>
+            </tr>
+            <!-- Add a horizontal line after each row -->
+            <tr class="skeleton-hr-row">
+              <td [attr.colspan]="columns.length">
+                <hr class="skeleton-hr" />
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -4,6 +4,7 @@ import { MaterialModule } from '../../material.module';
 import { LoginComponent } from './login/login.component';
 import { MainheaderComponent } from './mainheader/mainheader.component';
 import { SidenavbarComponent } from './sidenavbar/sidenavbar.component';
+import { ToolBarComponent } from './tool-bar/tool-bar.component';
 
 
 
@@ -12,7 +13,8 @@ import { SidenavbarComponent } from './sidenavbar/sidenavbar.component';
   declarations: [
     LoginComponent,
     MainheaderComponent,
-    SidenavbarComponent
+    SidenavbarComponent,
+    ToolBarComponent
   ],
   imports: [
     CommonModule,
@@ -20,6 +22,6 @@ import { SidenavbarComponent } from './sidenavbar/sidenavbar.component';
 
   ],
   exports: [MainheaderComponent,
-    SidenavbarComponent],
+    SidenavbarComponent, ToolBarComponent],
 })
 export class ComponentsModule { }

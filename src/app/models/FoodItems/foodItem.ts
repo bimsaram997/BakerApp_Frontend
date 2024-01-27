@@ -34,7 +34,7 @@ export class UpdateFoodItem {
   AddedDate: string | null;
   FoodDescription: string;
   FoodPrice: number | null;
-  ImageURL: string;
+  ImageURL: any | null;
   IsSold: boolean | null;
   Id: number | null;
 }

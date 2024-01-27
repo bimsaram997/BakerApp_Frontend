@@ -5,6 +5,9 @@ import { FoodListComponent } from './food-list/food-list.component';
 import { ProductRoutingModule } from './products-routing.module';
 import { MaterialModule } from '../../material.module';
 import { ComponentsModule } from '../../shared/components/components.module';
+import { NotifierModule } from 'angular-notifier';
+import { ToastrModule } from 'ngx-toastr';
+
 
 
 

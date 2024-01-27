@@ -8,22 +8,22 @@
     <div class="col-md-3">
       <img
         class="food-image"
-        src="https://cdn3.tmbi.com/secure/RMS/attachments/37/1200x1200/40-Minute-Hamburger-Buns_exps15221_W101973175B07_07_1bC_RMS.jpg"
+        [src]="imagePreview"
         alt=""
         srcset=""
       />
     </div>
     <div class="col-md-9">
       <form action="" [formGroup]="foodItemGroup">
-        <div class="row">
+        <div class="row" *ngIf="isEdit">
           <div class="col-md-6">
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="outline" >
               <mat-label>Food item code</mat-label>
               <input matInput placeholder="Placeholder"  formControlName="foodCode"/>
             </mat-form-field>
           </div>
           <div class="col-md-6">
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="outline" >
               <mat-label>Batch Id</mat-label>
               <input matInput placeholder="Placeholder"  formControlName="batchId"/>
             </mat-form-field>
@@ -78,10 +78,14 @@
               <mat-label>Food description</mat-label>
               <textarea matInput formControlName="foodDescription"></textarea>
             </mat-form-field>
-
+          </div>
+          <div class="col-md-3">
+            <input type="file" #fileInput style="display: none" (change)="onFileChange($event)" />
+            <button mat-raised-button (click)="triggerFileInput()">Basic</button>
           </div>
         </div>
       </form>
     </div>
   </div>
 </div>
+

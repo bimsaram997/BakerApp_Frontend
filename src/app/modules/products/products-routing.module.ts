@@ -7,6 +7,7 @@ import { FoodListComponent } from './food-list/food-list.component';
 const routes: Routes = [
   { path: 'product', component: FoodListComponent},
   { path: 'add/:mode/:id', component: AddFoodItemComponent },
+  { path: 'add/:mode', component: AddFoodItemComponent },
 
 
 ];

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ToolbarService } from '../../../services/layout/toolbar.service';
@@ -10,6 +10,8 @@ import { FoodItemsService } from '../../../services/bakery/food-items.service';
 import { FoodItemVM, UpdateFoodItem } from '../../../models/FoodItems/foodItem';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import { NotifierService } from 'angular-notifier';
+import { ToastrService } from 'ngx-toastr';
 @Component({
   selector: 'app-add-food-item',
   templateUrl: './add-food-item.component.html',
@@ -24,29 +26,44 @@ export class AddFoodItemComponent implements OnInit, OnDestroy {
   foodItemGroup: FormGroup;
   batchId: any;
   updateFoodItem: UpdateFoodItem = new UpdateFoodItem();
+  isEdit: boolean = false;
+  @ViewChild('fileInput') fileInput: ElementRef;
+  imagePreview: string;
+
+
   constructor(
     private route: ActivatedRoute,
     private toolbarService: ToolbarService,
     private foodTypeService: FoodTypeService,
     private fb: FormBuilder,
     private foodItemService: FoodItemsService,
-    private dialog: MatDialog
-  ) {}
+    private toastr: ToastrService,
+    private dialog: MatDialog,
+    private cd: ChangeDetectorRef,
+  ) {
+  }
   ngOnInit() {
     this.route.params.subscribe((params) => {
       this.mode = params['mode'];
-      this.foodItemId = +params['id'];
+      const id: number= +params['id'];
+      if (id !== null) {
+        this.foodItemId  =  id;
+      }
     });
     this.createFormGroup();
-    this.header = 'Add food item';
+
     this.toolbarService.updateCustomButtons([ToolbarButtonType.Save, ToolbarButtonType.Cancel]);
-    this.toolbarService.updateToolbarContent(this.header);
     this.getListSimpleFoodTypes();
     if(this.mode === 'edit') {
+      this.isEdit =  true;
       this.header = 'Update food item';
       this.getFoodItemById(this.foodItemId);
       this.disableFields();
+    } else {
+      this.header = 'Add food item';
     }
+    this.toolbarService.updateToolbarContent(this.header);
+
     this.subscription.push(this.toolbarService.buttonClick$.subscribe((buttonType) => {
       if (buttonType) {
         this.handleButtonClick(buttonType);
@@ -82,7 +99,8 @@ export class AddFoodItemComponent implements OnInit, OnDestroy {
       addedDate: [null],
       batchId: [null],
       available: [false],
-      foodDescription: [null]
+      foodDescription: [null],
+      image:  [null]
     });
   }
 
@@ -110,9 +128,11 @@ export class AddFoodItemComponent implements OnInit, OnDestroy {
         addedDate: foodItem.AddedDate,
         batchId: foodItem.BatchId,
         available: foodItem.IsSold,
-        foodDescription: foodItem.FoodDescription
+        foodDescription: foodItem.FoodDescription,
+        image: foodItem.ImageURL,
       });
     }
+    this.imagePreview = foodItem.ImageURL;
     this.batchId =  this.foodItemGroup.controls['batchId'].value;
   }
 
@@ -129,25 +149,49 @@ export class AddFoodItemComponent implements OnInit, OnDestroy {
       if (result) {
         this.updateItem();
       }
-      // Handle the result here
-      console.log('Dialog closed with result:', result);
     });
   }
 
   updateItem(): void {
+
+    this.updateFoodItem.ImageURL =  this.foodItemGroup.controls['image'].value;
     this.updateFoodItem.FoodDescription = this.foodItemGroup.controls['foodDescription'].value;
     this.updateFoodItem.AddedDate = this.foodItemGroup.controls['addedDate'].value;
-    this.updateFoodItem.ImageURL = 'sdsd'
     this.updateFoodItem.FoodPrice = this.foodItemGroup.controls['foodPrice'].value;
     this.updateFoodItem.IsSold = this.foodItemGroup.controls['available'].value;
     this.updateFoodItem.Id = this.foodItemId;
     this.subscription.push(this.foodItemService.updateItemsByBatchId(this.batchId, this.updateFoodItem).subscribe((res: any)=>{
       console.log(res);
       if(res != null) {
+        this.toastr.success('Success!', 'Food item updates!');
         this.getFoodItemById(res);
       }
     }))
 
+  }
+  triggerFileInput() {
+    // Trigger a click on the file input when the button is clicked
+    this.fileInput.nativeElement.click();
+  }
+  onFileChange(event: any): void {
+    const fileEvnet = event.target.files[0];
+    const uploadData = new FormData();
+    // uploadData.append('file', fileItem);
+    let reader = new FileReader(); // HTML5 FileReader API
+    let file = event.target.files[0];
+    if (event.target.files && event.target.files[0]) {
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        // this.imagePreview = reader.result;
+        this.imagePreview = reader.result as string;
+        console.log(file.name);
+        this.foodItemGroup.patchValue({
+          image: reader.result,
+        });
+      };
+      this.cd.markForCheck();
+    }
+    this.foodItemGroup.patchValue({image:file})
   }
 
   ngOnDestroy(): void {

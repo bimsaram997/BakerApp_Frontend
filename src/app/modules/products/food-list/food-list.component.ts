@@ -77,6 +77,7 @@ export class FoodListComponent implements OnInit, OnDestroy {
       addedDate: [null],
       batchId: [null],
       available: [null],
+      image: [null]
 
     });
   }
@@ -127,7 +128,7 @@ export class FoodListComponent implements OnInit, OnDestroy {
 
   private handleButtonClick(buttonType: ToolbarButtonType): void {
     switch (buttonType) {
-      case ToolbarButtonType.Save:
+      case ToolbarButtonType.New:
         this.handleSaveButton();
         break;
       case ToolbarButtonType.Update:
@@ -146,8 +147,7 @@ export class FoodListComponent implements OnInit, OnDestroy {
   }
 
   private handleSaveButton(): void {
-    console.log('Save button clicked - Dummy implementation');
-    // Add your save logic here
+    this.router.navigate(['base/product/add', 'add']);
   }
 
   private handleUpdateButton(): void {

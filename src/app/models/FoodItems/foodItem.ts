@@ -17,3 +17,24 @@ export class PaginatedFoodItems {
   PageSize: number;
 }
 
+export class FoodItemVM {
+  Id: number;
+  FoodCode: string;
+  AddedDate: string | null;
+  FoodDescription: string;
+  FoodPrice: number | null;
+  ImageURL: string;
+  FoodTypeId: number;
+  BatchId: number;
+  FoodTypeName: string | null;
+  IsSold: boolean | null;
+}
+
+export class UpdateFoodItem {
+  AddedDate: string | null;
+  FoodDescription: string;
+  FoodPrice: number | null;
+  ImageURL: string;
+  IsSold: boolean | null;
+  Id: number | null;
+}

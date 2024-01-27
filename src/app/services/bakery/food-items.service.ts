@@ -3,6 +3,7 @@ import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ProductListAdvanceFilter } from '../../models/FoodItems/productListAdvanceFilter';
+import { UpdateFoodItem } from '../../models/FoodItems/foodItem';
 
 
 @Injectable({
@@ -21,5 +22,13 @@ export class FoodItemsService {
   public getFoodItems(filter: ProductListAdvanceFilter): Observable<any> {
 
     return this.http.post(`${this.myUrl}/FoodItem/listAdvance`, filter);
+  }
+
+  public getFoodItemById(id: number): Observable<any> {
+    return this.http.get(`${this.myUrl}/FoodItem/getFoodItemId/${id}`);
+  }
+
+  public updateItemsByBatchId(batchId: number, updateItem: UpdateFoodItem): Observable<any> {
+    return this.http.post(`${this.myUrl}/FoodItem/updateItemsByBatchId/${batchId}`, updateItem)
   }
 }

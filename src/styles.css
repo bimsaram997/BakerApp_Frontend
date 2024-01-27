@@ -17,5 +17,59 @@ mat-form-field {
   color: blue;
   text-decoration: underline;
   cursor: pointer;
-
 }
+
+/* Add this CSS in your component's styles or a separate CSS file */
+
+/* Change font size and color for mat-form-field values */
+.mat-form-field-appearance-outline .mat-form-field-infix {
+  color: #0d276d;
+  font-size: larger;
+  font-weight: 500;
+}
+
+/* Change font size and color for mat-select values */
+.mat-select-value-text {
+  color: #0d276d;
+  font-size: larger;
+  font-weight: 500;
+}
+
+/* Change font size and color for input in mat-form-field */
+.mat-input-element {
+  color: #0d276d;
+  font-size: larger;
+  font-weight: 500;
+}
+
+/* Change font size and color for textarea in mat-form-field */
+.mat-input-element[textarea] {
+  color: #0d276d;
+  font-size: larger;
+  font-weight: 500;
+}
+
+
+/* Add styling for mat-datepicker */
+.mat-datepicker-content {
+  color: #0d276d;
+  font-size: larger;
+  font-weight: 500;
+}
+
+.mat-mdc-form-field:not(.mat-form-field-no-animations) .mdc-text-field__input {
+  transition: opacity 150ms 0ms cubic-bezier(0.4, 0, 0.2, 1);
+  color: #0d276d;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.mat-mdc-select-value-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #0d276d;
+  font-size: 15px;
+  font-weight: 500;
+}
+

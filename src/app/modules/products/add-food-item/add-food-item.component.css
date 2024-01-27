@@ -1,31 +1,10 @@
-.skeleton-table {
+.food-image {
   width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
+  border-radius: 20px
 }
 
-.skeleton-cell {
-  padding: 12px;
-  background-color: #f2f2f2;
-  border: 11px solid #fff;
-  position: relative;
-}
-
-.skeleton-cell-th {
-  padding: 27px 12px;
-    background-color: #f2f2f2;
-    border: 22px solid #fff;
-    position: relative;
-}
-
-.skeleton-hr-row {
-  height: 1px;
-}
-
-.skeleton-hr {
-  border: none;
-  height: 1px;
-  background-color: #ddd;
-  margin: 0;
-  width: 100%;
+.form-body {
+  margin-top: 72px;
+  margin-left: 20px;
+  margin-right: 20px;
 }

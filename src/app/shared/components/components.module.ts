@@ -5,6 +5,7 @@ import { LoginComponent } from './login/login.component';
 import { MainheaderComponent } from './mainheader/mainheader.component';
 import { SidenavbarComponent } from './sidenavbar/sidenavbar.component';
 import { ToolBarComponent } from './tool-bar/tool-bar.component';
+import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
 
 
 
@@ -14,8 +15,10 @@ import { ToolBarComponent } from './tool-bar/tool-bar.component';
     LoginComponent,
     MainheaderComponent,
     SidenavbarComponent,
-    ToolBarComponent
+    ToolBarComponent,
+    ConfirmDialogComponent
   ],
+  entryComponents: [ConfirmDialogComponent],
   imports: [
     CommonModule,
     MaterialModule

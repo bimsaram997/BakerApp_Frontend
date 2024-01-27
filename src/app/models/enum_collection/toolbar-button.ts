@@ -1,5 +1,6 @@
 export enum ToolbarButtonType {
   Save = 'Save',
   Update = 'Update',
-  New = 'New'
+  New = 'New',
+  Cancel = 'Cancel'
 }

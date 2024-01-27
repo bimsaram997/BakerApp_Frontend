@@ -4,28 +4,84 @@
       <app-tool-bar></app-tool-bar>
     </div>
   </div>
-  <div class="row">
-    <div class="col-md-12">
-      <table class="skeleton-table">
-        <thead>
-          <tr>
-            <th *ngFor="let col of columns" class="skeleton-cell-th"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <ng-container *ngFor="let row of rows; let i = index">
-            <tr>
-              <td *ngFor="let col of columns" class="skeleton-cell"></td>
-            </tr>
-            <!-- Add a horizontal line after each row -->
-            <tr class="skeleton-hr-row">
-              <td [attr.colspan]="columns.length">
-                <hr class="skeleton-hr" />
-              </td>
-            </tr>
-          </ng-container>
-        </tbody>
-      </table>
+  <div class="row form-body">
+    <div class="col-md-3">
+      <img
+        class="food-image"
+        src="https://cdn3.tmbi.com/secure/RMS/attachments/37/1200x1200/40-Minute-Hamburger-Buns_exps15221_W101973175B07_07_1bC_RMS.jpg"
+        alt=""
+        srcset=""
+      />
+    </div>
+    <div class="col-md-9">
+      <form action="" [formGroup]="foodItemGroup">
+        <div class="row">
+          <div class="col-md-6">
+            <mat-form-field appearance="outline">
+              <mat-label>Food item code</mat-label>
+              <input matInput placeholder="Placeholder"  formControlName="foodCode"/>
+            </mat-form-field>
+          </div>
+          <div class="col-md-6">
+            <mat-form-field appearance="outline">
+              <mat-label>Batch Id</mat-label>
+              <input matInput placeholder="Placeholder"  formControlName="batchId"/>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <mat-form-field appearance="outline">
+              <mat-label>Food type</mat-label>
+              <mat-select  formControlName="foodTypId">
+                <mat-option
+                  *ngFor="let foodType of foodTypes"
+                  [value]="foodType.Id">
+                  {{ foodType.FoodTypeName }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-md-6">
+            <mat-form-field appearance="outline">
+              <mat-label>Food price</mat-label>
+              <input matInput type="number" placeholder="0" formControlName="foodPrice" />
+              <span matTextPrefix>$&nbsp;</span>
+                  <span matTextSuffix>,00</span>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <mat-form-field appearance="outline">
+              <mat-label>Availability</mat-label>
+              <mat-select formControlName="available">
+                <mat-option [value]="false">Yes</mat-option>
+                <mat-option [value]="true">No</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-md-6">
+            <mat-form-field appearance="outline" >
+              <mat-label>Added date</mat-label>
+              <input matInput [matDatepicker]="picker" formControlName="addedDate" >
+              <mat-hint>MM/DD/YYYY</mat-hint>
+              <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <mat-form-field appearance="outline">
+              <mat-label>Food description</mat-label>
+              <textarea matInput formControlName="foodDescription"></textarea>
+            </mat-form-field>
+
+          </div>
+        </div>
+      </form>
     </div>
   </div>
 </div>

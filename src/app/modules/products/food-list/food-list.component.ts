@@ -24,7 +24,7 @@ export class FoodListComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = ['FoodCode','BatchId', 'FoodTypeName', 'FoodPrice', 'AddedDate', 'IsSold', 'FoodDescription', 'Action'];
   dataSource = new MatTableDataSource<AllFoodItemVM>();
   foodTypes: FoodType[] = [];
-  foodTypeForm: FormGroup;
+  searchFoodItemForm: FormGroup;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
@@ -55,7 +55,7 @@ export class FoodListComponent implements OnInit, OnDestroy {
   }
 
   valueChanges(): void {
-    // this.foodTypeForm.valueChanges.subscribe((res: any) => {
+    // this.searchFoodItemForm.valueChanges.subscribe((res: any) => {
     //   this.getFoodItemsList();
     // })
   }
@@ -65,12 +65,12 @@ export class FoodListComponent implements OnInit, OnDestroy {
   }
 
   clear(): void {
-    this.foodTypeForm.reset();
+    this.searchFoodItemForm.reset();
     this.getFoodItemsList();
   }
 
   searchFormGroup(): void {
-    this.foodTypeForm = this.fb.group({
+    this.searchFoodItemForm = this.fb.group({
       foodTypId: [null],
       foodPrice: [null],
       searchString: [null],
@@ -104,12 +104,12 @@ export class FoodListComponent implements OnInit, OnDestroy {
     const filter: ProductListAdvanceFilter = {
       SortBy: this.sort?.active || 'Id',
       IsAscending: true,
-      FoodTypeId:  this.foodTypeForm.get('foodTypId').value,
-      FoodPrice: this.foodTypeForm.get('foodPrice').value,
-      SearchString: this.foodTypeForm.get('searchString').value,
-      AddedDate: this.foodTypeForm.get('addedDate').value ?? null,
-      BatchId: this.foodTypeForm.get('batchId').value,
-      Available: this.foodTypeForm.get('available').value,
+      FoodTypeId:  this.searchFoodItemForm.get('foodTypId').value,
+      FoodPrice: this.searchFoodItemForm.get('foodPrice').value,
+      SearchString: this.searchFoodItemForm.get('searchString').value,
+      AddedDate: this.searchFoodItemForm.get('addedDate').value ?? null,
+      BatchId: this.searchFoodItemForm.get('batchId').value,
+      Available: this.searchFoodItemForm.get('available').value,
 
       Pagination: {
         PageIndex: this.paginator?.pageIndex + 1 || 1,

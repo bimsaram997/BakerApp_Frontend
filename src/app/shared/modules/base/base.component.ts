@@ -10,7 +10,11 @@ import { fadeInAnimation } from '../../_animations';
 })
 export class BaseComponent {
   public isSidenavOpen = true;
-  ngOnInit(): void {}
+
+  ngOnInit(): void {
+    //const config  = require('assets/config.json'); //use service for import this config
+    //test config.font
+  }
   toggleSidenav(): void {
     this.isSidenavOpen = !this.isSidenavOpen;
   }

@@ -1,17 +1,18 @@
 import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription, concatAll } from 'rxjs';
 import { ToolbarService } from '../../../services/layout/toolbar.service';
 import { ToolbarButtonType } from 'src/app/models/enum_collection/toolbar-button';
 import { FoodTypeService } from '../../../services/bakery/food-type.service';
 import { FoodType } from '../../../models/FoodItems/foodType';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { FoodItemsService } from '../../../services/bakery/food-items.service';
-import { FoodItemVM, UpdateFoodItem } from '../../../models/FoodItems/foodItem';
+import { AddFoodItem, FoodItemVM, UpdateFoodItem } from '../../../models/FoodItems/foodItem';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { NotifierService } from 'angular-notifier';
 import { ToastrService } from 'ngx-toastr';
+import { CustomValidators } from '../../../shared/utils/custom-validators';
 @Component({
   selector: 'app-add-food-item',
   templateUrl: './add-food-item.component.html',
@@ -26,10 +27,12 @@ export class AddFoodItemComponent implements OnInit, OnDestroy {
   foodItemGroup: FormGroup;
   batchId: any;
   updateFoodItem: UpdateFoodItem = new UpdateFoodItem();
+  newFoodItem: AddFoodItem = new AddFoodItem();
   isEdit: boolean = false;
   @ViewChild('fileInput') fileInput: ElementRef;
   imagePreview: string;
-
+  foodCount:FormControl;
+  saveCloseValue: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -40,6 +43,7 @@ export class AddFoodItemComponent implements OnInit, OnDestroy {
     private toastr: ToastrService,
     private dialog: MatDialog,
     private cd: ChangeDetectorRef,
+    private router: Router
   ) {
   }
   ngOnInit() {
@@ -52,7 +56,7 @@ export class AddFoodItemComponent implements OnInit, OnDestroy {
     });
     this.createFormGroup();
 
-    this.toolbarService.updateCustomButtons([ToolbarButtonType.Save, ToolbarButtonType.Cancel]);
+    this.toolbarService.updateCustomButtons([ToolbarButtonType.Save, ToolbarButtonType.SaveClose, ToolbarButtonType.Cancel ]);
     this.getListSimpleFoodTypes();
     if(this.mode === 'edit') {
       this.isEdit =  true;
@@ -69,15 +73,24 @@ export class AddFoodItemComponent implements OnInit, OnDestroy {
         this.handleButtonClick(buttonType);
       }
     }));
+    this.setValidators();
   }
 
   private handleButtonClick(buttonType: ToolbarButtonType): void {
     switch (buttonType) {
       case ToolbarButtonType.Save:
-        this.openDialog();
+        this.isEdit ? this.openDialog(): this.addFoodItem();
+        this.saveCloseValue = false;
         break;
       case ToolbarButtonType.Update:
         //this.handleUpdateButton();
+        break;
+      case ToolbarButtonType.SaveClose:
+        this.saveCloseValue = true;
+        this.isEdit ? this.openDialog(): this.addFoodItem();
+        break;
+      case ToolbarButtonType.Cancel:
+        this.saveClose();
         break;
       default:
         console.warn(`Unknown button type: ${buttonType}`);
@@ -93,15 +106,17 @@ export class AddFoodItemComponent implements OnInit, OnDestroy {
 
   createFormGroup(): void {
     this.foodItemGroup = this.fb.group({
-      foodTypId: [null],
-      foodPrice: [null],
+      foodTypId: [null, Validators.required],
+      foodPrice: [null, Validators.required],
       foodCode: [null],
-      addedDate: [null],
+      addedDate: [null, Validators.required],
       batchId: [null],
       available: [false],
-      foodDescription: [null],
-      image:  [null]
+      foodDescription: [null, Validators.required],
+      image:  [null],
     });
+
+    this.foodCount = new FormControl(null);
   }
 
 
@@ -137,37 +152,97 @@ export class AddFoodItemComponent implements OnInit, OnDestroy {
   }
 
   openDialog(): void {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '500px', // Set the width as per your requirement
-      data: {
-        title: 'Confirm Save',
-        text: `You are updating a record with Batch ID ${this.batchId}. This will also update other records with the same Batch ID. Are you sure you want to proceed?`,
-      }
+    if (this.isEdit) {
+      const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+        width: '500px', // Set the width as per your requirement
+        data: {
+          title: 'Confirm Save',
+          text: `You are updating a record with Batch ID ${this.batchId}. This will also update other records with the same Batch ID. Are you sure you want to proceed?`,
+        }
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          this.updateItem();
+        }
+      });
+    }
+
+  }
+
+  addFoodItem(): void {
+    Object.values(this.foodItemGroup.controls).forEach(control => {
+      control.markAsTouched();
+      this.foodCount.markAsTouched();
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.updateItem();
+    if (this.foodItemGroup.valid) {
+
+      try {
+        const formData = this.foodItemGroup.value;
+        const addFoodItem: AddFoodItem = {
+          FoodDescription: formData.foodDescription,
+          FoodPrice: formData.foodPrice,
+          ImageURL: formData.image,
+          AddedDate: formData.addedDate,
+          FoodTypeId: formData.foodTypId,
+          FoodItemCount: this.foodCount.value
+        };
+        console.log(addFoodItem);
+        const updateResponse = this.foodItemService.addFoodItems( addFoodItem);
+        this.subscription.push(updateResponse.subscribe((res: any) => {
+          console.log(res);
+          if (res != null) {
+            this.toastr.success('Success!', 'Food item updated!');
+            this.getFoodItemById(res);
+          }
+        }));
+        // Now you can do something with the addFoodItem object, such as sending it to a service
+        if ( this.saveCloseValue) {
+          this.saveClose();
+        }
+      }catch (error) {
+        console.error('An error occurred while updating the food item:', error);
+        this.toastr.error('Error!', 'Failed to update food item.');
       }
-    });
+    }
   }
 
   updateItem(): void {
+    try {
+      this.updateFoodItem.ImageURL =  this.foodItemGroup.controls['image'].value;
+      this.updateFoodItem.FoodDescription = this.foodItemGroup.controls['foodDescription'].value;
+      this.updateFoodItem.AddedDate = this.foodItemGroup.controls['addedDate'].value;
+      this.updateFoodItem.FoodPrice = this.foodItemGroup.controls['foodPrice'].value;
+      this.updateFoodItem.IsSold = this.foodItemGroup.controls['available'].value;
+      this.updateFoodItem.Id = this.foodItemId;
 
-    this.updateFoodItem.ImageURL =  this.foodItemGroup.controls['image'].value;
-    this.updateFoodItem.FoodDescription = this.foodItemGroup.controls['foodDescription'].value;
-    this.updateFoodItem.AddedDate = this.foodItemGroup.controls['addedDate'].value;
-    this.updateFoodItem.FoodPrice = this.foodItemGroup.controls['foodPrice'].value;
-    this.updateFoodItem.IsSold = this.foodItemGroup.controls['available'].value;
-    this.updateFoodItem.Id = this.foodItemId;
-    this.subscription.push(this.foodItemService.updateItemsByBatchId(this.batchId, this.updateFoodItem).subscribe((res: any)=>{
-      console.log(res);
-      if(res != null) {
-        this.toastr.success('Success!', 'Food item updates!');
-        this.getFoodItemById(res);
-      }
-    }))
+      const updateResponse = this.foodItemService.updateItemsByBatchId(this.batchId, this.updateFoodItem);
+      this.subscription.push(updateResponse.subscribe((res: any) => {
+        console.log(res);
+        if (res != null) {
+          this.toastr.success('Success!', 'Food item updated!');
+          this.getFoodItemById(res);
+        }
+      }));
+    } catch (error) {
+      console.error('An error occurred while updating the food item:', error);
+      this.toastr.error('Error!', 'Failed to update food item.');
+    }
+  }
 
+
+  setValidators(): void {
+    if(!this.isEdit) {
+      this.foodCount.setValidators([Validators.required, CustomValidators.nonNegative()]);
+    } else {
+      this.foodCount.clearValidators();
+    this.foodCount.updateValueAndValidity();
+    }
+  }
+
+  saveClose(): void {
+    this.router.navigate(['base/product/product'])
   }
   triggerFileInput() {
     // Trigger a click on the file input when the button is clicked

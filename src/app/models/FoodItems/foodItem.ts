@@ -38,3 +38,13 @@ export class UpdateFoodItem {
   IsSold: boolean | null;
   Id: number | null;
 }
+
+
+export class AddFoodItem {
+  FoodDescription: string;
+  FoodPrice: number | null;
+  ImageURL: string;
+  AddedDate: string | null;
+  FoodTypeId: number;
+  FoodItemCount: number;
+}

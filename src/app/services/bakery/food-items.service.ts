@@ -3,7 +3,7 @@ import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ProductListAdvanceFilter } from '../../models/FoodItems/productListAdvanceFilter';
-import { UpdateFoodItem } from '../../models/FoodItems/foodItem';
+import { AddFoodItem, UpdateFoodItem } from '../../models/FoodItems/foodItem';
 
 
 @Injectable({
@@ -31,4 +31,8 @@ export class FoodItemsService {
   public updateItemsByBatchId(batchId: number, updateItem: UpdateFoodItem): Observable<any> {
     return this.http.post(`${this.myUrl}/FoodItem/updateItemsByBatchId/${batchId}`, updateItem)
   }
+
+  public addFoodItems( addFoodItem: AddFoodItem): Observable<any> {
+    return this.http.post(`${this.myUrl}/FoodItem/addFood`, addFoodItem );
+}
 }

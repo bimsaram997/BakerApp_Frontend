@@ -41,6 +41,9 @@
                   {{ foodType.FoodTypeName }}
                 </mat-option>
               </mat-select>
+              <mat-error *ngIf="foodItemGroup.get('foodTypId').hasError('required')">
+                Food type is required
+            </mat-error>
             </mat-form-field>
           </div>
           <div class="col-md-6">
@@ -49,7 +52,11 @@
               <input matInput type="number" placeholder="0" formControlName="foodPrice" />
               <span matTextPrefix>$&nbsp;</span>
                   <span matTextSuffix>,00</span>
+                  <mat-error *ngIf="foodItemGroup.get('foodPrice').hasError('required')">
+                    Price is required
+                </mat-error>
             </mat-form-field>
+
           </div>
         </div>
         <div class="row">
@@ -69,6 +76,9 @@
               <mat-hint>MM/DD/YYYY</mat-hint>
               <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
               <mat-datepicker #picker></mat-datepicker>
+              <mat-error *ngIf="foodItemGroup.get('addedDate').hasError('required') && foodItemGroup.get('foodDescription').touched">
+                Date is required
+            </mat-error>
             </mat-form-field>
           </div>
         </div>
@@ -77,9 +87,33 @@
             <mat-form-field appearance="outline">
               <mat-label>Food description</mat-label>
               <textarea matInput formControlName="foodDescription"></textarea>
+              <mat-error *ngIf="foodItemGroup.get('foodDescription').hasError('required')">
+                Description is required
+            </mat-error>
             </mat-form-field>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-4" *ngIf="!isEdit">
+            <mat-form-field appearance="outline">
+              <mat-label>Food count</mat-label>
+              <input matInput type="number" placeholder="0" [formControl]="foodCount" />
+
+              <mat-error *ngIf="foodCount.invalid && (foodCount.dirty || foodCount.touched)">
+                  <span *ngIf="foodCount.hasError('required')">
+                      Count is required
+                  </span>
+                  <span *ngIf="foodCount.hasError('min')">
+                      Minimum value is 0
+                  </span>
+                  <span *ngIf="foodCount.hasError('max')">
+                      Maximum value is 100
+                  </span>
+                  <span *ngIf="foodCount.hasError('nonNegative')">
+                    Count cannot be negative
+                </span>
+              </mat-error>
+          </mat-form-field>
+          </div>
+          <div class="col-md-2">
             <input type="file" #fileInput style="display: none" (change)="onFileChange($event)" />
             <button mat-raised-button (click)="triggerFileInput()">Basic</button>
           </div>

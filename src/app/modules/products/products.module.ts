@@ -7,6 +7,7 @@ import { MaterialModule } from '../../material.module';
 import { ComponentsModule } from '../../shared/components/components.module';
 import { NotifierModule } from 'angular-notifier';
 import { ToastrModule } from 'ngx-toastr';
+import { MatRippleModule } from '@angular/material/core';
 
 
 
@@ -21,6 +22,7 @@ import { ToastrModule } from 'ngx-toastr';
     ProductRoutingModule,
     MaterialModule,
     ComponentsModule,
+    MatRippleModule
   ]
 })
 export class ProductsModule { }

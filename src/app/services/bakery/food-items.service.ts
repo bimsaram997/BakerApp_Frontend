@@ -16,7 +16,7 @@ export class FoodItemsService {
 
   constructor(private http: HttpClient) {
     //this.currntUserSubject = new BehaviorSubject<any>(JSON.parse(localStorage.getItem('currentUser')));
-    // this.currentUser = this.currntUserSubject.asObservable()
+    // this.currentUser = this.currntUserSubject.asObservable() test
   }
 
   public getFoodItems(filter: ProductListAdvanceFilter): Observable<any> {

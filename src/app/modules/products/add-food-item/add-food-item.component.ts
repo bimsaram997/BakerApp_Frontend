@@ -10,7 +10,6 @@ import { FoodItemsService } from '../../../services/bakery/food-items.service';
 import { AddFoodItem, FoodItemVM, UpdateFoodItem } from '../../../models/FoodItems/foodItem';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
-import { NotifierService } from 'angular-notifier';
 import { ToastrService } from 'ngx-toastr';
 import { CustomValidators } from '../../../shared/utils/custom-validators';
 @Component({

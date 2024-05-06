@@ -21,7 +21,7 @@ import { Router } from '@angular/router';
 export class FoodListComponent implements OnInit, OnDestroy {
   header: string = 'Food items';
   subscription: Subscription[] = [];
-  displayedColumns: string[] = ['FoodCode','BatchId', 'FoodTypeName', 'FoodPrice', 'AddedDate', 'IsSold', 'FoodDescription', 'Action'];
+  displayedColumns: string[] = ['FoodCode','BatchId', 'FoodTypeName', 'FoodPrice', 'AddedDate', 'ModifiedDate', 'IsSold', 'FoodDescription', 'Action'];
   dataSource = new MatTableDataSource<AllFoodItemVM>();
   foodTypes: FoodType[] = [];
   searchFoodItemForm: FormGroup;
@@ -44,13 +44,9 @@ export class FoodListComponent implements OnInit, OnDestroy {
     this.getListSimpleFoodTypes();
     this.valueChanges();
     this.getFoodItemsList();
-    this.subscription.push(
-      this.toolbarService.buttonClick$.subscribe((buttonType) => {
-        if (buttonType) {
-          this.handleButtonClick(buttonType);
-        }
-      })
-    );
+    this.toolbarService.subscribeToButtonClick((buttonType: ToolbarButtonType) => {
+      this.handleButtonClick(buttonType);
+    });
 
   }
 
@@ -104,7 +100,7 @@ export class FoodListComponent implements OnInit, OnDestroy {
   public getFoodItemsList(): void {
     const filter: ProductListAdvanceFilter = {
       SortBy: this.sort?.active || 'Id',
-      IsAscending: true,
+      IsAscending: false,
       FoodTypeId:  this.searchFoodItemForm.get('foodTypId').value,
       FoodPrice: this.searchFoodItemForm.get('foodPrice').value,
       SearchString: this.searchFoodItemForm.get('searchString').value,
@@ -129,7 +125,7 @@ export class FoodListComponent implements OnInit, OnDestroy {
   private handleButtonClick(buttonType: ToolbarButtonType): void {
     switch (buttonType) {
       case ToolbarButtonType.New:
-        this.handleSaveButton();
+        this.handleNewButton();
         break;
       case ToolbarButtonType.Update:
         this.handleUpdateButton();
@@ -146,7 +142,7 @@ export class FoodListComponent implements OnInit, OnDestroy {
 
   }
 
-  private handleSaveButton(): void {
+  public handleNewButton(): void {
     this.router.navigate(['base/product/add', 'add']);
   }
 
@@ -158,6 +154,7 @@ export class FoodListComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.toolbarService.updateCustomButtons([]);
     this.toolbarService.updateToolbarContent("");
+    this.toolbarService.unsubscribeAll();
     this.subscription.forEach((subscription: Subscription) => {
       subscription.unsubscribe();
     });

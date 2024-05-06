@@ -1,26 +1,27 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { AddFoodItemComponent } from './add-food-item/add-food-item.component';
-import { FoodListComponent } from './food-list/food-list.component';
-import { ProductRoutingModule } from './products-routing.module';
 import { MaterialModule } from '../../material.module';
 import { ComponentsModule } from '../../shared/components/components.module';
 import { MatRippleModule } from '@angular/material/core';
+import { RawMaterialRoutingModule } from './rawMaterials-routing.module';
+import { AddRawMaterialComponent } from './add-raw-material/add-raw-material.component';
+import { RawMaterialListComponent } from './raw-material-list/raw-material-list.component';
+
 
 
 
 
 @NgModule({
   declarations: [
-     AddFoodItemComponent,
-     FoodListComponent
+    AddRawMaterialComponent,
+    RawMaterialListComponent
   ],
   imports: [
     CommonModule,
-    ProductRoutingModule,
     MaterialModule,
     ComponentsModule,
-    MatRippleModule
+    MatRippleModule,
+    RawMaterialRoutingModule
   ]
 })
-export class ProductsModule { }
+export class RawMaterialModule { }

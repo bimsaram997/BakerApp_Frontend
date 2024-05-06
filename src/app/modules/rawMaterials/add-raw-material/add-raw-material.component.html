@@ -1,0 +1,89 @@
+<div class="container-fluid">
+    <div class="row">
+      <div class="col-md-12">
+        <app-tool-bar></app-tool-bar>
+      </div>
+    </div>
+    <div class="row form-body mt-2">
+      <div class="col-md-3">
+        <img
+          class="image"
+          [src]="imagePreview"
+          alt=""
+          srcset=""
+        />
+      </div>
+      <div class="col-md-9">
+        <form action="" [formGroup]="rawMaterialGroup" >
+          <div class="row">
+            <div class="col-md-6">
+              <mat-form-field appearance="outline" >
+                <mat-label>Raw material name</mat-label>
+                <input matInput placeholder="Placeholder"  formControlName="name"/>
+              </mat-form-field>
+            </div>
+            <div class="col-md-6">
+              <mat-form-field appearance="outline">
+                <mat-label>Quantity type</mat-label>
+                <mat-select  formControlName="rawMaterialQuantityType" (selectionChange)="selectType($event)">
+                  <mat-option
+                    *ngFor="let quantityType of quantityTypes"
+                    [value]="quantityType.rawMaterialQuantityType">
+                    {{ quantityType.name }}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="rawMaterialGroup.get('rawMaterialQuantityType').hasError('required')">
+                  Food type is required
+              </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+                <mat-form-field appearance="outline">
+                  <mat-label>Quantity</mat-label>
+                  <input matInput type="number" placeholder="0" [formControl]="quantity" />
+                      <span matTextSuffix>{{quantityType}}</span>
+                      <mat-error *ngIf="quantity.invalid && (quantity.dirty || quantity.touched)">
+                        <span *ngIf="quantity.hasError('required')">
+                            Count is required
+                        </span>
+                        <span *ngIf="quantity.hasError('min')">
+                            Minimum value is 0
+                        </span>
+                        <span *ngIf="quantity.hasError('max')">
+                            Maximum value is 100
+                        </span>
+                        <span *ngIf="quantity.hasError('nonNegative')">
+                          Count cannot be negative
+                      </span>
+                    </mat-error>
+                </mat-form-field>
+            </div>
+            <div class="col-md-6">
+              <mat-form-field appearance="outline" >
+                <mat-label>Added date</mat-label>
+                <input matInput [matDatepicker]="picker" formControlName="addedDate" >
+                <mat-hint>MM/DD/YYYY</mat-hint>
+                <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+                <mat-error *ngIf="rawMaterialGroup.get('addedDate').hasError('required')">
+                  Date is required
+              </mat-error>
+              </mat-form-field>
+
+            </div>
+          </div>
+          <div class="row" *ngIf=" isEdit">
+            <div class="col-md-6">
+              <input type="file" #fileInput style="display: none" (change)="onFileChange($event)" />
+              <button mat-raised-button (click)="triggerFileInput()">Add image</button>
+
+            </div>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+

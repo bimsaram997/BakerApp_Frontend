@@ -66,12 +66,10 @@ export class AddFoodItemComponent implements OnInit, OnDestroy {
       this.header = 'Add food item';
     }
     this.toolbarService.updateToolbarContent(this.header);
+    this.toolbarService.subscribeToButtonClick((buttonType: ToolbarButtonType) => {
+      this.handleButtonClick(buttonType);
+    });
 
-    this.subscription.push(this.toolbarService.buttonClick$.subscribe((buttonType) => {
-      if (buttonType) {
-        this.handleButtonClick(buttonType);
-      }
-    }));
     this.setValidators();
   }
 
@@ -192,6 +190,7 @@ export class AddFoodItemComponent implements OnInit, OnDestroy {
         this.subscription.push(updateResponse.subscribe((res: any) => {
           console.log(res);
           if (res != null) {
+            this.toolbarService.enableButtons(true)
             this.toastr.success('Success!', 'Food item updated!');
             this.getFoodItemById(res);
           }
@@ -201,6 +200,7 @@ export class AddFoodItemComponent implements OnInit, OnDestroy {
           this.saveClose();
         }
       }catch (error) {
+        this.toolbarService.enableButtons(true)
         console.error('An error occurred while updating the food item:', error);
         this.toastr.error('Error!', 'Failed to update food item.');
       }
@@ -220,11 +220,13 @@ export class AddFoodItemComponent implements OnInit, OnDestroy {
       this.subscription.push(updateResponse.subscribe((res: any) => {
         console.log(res);
         if (res != null) {
+          this.toolbarService.enableButtons(true)
           this.toastr.success('Success!', 'Food item updated!');
           this.getFoodItemById(res);
         }
       }));
     } catch (error) {
+      this.toolbarService.enableButtons(true)
       console.error('An error occurred while updating the food item:', error);
       this.toastr.error('Error!', 'Failed to update food item.');
     }
@@ -271,9 +273,11 @@ export class AddFoodItemComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.toolbarService.updateCustomButtons([]);
     this.toolbarService.updateToolbarContent('');
+
     this.subscription.forEach((subscription: Subscription) => {
       subscription.unsubscribe();
     });
+    this.toolbarService.unsubscribeAll();
   }
 
 }

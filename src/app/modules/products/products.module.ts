@@ -6,7 +6,7 @@ import { ProductRoutingModule } from './products-routing.module';
 import { MaterialModule } from '../../material.module';
 import { ComponentsModule } from '../../shared/components/components.module';
 
-import { ToastrModule } from 'ngx-toastr';
+
 import { MatRippleModule } from '@angular/material/core';
 
 

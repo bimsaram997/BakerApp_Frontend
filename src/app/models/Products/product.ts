@@ -1,28 +1,28 @@
-export class AllFoodItemVM {
+export class AllProductVM {
   Id: number;
-  FoodCode: string;
+  ProductCode: string;
   AddedDate: string | null;
-  FoodDescription: string;
-  FoodPrice: number | null;
+  ProductDescription: string;
+  ProductPrice: number | null;
   ImageURL: string;
   FoodTypeId: number;
   FoodTypeName: string;
   BatchId: number;
   IsSold: boolean;
 }
-export class PaginatedFoodItems {
-  Items: AllFoodItemVM[];
+export class PaginatedProducts {
+  Items: AllProductVM[];
   TotalCount: number;
   PageIndex: number;
   PageSize: number;
 }
 
-export class FoodItemVM {
+export class ProductVM {
   Id: number;
-  FoodCode: string;
+  ProductCode: string;
   AddedDate: string | null;
-  FoodDescription: string;
-  FoodPrice: number | null;
+  ProductDescription: string;
+  ProductPrice: number | null;
   ImageURL: string;
   FoodTypeId: number;
   BatchId: number;
@@ -30,21 +30,21 @@ export class FoodItemVM {
   IsSold: boolean | null;
 }
 
-export class UpdateFoodItem {
+export class UpdateProduct {
   AddedDate: string | null;
-  FoodDescription: string;
-  FoodPrice: number | null;
+  ProductDescription: string;
+  ProductPrice: number | null;
   ImageURL: any | null;
   IsSold: boolean | null;
   Id: number | null;
 }
 
 
-export class AddFoodItem {
-  FoodDescription: string;
-  FoodPrice: number | null;
+export class AddProduct {
+  ProductDescription: string;
+  ProductPrice: number | null;
   ImageURL: string;
   AddedDate: string | null;
   FoodTypeId: number;
-  FoodItemCount: number;
+  ProductCount: number;
 }

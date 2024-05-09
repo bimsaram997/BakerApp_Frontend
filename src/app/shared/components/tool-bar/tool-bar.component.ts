@@ -58,4 +58,23 @@ export class ToolBarComponent {
       return this.disabledButtons.has(buttonType);
     }
   }
+
+  getButtonColorClass(buttonType: ToolbarButtonType): string {
+    switch(buttonType) {
+      case ToolbarButtonType.Save:
+        return 'primary';
+      case ToolbarButtonType.Update:
+        return 'primary';
+        case ToolbarButtonType.Delete:
+          return 'warn';
+      case ToolbarButtonType.New:
+        return 'primary';
+      case ToolbarButtonType.Cancel:
+        return '';
+      case ToolbarButtonType.SaveClose:
+        return 'primary';
+      default:
+        return ''; // Default color class
+    }
+  }
 }

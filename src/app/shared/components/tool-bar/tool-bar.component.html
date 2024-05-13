@@ -9,14 +9,16 @@
           <div class="col-md-4 d-flex justify-content-end align-items-center content">
             <ng-container *ngFor="let button of customButtons; let last = last">
               <button
-                mat-stroked-button
+                mat-raised-button
                 (click)="handleButtonClick(button)"
+                [color]="getButtonColorClass(button)"
                 class="button-with-border"
                 [disabled]="isButtonDisabled(button)">
                 {{ button }}
               </button>
               <span *ngIf="!last" class="ms-2"></span> <!-- Add a small margin between buttons -->
             </ng-container>
+
           </div>
         </div>
       </mat-toolbar>

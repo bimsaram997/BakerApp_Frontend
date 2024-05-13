@@ -1,0 +1,14 @@
+
+
+.form-body {
+  margin-top: 80px;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+:host ::ng-deep .ck-editor__editable_inline {
+  min-height: 200px;
+}
+
+.cutom-error{
+  font-size: small;
+}

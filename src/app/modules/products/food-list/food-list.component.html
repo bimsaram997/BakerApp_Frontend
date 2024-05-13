@@ -20,7 +20,7 @@
               <div class="col-md-3">
                 <mat-form-field floatLabel="always" appearance="outline" >
                   <mat-label>Price</mat-label>
-                  <input matInput type="number" class="example-right-align" placeholder="0" formControlName="foodPrice">
+                  <input matInput type="number" class="example-right-align" placeholder="0" formControlName="productPrice">
                   <span matTextPrefix>$&nbsp;</span>
                   <span matTextSuffix>,00</span>
                 </mat-form-field>
@@ -87,9 +87,9 @@
             <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
 
               <!-- Define your columns -->
-              <ng-container matColumnDef="FoodCode">
+              <ng-container matColumnDef="ProductCode">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header>Food code</th>
-                <td mat-cell *matCellDef="let element" class="link"> <a  (click)="navigateToEditFoodItem(element.Id)" >{{ element.FoodCode }}</a> </td>
+                <td mat-cell *matCellDef="let element" class="link"> <a  (click)="navigateToEditFoodItem(element.Id)" >{{ element.ProductCode }}</a> </td>
               </ng-container>
 
               <ng-container matColumnDef="BatchId">
@@ -102,9 +102,9 @@
                 <td mat-cell *matCellDef="let element">{{ element.FoodTypeName }}</td>
               </ng-container>
 
-              <ng-container matColumnDef="FoodPrice">
+              <ng-container matColumnDef="ProductPrice">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header>Price</th>
-                <td mat-cell *matCellDef="let element">{{ element.FoodPrice }}</td>
+                <td mat-cell *matCellDef="let element">{{ element.ProductPrice }}</td>
               </ng-container>
 
               <ng-container matColumnDef="AddedDate">
@@ -121,9 +121,9 @@
                 <td mat-cell *matCellDef="let element">{{ element.IsSold ? "Unavaialable": "Avaialable" }}</td>
               </ng-container>
 
-              <ng-container matColumnDef="FoodDescription">
+              <ng-container matColumnDef="ProductDescription">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header>Food description</th>
-                <td mat-cell *matCellDef="let element">{{ element.FoodDescription }}</td>
+                <td mat-cell *matCellDef="let element">{{ element.ProductDescription }}</td>
               </ng-container>
               <ng-container matColumnDef="Action">
                 <th mat-header-cell *matHeaderCellDef ></th>

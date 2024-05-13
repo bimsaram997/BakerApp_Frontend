@@ -16,6 +16,10 @@ const routes: Routes = [
       {
         path:'rawMaterial',
         loadChildren: () => import('../../../modules/rawMaterials/rawMaterials.module').then(m => m.RawMaterialModule)
+      },
+      {
+        path:'recipe',
+        loadChildren: () => import('../../../modules/recipe/recipe.module').then(m => m.RecipeModule)
       }
     ]
 }];

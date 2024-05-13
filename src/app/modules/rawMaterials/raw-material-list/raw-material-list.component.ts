@@ -61,6 +61,8 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
 
   }
 
+
+
   isSelected(id: string): boolean {
     this.id = +id;
     return this.selectedId === id;

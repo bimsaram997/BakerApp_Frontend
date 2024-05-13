@@ -6,7 +6,7 @@ import { MatRippleModule } from '@angular/material/core';
 import { RecipeRoutingModule } from './recipe-routing.module';
 import { RecipeListComponent } from './recipe-list/recipe-list.component';
 import { AddRecipeComponent } from './add-recipe/add-recipe.component';
-
+import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 
 
 
@@ -22,7 +22,7 @@ import { AddRecipeComponent } from './add-recipe/add-recipe.component';
     ComponentsModule,
     MatRippleModule,
     RecipeRoutingModule,
-
+    CKEditorModule
 
   ]
 })

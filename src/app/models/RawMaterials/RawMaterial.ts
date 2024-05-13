@@ -73,3 +73,11 @@ export class UpdateRawMaterial {
   Price: number;
   LocationId: number;
 }
+
+
+export class RawMaterialListSimpleVM {
+  Id: number;
+  Name: string;
+  Quantity: number;
+  MeasureUnit: QuantityType;
+}

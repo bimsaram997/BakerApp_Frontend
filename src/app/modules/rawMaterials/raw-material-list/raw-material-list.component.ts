@@ -51,13 +51,6 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
     this.toolBarButtons = [ToolbarButtonType.New];
     this.toolbarService.updateCustomButtons(this.toolBarButtons);
     this.getRawMaterialList();
-    this.subscription.push(
-      this.toolbarService.buttonClick$.subscribe((buttonType) => {
-        if (buttonType) {
-          this.handleButtonClick(buttonType);
-        }
-      })
-    );
 
   }
 
@@ -125,7 +118,7 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
     });
   }
 
-  private handleButtonClick(buttonType: ToolbarButtonType): void {
+  public handleButtonClick(buttonType: ToolbarButtonType): void {
     switch (buttonType) {
       case ToolbarButtonType.New:
         this.handleNewButton();

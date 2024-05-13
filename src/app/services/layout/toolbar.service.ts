@@ -6,7 +6,10 @@ import { ToolbarButtonType } from '../../models/enum_collection/toolbar-button';
 @Injectable({
   providedIn: 'root',
 })
+
 export class ToolbarService implements OnDestroy {
+
+
   private toolbarContentSubject: BehaviorSubject<string> = new BehaviorSubject<string>('');
   public toolbarContent$: Observable<string> = this.toolbarContentSubject.asObservable();
 
@@ -15,8 +18,7 @@ export class ToolbarService implements OnDestroy {
   public customButtons$: Observable<ToolbarButtonType[]> = this.customButtonsSubject.asObservable();
   public enableButtons$: Observable<boolean> = this.enableButtonsSubject.asObservable();
 
-  private buttonClickSubject: Subject<ToolbarButtonType> = new Subject<ToolbarButtonType>();
-  public buttonClick$: Observable<ToolbarButtonType> = this.buttonClickSubject.asObservable();
+
 
   // Subject to signal to subscriptions to unsubscribe
   private unsubscribe$: Subject<void> = new Subject<void>();
@@ -36,9 +38,7 @@ export class ToolbarService implements OnDestroy {
   }
 
 
-  handleButtonClick(buttonType: ToolbarButtonType): void {
-    this.buttonClickSubject.next(buttonType);
-  }
+
 
 
 
@@ -53,12 +53,7 @@ export class ToolbarService implements OnDestroy {
     this.unsubscribeAll();
   }
 
-  // Method to subscribe to button clicks with automatic unsubscription
-  subscribeToButtonClick(handler: (buttonType: ToolbarButtonType) => void): void {
-    this.buttonClick$
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(handler);
-  }
+
 
 
 }

@@ -33,7 +33,7 @@ export class AddRecipeComponent implements OnInit, OnDestroy, AfterViewInit   {
 rawMaterialList:RawMaterialListSimpleVM[]
   matHint: string;
   recipeId: number;
-  updateRecipe: UpdateRecipe = new UpdateRecipe();
+  updateRecipeValues: UpdateRecipe = new UpdateRecipe();
 
   constructor(
     private route: ActivatedRoute,
@@ -65,16 +65,13 @@ rawMaterialList:RawMaterialListSimpleVM[]
 
     if(this.mode === 'edit') {
       this.isEdit =  true;
-      this.header = 'Update raw material';
+      this.header = 'Update recipe';
       this.getRecipeById(this.recipeId);
       //this.disableFields();
     } else {
-      this.header = 'Add raw material';
+      this.header = 'Add recipe';
     }
     this.toolbarService.updateToolbarContent(this.header);
-    this.toolbarService.subscribeToButtonClick((buttonType: ToolbarButtonType) => {
-      this.handleButtonClick(buttonType);
-    });
    // this.setValidators();
   }
 
@@ -128,7 +125,7 @@ rawMaterialList:RawMaterialListSimpleVM[]
     this.dataSource = new MatTableDataSource(this.rawMaterials.controls);
   }
 
-  private handleButtonClick(buttonType: ToolbarButtonType): void {
+  public handleButtonClick(buttonType: ToolbarButtonType): void {
     switch (buttonType) {
       case ToolbarButtonType.Save:
        this.isEdit ? this.updateItem():  this.addRecipe();
@@ -143,8 +140,8 @@ rawMaterialList:RawMaterialListSimpleVM[]
         this.isEdit ? this.updateItem(): this.addRecipe();
         break;
       case ToolbarButtonType.Cancel:
-        //this.saveClose();
-        this.getRecipeById(4)
+        this.saveClose();
+        //this.getRecipeById(4)
         break;
       default:
         console.warn(`Unknown button type: ${buttonType}`);
@@ -183,13 +180,20 @@ rawMaterialList:RawMaterialListSimpleVM[]
   }
 
   addRecipe(): void {
-    console.log(this.recipeGroup.value);
     Object.values(this.recipeGroup.controls).forEach(control => {
       control.markAsTouched();
     });
+    const rawMaterialsArray = this.rawMaterials;
+const length = rawMaterialsArray.length;
+    if (length <= 0) {
+      this.toastr.error('Error!', 'Please add atleast one raw material');
+      this.toolbarService.enableButtons(true)
+      return;
+    }
 
-    if(this.recipeGroup.valid) {
+    if(this.recipeGroup.valid && this.getRawMaterialArray().length > 0) {
       try {
+        this.toolbarService.enableButtons(false)
         const recipeRequest: AddRecipeRequest = {
           AddedDate: this.recipeGroup.get('addedDate').value,
           RecipeName: this.recipeGroup.get('name').value,
@@ -220,17 +224,23 @@ rawMaterialList:RawMaterialListSimpleVM[]
 
   updateItem(): void {
     try {
-      this.updateRecipe.RecipeName =  this.recipeGroup.controls['name'].value;
-      this.updateRecipe.Description = this.recipeGroup.controls['description'].value;
-      this.updateRecipe.Instructions = this.recipeGroup.controls['content'].value;
-      this.updateRecipe.RawMaterials= this.getRawMaterialArray()
+      this.toolbarService.enableButtons(false)
+      this.updateRecipeValues.RecipeName =  this.recipeGroup.controls['name'].value;
+      this.updateRecipeValues.Description = this.recipeGroup.controls['description'].value;
+      this.updateRecipeValues.Instructions = this.recipeGroup.controls['content'].value;
+      this.updateRecipeValues.RawMaterials= this.getRawMaterialArray()
 
-      const updateResponse = this.recipeService.updateRecipeById(this.recipeId, this.updateRecipe);
+      const updateResponse = this.recipeService.updateRecipeById(this.recipeId, this.updateRecipeValues);
       this.subscription.push(updateResponse.subscribe((res: any) => {
         if (res != null) {
           this.toastr.success('Success!', 'Recipe updated!');
           this.toolbarService.enableButtons(true)
-          this.getRecipeById(res);
+          if (this.saveCloseValue) {
+            this.saveClose();
+          } else {
+             this.getRecipeById(res);
+          }
+
         }
       }));
     } catch (error) {

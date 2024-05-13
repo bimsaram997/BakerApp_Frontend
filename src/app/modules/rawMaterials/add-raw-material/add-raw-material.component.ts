@@ -70,16 +70,12 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy  {
       this.header = 'Add raw material';
     }
     this.toolbarService.updateToolbarContent(this.header);
-    this.toolbarService.subscribeToButtonClick((buttonType: ToolbarButtonType) => {
-      this.handleButtonClick(buttonType);
-    });
     this.setValidators();
   }
-  disableFields() {
-    throw new Error('Method not implemented.');
-  }
 
-  private handleButtonClick(buttonType: ToolbarButtonType): void {
+  lastButtonClick: string = '';
+
+  handleButtonClick(buttonType: ToolbarButtonType) {
     switch (buttonType) {
       case ToolbarButtonType.Save:
        this.isEdit ? this.updateItem():  this.addRawMaterial();
@@ -99,6 +95,11 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy  {
         console.warn(`Unknown button type: ${buttonType}`);
     }
   }
+  disableFields() {
+    throw new Error('Method not implemented.');
+  }
+
+
 
   createFormGroup(): void {
     this.rawMaterialGroup = this.fb.group({
@@ -118,10 +119,14 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy  {
     Object.values(this.rawMaterialGroup.controls).forEach(control => {
       control.markAsTouched();
       this.quantity.markAsTouched();
+
     });
 
     if(this.rawMaterialGroup.valid) {
+
       try {
+        this.toolbarService.enableButtons(false)
+
         const formData = this.rawMaterialGroup.value;
         const addRawMaterial: AddRawMaterial = {
           Name: formData.name,
@@ -155,6 +160,7 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy  {
 
   updateItem(): void {
     try {
+      this.toolbarService.enableButtons(false)
       this.updateRawMaterial.ImageURL =  this.rawMaterialGroup.controls['imageURL'].value;
       this.updateRawMaterial.Name = this.rawMaterialGroup.controls['name'].value;
       this.updateRawMaterial.Quantity = this.quantity.value;
@@ -167,6 +173,7 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy  {
         if (res != null) {
           this.toastr.success('Success!', 'Food item updated!');
           this.toolbarService.enableButtons(true)
+
           this.getRawMaterialById(res);
         }
       }));

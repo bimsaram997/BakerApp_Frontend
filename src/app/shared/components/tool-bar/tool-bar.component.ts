@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ToolbarButtonType } from '../../../models/enum_collection/toolbar-button';
 import { ToolbarService } from '../../../services/layout/toolbar.service';
 import { Subscription } from 'rxjs';
@@ -9,6 +9,7 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./tool-bar.component.css']
 })
 export class ToolBarComponent {
+  @Output() buttonClick: EventEmitter<ToolbarButtonType> = new EventEmitter<ToolbarButtonType>();
   toolbarContent: string = '';
   customButtons: ToolbarButtonType[] = [];
   private subscription: Subscription;
@@ -34,13 +35,9 @@ export class ToolBarComponent {
 
   }
 
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
-  }
 
   handleButtonClick(buttonType: ToolbarButtonType): void {
-    this.toolbarService.handleButtonClick(buttonType);
-    this.isEnable =  false
+    this.buttonClick.emit(buttonType);
     this.initializeDisabledButtons();
   }
 
@@ -77,4 +74,8 @@ export class ToolBarComponent {
         return ''; // Default color class
     }
   }
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
 }

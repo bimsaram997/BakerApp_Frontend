@@ -44,9 +44,9 @@ export class FoodListComponent implements OnInit, OnDestroy {
     this.getListSimpleFoodTypes();
     this.valueChanges();
     this.getFoodItemsList();
-    this.toolbarService.subscribeToButtonClick((buttonType: ToolbarButtonType) => {
-      this.handleButtonClick(buttonType);
-    });
+    // this.toolbarService.subscribeToButtonClick((buttonType: ToolbarButtonType) => {
+    //   this.handleButtonClick(buttonType);
+    // });
 
   }
 

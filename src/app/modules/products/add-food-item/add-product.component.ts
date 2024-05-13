@@ -66,9 +66,9 @@ export class AddProductComponent implements OnInit, OnDestroy {
       this.header = 'Add product';
     }
     this.toolbarService.updateToolbarContent(this.header);
-    this.toolbarService.subscribeToButtonClick((buttonType: ToolbarButtonType) => {
-      this.handleButtonClick(buttonType);
-    });
+    // this.toolbarService.subscribeToButtonClick((buttonType: ToolbarButtonType) => {
+    //   this.handleButtonClick(buttonType);
+    // });
 
     this.setValidators();
   }

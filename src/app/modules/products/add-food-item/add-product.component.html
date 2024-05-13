@@ -14,12 +14,12 @@
       />
     </div>
     <div class="col-md-9">
-      <form action="" [formGroup]="foodItemGroup">
+      <form action="" [formGroup]="productGroup">
         <div class="row" *ngIf="isEdit">
           <div class="col-md-6">
             <mat-form-field appearance="outline" >
               <mat-label>Food item code</mat-label>
-              <input matInput placeholder="Placeholder"  formControlName="foodCode"/>
+              <input matInput placeholder="Placeholder"  formControlName="productCode"/>
             </mat-form-field>
           </div>
           <div class="col-md-6">
@@ -41,7 +41,7 @@
                   {{ foodType.FoodTypeName }}
                 </mat-option>
               </mat-select>
-              <mat-error *ngIf="foodItemGroup.get('foodTypId').hasError('required')">
+              <mat-error *ngIf="productGroup.get('foodTypId').hasError('required')">
                 Food type is required
             </mat-error>
             </mat-form-field>
@@ -49,10 +49,10 @@
           <div class="col-md-6">
             <mat-form-field appearance="outline">
               <mat-label>Food price</mat-label>
-              <input matInput type="number" placeholder="0" formControlName="foodPrice" />
+              <input matInput type="number" placeholder="0" formControlName="productPrice" />
               <span matTextPrefix>$&nbsp;</span>
                   <span matTextSuffix>,00</span>
-                  <mat-error *ngIf="foodItemGroup.get('foodPrice').hasError('required')">
+                  <mat-error *ngIf="productGroup.get('productPrice').hasError('required')">
                     Price is required
                 </mat-error>
             </mat-form-field>
@@ -76,7 +76,7 @@
               <mat-hint>MM/DD/YYYY</mat-hint>
               <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
               <mat-datepicker #picker></mat-datepicker>
-              <mat-error *ngIf="foodItemGroup.get('addedDate').hasError('required') && foodItemGroup.get('foodDescription').touched">
+              <mat-error *ngIf="productGroup.get('addedDate').hasError('required') && productGroup.get('productDescription').touched">
                 Date is required
             </mat-error>
             </mat-form-field>
@@ -86,8 +86,8 @@
           <div class="col-md-6">
             <mat-form-field appearance="outline">
               <mat-label>Food description</mat-label>
-              <textarea matInput formControlName="foodDescription"></textarea>
-              <mat-error *ngIf="foodItemGroup.get('foodDescription').hasError('required')">
+              <textarea matInput formControlName="productDescription"></textarea>
+              <mat-error *ngIf="productGroup.get('productDescription').hasError('required')">
                 Description is required
             </mat-error>
             </mat-form-field>
@@ -95,19 +95,19 @@
           <div class="col-md-4" *ngIf="!isEdit">
             <mat-form-field appearance="outline">
               <mat-label>Food count</mat-label>
-              <input matInput type="number" placeholder="0" [formControl]="foodCount" />
+              <input matInput type="number" placeholder="0" [formControl]="productCount" />
 
-              <mat-error *ngIf="foodCount.invalid && (foodCount.dirty || foodCount.touched)">
-                  <span *ngIf="foodCount.hasError('required')">
+              <mat-error *ngIf="productCount.invalid && (productCount.dirty || productCount.touched)">
+                  <span *ngIf="productCount.hasError('required')">
                       Count is required
                   </span>
-                  <span *ngIf="foodCount.hasError('min')">
+                  <span *ngIf="productCount.hasError('min')">
                       Minimum value is 0
                   </span>
-                  <span *ngIf="foodCount.hasError('max')">
+                  <span *ngIf="productCount.hasError('max')">
                       Maximum value is 100
                   </span>
-                  <span *ngIf="foodCount.hasError('nonNegative')">
+                  <span *ngIf="productCount.hasError('nonNegative')">
                     Count cannot be negative
                 </span>
               </mat-error>

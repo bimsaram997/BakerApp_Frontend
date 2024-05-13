@@ -5,12 +5,19 @@ export enum QuantityType {
   L = 1
 }
 
+export enum LocationType {
+  Matara =0,
+  Colombo = 1
+}
+
 export class AddRawMaterial {
   Name: string;
   Quantity: number;
   AddedDate: string | null;
   ImageURL: string;
-  RawMaterialQuantityType: QuantityType;
+  MeasureUnit: QuantityType;
+  Price: number;
+  LocationId: number;
 }
 
 export class RawMaterialVM {
@@ -20,9 +27,11 @@ export class RawMaterialVM {
   Quantity: number;
   AddedDate: string | null;
   ImageURL: string;
-  RawMaterialQuantityType: QuantityType;
+  MeasureUnit: QuantityType;
   IsDeleted: boolean;
   ModifiedDate: string | null;
+  Price: number;
+  LocationId: number;
 }
 
 
@@ -30,11 +39,12 @@ export class AllRawMaterialVM {
   Id: number;
   Name: string;
   AddedDate: string | null;
-  RawMaterialQuantityType:  QuantityType;
+  MeasureUnit:  QuantityType;
   Quantity: number | null;
   ImageURL: string;
   ModifiedDate: string | null;
   RawMaterialCode: string | null;
+  Location: string | null;
 }
 
 export interface PaginatedRawMaterials {
@@ -48,7 +58,7 @@ export class RawMaterialListAdvanceFilter {
   Quantity: number | null;
   SearchString: string | null;
   AddedDate: string | null;
-  RawMaterialQuantityType: QuantityType | null;
+  MeasureUnit: QuantityType | null;
   Pagination: Pagination;
   SortBy: string;
   IsAscending: boolean;
@@ -59,5 +69,15 @@ export class UpdateRawMaterial {
   Name: string;
   Quantity: number;
   ImageURL: string;
-  RawMaterialQuantityType: QuantityType;
+  MeasureUnit: QuantityType;
+  Price: number;
+  LocationId: number;
+}
+
+
+export class RawMaterialListSimpleVM {
+  Id: number;
+  Name: string;
+  Quantity: number;
+  MeasureUnit: QuantityType;
 }

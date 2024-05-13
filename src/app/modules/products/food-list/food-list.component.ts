@@ -2,14 +2,14 @@ import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ToolbarButtonType } from '../../../models/enum_collection/toolbar-button';
 import { ToolbarService } from '../../../services/layout/toolbar.service';
-import { FoodItemsService } from '../../../services/bakery/food-items.service';
-import { ProductListAdvanceFilter } from '../../../models/FoodItems/productListAdvanceFilter';
+import { ProductService } from '../../../services/bakery/product.service';
+import { ProductListAdvanceFilter } from '../../../models/Products/productListAdvanceFilter';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import { AllFoodItemVM, PaginatedFoodItems } from '../../../models/FoodItems/foodItem';
+import { AllProductVM, PaginatedProducts } from '../../../models/Products/product';
 import { FoodTypeService } from '../../../services/bakery/food-type.service';
-import { FoodType } from '../../../models/FoodItems/foodType';
+import { FoodType } from '../../../models/Products/foodType';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -21,8 +21,8 @@ import { Router } from '@angular/router';
 export class FoodListComponent implements OnInit, OnDestroy {
   header: string = 'Food items';
   subscription: Subscription[] = [];
-  displayedColumns: string[] = ['FoodCode','BatchId', 'FoodTypeName', 'FoodPrice', 'AddedDate', 'ModifiedDate', 'IsSold', 'FoodDescription', 'Action'];
-  dataSource = new MatTableDataSource<AllFoodItemVM>();
+  displayedColumns: string[] = ['ProductCode','BatchId', 'FoodTypeName', 'ProductPrice', 'AddedDate', 'ModifiedDate', 'IsSold', 'ProductDescription', 'Action'];
+  dataSource = new MatTableDataSource<AllProductVM>();
   foodTypes: FoodType[] = [];
   searchFoodItemForm: FormGroup;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -30,7 +30,7 @@ export class FoodListComponent implements OnInit, OnDestroy {
 
 
   constructor(
-    private foodItemService: FoodItemsService,
+    private foodItemService: ProductService,
     private toolbarService: ToolbarService,
     private foodTypeService: FoodTypeService,
     private fb: FormBuilder,
@@ -68,7 +68,7 @@ export class FoodListComponent implements OnInit, OnDestroy {
   searchFormGroup(): void {
     this.searchFoodItemForm = this.fb.group({
       foodTypId: [null],
-      foodPrice: [null],
+      productPrice: [null],
       searchString: [null],
       addedDate: [null],
       batchId: [null],
@@ -98,11 +98,12 @@ export class FoodListComponent implements OnInit, OnDestroy {
   }
 
   public getFoodItemsList(): void {
+    this.dataSource.data =  null;
     const filter: ProductListAdvanceFilter = {
       SortBy: this.sort?.active || 'Id',
       IsAscending: false,
       FoodTypeId:  this.searchFoodItemForm.get('foodTypId').value,
-      FoodPrice: this.searchFoodItemForm.get('foodPrice').value,
+      ProductPrice: this.searchFoodItemForm.get('productPrice').value,
       SearchString: this.searchFoodItemForm.get('searchString').value,
       AddedDate: this.searchFoodItemForm.get('addedDate').value ?? null,
       BatchId: this.searchFoodItemForm.get('batchId').value,
@@ -114,7 +115,7 @@ export class FoodListComponent implements OnInit, OnDestroy {
       },
     };
 
-    this.foodItemService.getFoodItems(filter).subscribe((res: PaginatedFoodItems) => {
+    this.foodItemService.getProducts(filter).subscribe((res: PaginatedProducts) => {
       this.dataSource.data = res.Items;
       this.dataSource.paginator = this.paginator;
       this.paginator.length = res.TotalCount || 0; // Update paginator length

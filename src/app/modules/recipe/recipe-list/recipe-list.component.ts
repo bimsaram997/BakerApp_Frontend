@@ -3,54 +3,50 @@ import { ToolbarService } from '../../../services/layout/toolbar.service';
 import { ToolbarButtonType } from '../../../models/enum_collection/toolbar-button';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
-import { MatSelectChange } from '@angular/material/select';
-import { AllRawMaterialVM, PaginatedRawMaterials, QuantityType, RawMaterialListAdvanceFilter } from 'src/app/models/RawMaterials/RawMaterial';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { RecipeService } from '../../../services/bakery/reipe.service';
+import { RecipeListAdvanceFilter, AllRecipeVM, PaginatedRawMaterials } from '../../../models/Recipe/Recipe';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import { RawMaterialService } from 'src/app/services/bakery/raw-material.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatCheckboxChange } from '@angular/material/checkbox';
-
+import { RawMaterialService } from '../../../services/bakery/raw-material.service';
+import { RawMaterialListSimpleVM } from 'src/app/models/RawMaterials/RawMaterial';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 @Component({
-  selector: 'app-raw-material-list',
-  templateUrl: './raw-material-list.component.html',
-  styleUrls: ['./raw-material-list.component.css']
+  selector: 'app-recipe-list',
+  templateUrl: './recipe-list.component.html',
+  styleUrls: ['./recipe-list.component.css']
 })
-export class RawMaterialListComponent implements OnInit, OnDestroy {
-  header: string = 'Raw materials';
+export class RecipeListComponent implements OnInit, OnDestroy {
+  header: string = 'Recipes';
   subscription: Subscription[] = [];
-  quantityTypes: any[] = [
-    {MeasureUnit: 0, name: "Kg"}, {MeasureUnit: 1, name: "L"}
-  ]
-  searchRawMaterialForm: FormGroup;
-  quantityType: string;
+  toolBarButtons: ToolbarButtonType[];
+  searchRecipeForm: FormGroup;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
-  displayedColumns: string[] = [ 'select', 'Name', 'MeasureUnit', 'Quantity', 'Price', 'Location', 'AddedDate', 'ModifiedDate'];
-  dataSource = new MatTableDataSource<AllRawMaterialVM>();
-  QuantityType = QuantityType; // Import the enum
-  toolBarButtons: ToolbarButtonType[];
+  displayedColumns: string[] = [ 'select', 'RecipeName', 'Description', 'RawMaterial',  'AddedDate', 'ModifiedDate', 'Instructions'];
+  dataSource = new MatTableDataSource<AllRecipeVM>();
   selectedId: string | null = null;
   id: number
-  getQuantityType(value: number): string {
-    return QuantityType[value];
-  }
-
-
+  rawMaterialList:RawMaterialListSimpleVM[]
   constructor(private toolbarService: ToolbarService,
     private router: Router,
     private fb: FormBuilder,
-    private rawMaterialService:RawMaterialService
-  ) {
+    private recipeService: RecipeService,
+    private rawMaterialService:RawMaterialService,
+    private sanitizer: DomSanitizer) {
 
   }
+
+
   ngOnInit() {
     this.searchFormGroup();
+    this.getListRawMaterials();
     this.toolbarService.updateToolbarContent(this.header);
     this.toolBarButtons = [ToolbarButtonType.New];
     this.toolbarService.updateCustomButtons(this.toolBarButtons);
-    this.getRawMaterialList();
+    this.getRecipeList();
     this.subscription.push(
       this.toolbarService.buttonClick$.subscribe((buttonType) => {
         if (buttonType) {
@@ -61,7 +57,11 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
 
   }
 
-
+  public  getListRawMaterials(): void {
+    this.subscription.push(this.rawMaterialService.listSimpleRawmaterials().subscribe((rawMaterials: RawMaterialListSimpleVM[]) => {
+      this.rawMaterialList = rawMaterials;
+    }))
+  }
 
   isSelected(id: string): boolean {
     this.id = +id;
@@ -116,14 +116,6 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
     }
     this.toolbarService.updateCustomButtons(this.toolBarButtons);
   }
-  searchFormGroup(): void {
-    this.searchRawMaterialForm = this.fb.group({
-      quantity: [null],
-      measureUnit: [null],
-      searchString: [null],
-      addedDate: [null],
-    });
-  }
 
   private handleButtonClick(buttonType: ToolbarButtonType): void {
     switch (buttonType) {
@@ -131,10 +123,10 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
         this.handleNewButton();
         break;
       case ToolbarButtonType.Update:
-        this.handleUpdateButton();
+       // this.handleUpdateButton();
         break;
         case ToolbarButtonType.Edit:
-        this.navigateToEditRawMaterial(this.id);
+        this.navigateToEditRecipe(this.id);
         break;
         case ToolbarButtonType.Delete:
         //this.handleUpdateButton();
@@ -144,15 +136,24 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
     }
   }
 
-  public getRawMaterialList(): void {
+  searchFormGroup(): void {
+    this.searchRecipeForm = this.fb.group({
+      description: [null],
+      rawMaterialIds: [null],
+      searchString: [null],
+      addedDate: [null],
+    });
+  }
+
+  public getRecipeList(): void {
     this.dataSource.data =  null;
-    const filter: RawMaterialListAdvanceFilter = {
+    const filter: RecipeListAdvanceFilter = {
       SortBy: this.sort?.active || 'Id',
       IsAscending: false,
-      Quantity:  this.searchRawMaterialForm.get('quantity').value,
-      MeasureUnit: this.searchRawMaterialForm.get('measureUnit').value,
-      SearchString: this.searchRawMaterialForm.get('searchString').value,
-      AddedDate: this.searchRawMaterialForm.get('addedDate').value ?? null,
+      Description:  this.searchRecipeForm.get('description').value,
+      RawMaterialIds: this.searchRecipeForm.get('rawMaterialIds').value,
+      SearchString: this.searchRecipeForm.get('searchString').value,
+      AddedDate: this.searchRecipeForm.get('addedDate').value ?? null,
 
       Pagination: {
         PageIndex: this.paginator?.pageIndex + 1 || 1,
@@ -160,7 +161,7 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
       },
     };
 
-    this.rawMaterialService.getRawMaterials(filter).subscribe((res: PaginatedRawMaterials) => {
+    this.recipeService.getRecipes(filter).subscribe((res: PaginatedRawMaterials) => {
 
       this.dataSource.data = res.Items;
       this.dataSource.paginator = this.paginator;
@@ -169,13 +170,23 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
     });
   }
 
+  private handleNewButton(): void {
+    this.router.navigate(['base/recipe/add', 'add']);
+  }
+
   search(): void {
-    this.getRawMaterialList();
+    this.getRecipeList();
   }
 
   clear(): void {
-    this.searchRawMaterialForm.reset();
-    this.getRawMaterialList();
+    this.searchRecipeForm.reset();
+    this.getRecipeList();
+
+  }
+
+
+  navigateToEditRecipe(id: number) {
+    this.router.navigate(['base/recipe/add', 'edit', id]);
 
   }
 
@@ -183,43 +194,23 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
     this.sort.sortChange.subscribe(() => {
       if (this.paginator) {
         this.paginator.pageIndex = 0; // Reset pageIndex when sorting
-        this.getRawMaterialList();
+        this.getRecipeList();
       }
     });
 
     this.subscription.push(
-      this.paginator.page.subscribe(() => this.getRawMaterialList())
+      this.paginator.page.subscribe(() => this.getRecipeList())
     );
   }
 
-
-  selectType(value: MatSelectChange): void{
-    switch (value.value) {
-      case QuantityType.Kg:
-        this.quantityType = "Kg";
-        break;
-      case QuantityType.L:
-        this.quantityType = "L";
-        break;
-      default:
-        this.quantityType = "";
-
-    }
+  removeHtmlTags(html: string): string {
+    // Regular expression to remove HTML tags
+    return html.replace(/<[^>]*>/g, '');
   }
 
-
-  navigateToEditRawMaterial(id: number) {
-    this.router.navigate(['base/rawMaterial/add', 'edit', id]);
-
-  }
-
-  private handleNewButton(): void {
-    this.router.navigate(['base/rawMaterial/add', 'add']);
-  }
-
-  private handleUpdateButton(): void {
-    console.log('Update button clicked - Dummy implementation');
-    // Add your update logic here
+  getSanitizedContent(htmlContent: string): SafeHtml {
+    const smallPart = htmlContent.substring(0, 50);
+    return this.sanitizer.bypassSecurityTrustHtml(smallPart);
   }
 
   ngOnDestroy(): void {

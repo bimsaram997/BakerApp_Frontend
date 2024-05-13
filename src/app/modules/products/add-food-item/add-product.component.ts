@@ -4,33 +4,33 @@ import { Subscription, concatAll } from 'rxjs';
 import { ToolbarService } from '../../../services/layout/toolbar.service';
 import { ToolbarButtonType } from 'src/app/models/enum_collection/toolbar-button';
 import { FoodTypeService } from '../../../services/bakery/food-type.service';
-import { FoodType } from '../../../models/FoodItems/foodType';
+import { FoodType } from '../../../models/Products/foodType';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { FoodItemsService } from '../../../services/bakery/food-items.service';
-import { AddFoodItem, FoodItemVM, UpdateFoodItem } from '../../../models/FoodItems/foodItem';
+import { ProductService } from '../../../services/bakery/product.service';
+import { AddProduct, ProductVM, UpdateProduct } from '../../../models/Products/product';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { ToastrService } from 'ngx-toastr';
 import { CustomValidators } from '../../../shared/utils/custom-validators';
 @Component({
   selector: 'app-add-food-item',
-  templateUrl: './add-food-item.component.html',
-  styleUrls: ['./add-food-item.component.css'],
+  templateUrl: './add-product.component.html',
+  styleUrls: ['./add-product.component.css'],
 })
-export class AddFoodItemComponent implements OnInit, OnDestroy {
+export class AddProductComponent implements OnInit, OnDestroy {
   subscription: Subscription[] = [];
   header: string;
   mode: string;
-  foodItemId: number;
+  productId: number;
   foodTypes: FoodType[] = [];
-  foodItemGroup: FormGroup;
+  productGroup: FormGroup;
   batchId: any;
-  updateFoodItem: UpdateFoodItem = new UpdateFoodItem();
-  newFoodItem: AddFoodItem = new AddFoodItem();
+  updateProduct: UpdateProduct = new UpdateProduct();
+  newProduct: AddProduct = new AddProduct();
   isEdit: boolean = false;
   @ViewChild('fileInput') fileInput: ElementRef;
-  imagePreview: string;
-  foodCount:FormControl;
+  imagePreview: string = "assets/main images/placeholder.png";
+  productCount:FormControl;
   saveCloseValue: boolean = false;
 
   constructor(
@@ -38,7 +38,7 @@ export class AddFoodItemComponent implements OnInit, OnDestroy {
     private toolbarService: ToolbarService,
     private foodTypeService: FoodTypeService,
     private fb: FormBuilder,
-    private foodItemService: FoodItemsService,
+    private productService: ProductService,
     private toastr: ToastrService,
     private dialog: MatDialog,
     private cd: ChangeDetectorRef,
@@ -50,7 +50,7 @@ export class AddFoodItemComponent implements OnInit, OnDestroy {
       this.mode = params['mode'];
       const id: number= +params['id'];
       if (id !== null) {
-        this.foodItemId  =  id;
+        this.productId  =  id;
       }
     });
     this.createFormGroup();
@@ -59,11 +59,11 @@ export class AddFoodItemComponent implements OnInit, OnDestroy {
     this.getListSimpleFoodTypes();
     if(this.mode === 'edit') {
       this.isEdit =  true;
-      this.header = 'Update food item';
-      this.getFoodItemById(this.foodItemId);
+      this.header = 'Update product';
+      this.getProductById(this.productId);
       this.disableFields();
     } else {
-      this.header = 'Add food item';
+      this.header = 'Add product';
     }
     this.toolbarService.updateToolbarContent(this.header);
     this.toolbarService.subscribeToButtonClick((buttonType: ToolbarButtonType) => {
@@ -76,7 +76,7 @@ export class AddFoodItemComponent implements OnInit, OnDestroy {
   private handleButtonClick(buttonType: ToolbarButtonType): void {
     switch (buttonType) {
       case ToolbarButtonType.Save:
-        this.isEdit ? this.openDialog(): this.addFoodItem();
+        this.isEdit ? this.openDialog(): this.addProduct();
         this.saveCloseValue = false;
         break;
       case ToolbarButtonType.Update:
@@ -84,7 +84,7 @@ export class AddFoodItemComponent implements OnInit, OnDestroy {
         break;
       case ToolbarButtonType.SaveClose:
         this.saveCloseValue = true;
-        this.isEdit ? this.openDialog(): this.addFoodItem();
+        this.isEdit ? this.openDialog(): this.addProduct();
         break;
       case ToolbarButtonType.Cancel:
         this.saveClose();
@@ -96,24 +96,24 @@ export class AddFoodItemComponent implements OnInit, OnDestroy {
 
 
   disableFields(): void {
-    this.foodItemGroup.controls['foodTypId'].disable();
-    this.foodItemGroup.controls['foodCode'].disable();
-    this.foodItemGroup.controls['batchId'].disable();
+    this.productGroup.controls['foodTypId'].disable();
+    this.productGroup.controls['productCode'].disable();
+    this.productGroup.controls['batchId'].disable();
   }
 
   createFormGroup(): void {
-    this.foodItemGroup = this.fb.group({
+    this.productGroup = this.fb.group({
       foodTypId: [null, Validators.required],
-      foodPrice: [null, Validators.required],
-      foodCode: [null],
+      productPrice: [null, Validators.required],
+      productCode: [null],
       addedDate: [null, Validators.required],
       batchId: [null],
       available: [false],
-      foodDescription: [null, Validators.required],
+      productDescription: [null, Validators.required],
       image:  [null],
     });
 
-    this.foodCount = new FormControl(null);
+    this.productCount = new FormControl(null);
   }
 
 
@@ -123,29 +123,29 @@ export class AddFoodItemComponent implements OnInit, OnDestroy {
     }))
   }
 
-  public getFoodItemById(foodItemId: number): void {
-    if (foodItemId> 0) {
-      this.subscription.push (this.foodItemService.getFoodItemById(foodItemId).subscribe((foodItem: FoodItemVM) => {
+  public getProductById(productId: number): void {
+    if (productId> 0) {
+      this.subscription.push (this.productService.getProductById(productId).subscribe((foodItem: ProductVM) => {
         this.setValuestoForm(foodItem);
       }));
     }
   }
 
-  setValuestoForm(foodItem: FoodItemVM): void {
+  setValuestoForm(foodItem: ProductVM): void {
     if(foodItem != null) {
-      this.foodItemGroup.setValue({
+      this.productGroup.setValue({
         foodTypId: foodItem.FoodTypeId,
-        foodPrice: foodItem.FoodPrice,
-        foodCode: foodItem.FoodCode,
+        productPrice: foodItem.ProductPrice,
+        productCode: foodItem.ProductCode,
         addedDate: foodItem.AddedDate,
         batchId: foodItem.BatchId,
         available: foodItem.IsSold,
-        foodDescription: foodItem.FoodDescription,
+        productDescription: foodItem.ProductDescription,
         image: foodItem.ImageURL,
       });
     }
     this.imagePreview = foodItem.ImageURL;
-    this.batchId =  this.foodItemGroup.controls['batchId'].value;
+    this.batchId =  this.productGroup.controls['batchId'].value;
   }
 
   openDialog(): void {
@@ -167,35 +167,34 @@ export class AddFoodItemComponent implements OnInit, OnDestroy {
 
   }
 
-  addFoodItem(): void {
-    Object.values(this.foodItemGroup.controls).forEach(control => {
+  addProduct(): void {
+    Object.values(this.productGroup.controls).forEach(control => {
       control.markAsTouched();
-      this.foodCount.markAsTouched();
+      this.productCount.markAsTouched();
     });
 
-    if (this.foodItemGroup.valid) {
+    if (this.productGroup.valid) {
 
       try {
-        const formData = this.foodItemGroup.value;
-        const addFoodItem: AddFoodItem = {
-          FoodDescription: formData.foodDescription,
-          FoodPrice: formData.foodPrice,
+        const formData = this.productGroup.value;
+        const addProduct: AddProduct = {
+          ProductDescription: formData.productDescription,
+          ProductPrice: formData.productPrice,
           ImageURL: formData.image,
           AddedDate: formData.addedDate,
           FoodTypeId: formData.foodTypId,
-          FoodItemCount: this.foodCount.value
+          ProductCount: this.productCount.value
         };
-        console.log(addFoodItem);
-        const updateResponse = this.foodItemService.addFoodItems( addFoodItem);
+        const updateResponse = this.productService.addProduct( addProduct);
         this.subscription.push(updateResponse.subscribe((res: any) => {
           console.log(res);
           if (res != null) {
             this.toolbarService.enableButtons(true)
             this.toastr.success('Success!', 'Food item updated!');
-            this.getFoodItemById(res);
+            this.getProductById(res);
           }
         }));
-        // Now you can do something with the addFoodItem object, such as sending it to a service
+        // Now you can do something with the addProduct object, such as sending it to a service
         if ( this.saveCloseValue) {
           this.saveClose();
         }
@@ -209,20 +208,20 @@ export class AddFoodItemComponent implements OnInit, OnDestroy {
 
   updateItem(): void {
     try {
-      this.updateFoodItem.ImageURL =  this.foodItemGroup.controls['image'].value;
-      this.updateFoodItem.FoodDescription = this.foodItemGroup.controls['foodDescription'].value;
-      this.updateFoodItem.AddedDate = this.foodItemGroup.controls['addedDate'].value;
-      this.updateFoodItem.FoodPrice = this.foodItemGroup.controls['foodPrice'].value;
-      this.updateFoodItem.IsSold = this.foodItemGroup.controls['available'].value;
-      this.updateFoodItem.Id = this.foodItemId;
+      this.updateProduct.ImageURL =  this.productGroup.controls['image'].value;
+      this.updateProduct.ProductDescription = this.productGroup.controls['productDescription'].value;
+      this.updateProduct.AddedDate = this.productGroup.controls['addedDate'].value;
+      this.updateProduct.ProductPrice = this.productGroup.controls['productPrice'].value;
+      this.updateProduct.IsSold = this.productGroup.controls['available'].value;
+      this.updateProduct.Id = this.productId;
 
-      const updateResponse = this.foodItemService.updateItemsByBatchId(this.batchId, this.updateFoodItem);
+      const updateResponse = this.productService.updateProductByBatchId(this.batchId, this.updateProduct);
       this.subscription.push(updateResponse.subscribe((res: any) => {
         console.log(res);
         if (res != null) {
           this.toolbarService.enableButtons(true)
           this.toastr.success('Success!', 'Food item updated!');
-          this.getFoodItemById(res);
+          this.getProductById(res);
         }
       }));
     } catch (error) {
@@ -235,10 +234,10 @@ export class AddFoodItemComponent implements OnInit, OnDestroy {
 
   setValidators(): void {
     if(!this.isEdit) {
-      this.foodCount.setValidators([Validators.required, CustomValidators.nonNegative()]);
+      this.productCount.setValidators([Validators.required, CustomValidators.nonNegative()]);
     } else {
-      this.foodCount.clearValidators();
-    this.foodCount.updateValueAndValidity();
+      this.productCount.clearValidators();
+    this.productCount.updateValueAndValidity();
     }
   }
 
@@ -261,13 +260,13 @@ export class AddFoodItemComponent implements OnInit, OnDestroy {
         // this.imagePreview = reader.result;
         this.imagePreview = reader.result as string;
         console.log(file.name);
-        this.foodItemGroup.patchValue({
+        this.productGroup.patchValue({
           image: reader.result,
         });
       };
       this.cd.markForCheck();
     }
-    this.foodItemGroup.patchValue({image:file})
+    this.productGroup.patchValue({image:file})
   }
 
   ngOnDestroy(): void {

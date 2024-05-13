@@ -1,17 +1,16 @@
 
 import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription, concatAll } from 'rxjs';
-import { ToolbarService } from '../../../services/layout/toolbar.service';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ToastrService } from 'ngx-toastr';
 import { MatDialog } from '@angular/material/dialog';
-import { ToolbarButtonType } from '../../../models/enum_collection/toolbar-button';
-import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
-import { CustomValidators } from '../../../shared/utils/custom-validators';
 import { MatSelectChange } from '@angular/material/select';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
+import { Subscription } from 'rxjs';
 import { AddRawMaterial, QuantityType, RawMaterialVM, UpdateRawMaterial } from '../../../models/RawMaterials/RawMaterial';
+import { ToolbarButtonType } from '../../../models/enum_collection/toolbar-button';
 import { RawMaterialService } from '../../../services/bakery/raw-material.service';
+import { ToolbarService } from '../../../services/layout/toolbar.service';
+import { CustomValidators } from '../../../shared/utils/custom-validators';
 @Component({
   selector: 'app-add-raw-material',
   templateUrl: './add-raw-material.component.html',
@@ -24,12 +23,16 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy  {
   isEdit: boolean = false;
   saveCloseValue: boolean = false;
   rawMaterialGroup: FormGroup;
-  imagePreview: string;
+  imagePreview: string = "assets/main images/placeholder.png";
   quantityTypes: any[] = [
-    {rawMaterialQuantityType: 0, name: "Kg"}, {rawMaterialQuantityType: 1, name: "L"}
+    {measureUnit: 0, name: "Kg"}, {measureUnit: 1, name: "L"}
+  ]
+  locations: any[] = [
+    {locationId: 0, name: "Matara"}, {locationId: 1, name: "Colombo"}
   ]
   @ViewChild('fileInput') fileInput: ElementRef;
   quantity:FormControl;
+  unitPrice:FormControl;
   quantityType: string;
   rawMaterialId: number;
   updateRawMaterial: UpdateRawMaterial = new UpdateRawMaterial();
@@ -101,11 +104,14 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy  {
     this.rawMaterialGroup = this.fb.group({
       name: [null, Validators.required],
       addedDate: [null, Validators.required],
-      rawMaterialQuantityType: [null, Validators.required],
+      measureUnit: [null, Validators.required],
       imageURL:  [null],
-      modifiedDate:[null]
+      modifiedDate:[null],
+      locationId: [null]
     });
     this.quantity = new FormControl(null);
+    this.unitPrice = new FormControl(null);
+    this.unitPrice.setValidators([Validators.required, CustomValidators.nonNegative()]);
   }
 
   addRawMaterial() {
@@ -122,7 +128,9 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy  {
           Quantity: this.quantity.value,
           ImageURL: formData.imageURL,
           AddedDate: formData.addedDate,
-          RawMaterialQuantityType: formData.rawMaterialQuantityType,
+          MeasureUnit: formData.measureUnit,
+          Price: this.unitPrice.value,
+          LocationId: formData.locationId,
         };
         console.log(addRawMaterial);
         const updateResponse = this.rawMaterialService.addRawMaterial( addRawMaterial);
@@ -134,7 +142,6 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy  {
             this.getRawMaterialById(res);
           }
         }));
-        // Now you can do something with the addRawMaterial object, such as sending it to a service
         if ( this.saveCloseValue) {
           this.saveClose();
         }
@@ -151,8 +158,9 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy  {
       this.updateRawMaterial.ImageURL =  this.rawMaterialGroup.controls['imageURL'].value;
       this.updateRawMaterial.Name = this.rawMaterialGroup.controls['name'].value;
       this.updateRawMaterial.Quantity = this.quantity.value;
-      this.updateRawMaterial.RawMaterialQuantityType = this.rawMaterialGroup.controls['rawMaterialQuantityType'].value;
-
+      this.updateRawMaterial.MeasureUnit = this.rawMaterialGroup.controls['measureUnit'].value;
+      this.updateRawMaterial.Price =  this.unitPrice.value;
+      this.updateRawMaterial.LocationId = this.rawMaterialGroup.controls['locationId'].value;
 
       const updateResponse = this.rawMaterialService.updateRawMaterialById(this.rawMaterialId, this.updateRawMaterial);
       this.subscription.push(updateResponse.subscribe((res: any) => {
@@ -192,13 +200,17 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy  {
       this.rawMaterialGroup.setValue({
         name: rawMaterial.Name,
         addedDate: rawMaterial.AddedDate,
-        rawMaterialQuantityType: rawMaterial.RawMaterialQuantityType,
+        measureUnit: rawMaterial.MeasureUnit,
         modifiedDate: rawMaterial.ModifiedDate,
         imageURL: rawMaterial.ImageURL,
+        locationId: rawMaterial.LocationId
       });
     }
     this.quantity.setValue(rawMaterial.Quantity);
-    this.imagePreview = rawMaterial.ImageURL;
+    if (rawMaterial.ImageURL != null && rawMaterial.ImageURL !== "string") {
+      this.imagePreview = rawMaterial.ImageURL;
+    }
+    this.unitPrice.setValue(rawMaterial.Price);
   }
 
   selectType(value: MatSelectChange): void{

@@ -36,6 +36,9 @@ export class SidenavbarComponent {
         break;
       case MenuType.RawMaterial:
         this.router.navigate(['base/rawMaterial/rawMaterial']);
+        break;
+        case MenuType.Recipe:
+        this.router.navigate(['base/recipe/recipe']);
     }
 
   }

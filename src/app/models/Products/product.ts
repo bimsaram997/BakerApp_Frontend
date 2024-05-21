@@ -1,14 +1,17 @@
-export class AllProductVM {
+export interface AllProductVM {
   Id: number;
+  Name: string | null;
   ProductCode: string;
   AddedDate: string | null;
+  ModifiedDate: string | null;
   ProductDescription: string;
-  ProductPrice: number | null;
+  SellingPrice: number | null;
+  CostPrice: number | null;
   ImageURL: string;
-  FoodTypeId: number;
-  FoodTypeName: string;
-  BatchId: number;
-  IsSold: boolean;
+  Unit: number | null;
+  CostCode: number | null;
+  RecipeId: number | null;
+  RecipeName: string;
 }
 export class PaginatedProducts {
   Items: AllProductVM[];
@@ -20,24 +23,19 @@ export class PaginatedProducts {
 export class ProductVM {
   Id: number;
   ProductCode: string;
-  AddedDate: string | null;
+  Name: string;
+  Unit: number;
+  CostCode: number;
+  CostPrice: number;
+  SellingPrice: number;
+  RecipeId: number;
   ProductDescription: string;
-  ProductPrice: number | null;
   ImageURL: string;
-  FoodTypeId: number;
-  BatchId: number;
-  FoodTypeName: string | null;
-  IsSold: boolean | null;
+  AddedDate: string | null;
+  ModifiedDate: string | null;
+  IsDeleted: boolean;
 }
 
-export class UpdateProduct {
-  AddedDate: string | null;
-  ProductDescription: string;
-  ProductPrice: number | null;
-  ImageURL: any | null;
-  IsSold: boolean | null;
-  Id: number | null;
-}
 
 
 export class AddProduct {
@@ -47,4 +45,46 @@ export class AddProduct {
   AddedDate: string | null;
   FoodTypeId: number;
   ProductCount: number;
+}
+
+export class RecipeListSimpleVM {
+  Id: number;
+  RecipeName: string;
+}
+
+
+export class AddProductRequest {
+  Name: string;
+  Unit: number;
+  CostCode: number;
+  CostPrice: number;
+  SellingPrice: number;
+  RecipeId: number;
+  ProductDescription: string;
+  ImageURL: string;
+  AddedDate: string;
+}
+
+export class UpdateProduct {
+  Name: string;
+  Unit: number;
+  CostCode: number;
+  CostPrice: number;
+  SellingPrice: number;
+  RecipeId: number;
+  ProductDescription: string;
+  ImageURL: string;
+}
+
+
+export enum CostCode {
+  "CC001 Bakery products" = 0,
+  "CC002 Vegetables" = 1,
+  "CC003 Diary products" = 2
+}
+
+export enum Unit {
+  "PCS" = 0,
+  "HRS" = 1,
+
 }

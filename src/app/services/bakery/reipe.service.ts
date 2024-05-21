@@ -34,4 +34,8 @@ export class RecipeService {
   public addRecipe( addRecipe: AddRecipeRequest): Observable<any> {
     return this.http.post(`${this.myUrl}/Recipe/addRecipe`, addRecipe );
 }
+
+public listSimpleRecipes(): Observable<any> {
+  return this.http.get(`${this.myUrl}/Recipe/listSimpleRecipes`);
+}
 }

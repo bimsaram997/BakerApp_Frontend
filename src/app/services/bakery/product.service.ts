@@ -3,7 +3,7 @@ import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ProductListAdvanceFilter } from '../../models/Products/productListAdvanceFilter';
-import { AddProduct, UpdateProduct } from '../../models/Products/product';
+import { AddProduct, AddProductRequest, UpdateProduct } from '../../models/Products/product';
 
 
 @Injectable({
@@ -28,11 +28,11 @@ export class ProductService {
     return this.http.get(`${this.myUrl}/Product/getProudctById/${id}`);
   }
 
-  public updateProductByBatchId(batchId: number, updateItem: UpdateProduct): Observable<any> {
-    return this.http.post(`${this.myUrl}/Product/updateProductByBatchId/${batchId}`, updateItem)
+  public updateProductById(productId: number, updateItem: UpdateProduct): Observable<any> {
+    return this.http.post(`${this.myUrl}/Product/updateProductsById/${productId}`, updateItem)
   }
 
-  public addProduct( addProduct: AddProduct): Observable<any> {
-    return this.http.post(`${this.myUrl}/Product/addFood`, addProduct );
+  public addProduct( addProduct:AddProductRequest ): Observable<any> {
+    return this.http.post(`${this.myUrl}/Product/addProduct`, addProduct );
 }
 }

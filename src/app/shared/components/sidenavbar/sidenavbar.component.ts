@@ -12,8 +12,7 @@ export class SidenavbarComponent {
   @Output() sidenavClose = new EventEmitter();
   imagePath: string = 'assets/main images/bread-food-meal-bun.jpg';
    menuArray: Menu[] = [
-    { name: 'Food items', icon: 'assets/main images/fast-food.svg', menuType: MenuType.FoodItem },
-    { name: 'Food types', icon: 'assets/main images/coffee.svg', menuType: MenuType.FoodType },
+    { name: 'Products', icon: 'assets/main images/fast-food.svg', menuType: MenuType.FoodItem },
     { name: 'Raw materials', icon: 'assets/main images/raw-materials.svg', menuType: MenuType.RawMaterial },
     { name: 'Recipe', icon: 'assets/main images/recipe.svg', menuType: MenuType.Recipe },
     { name: 'User', icon: 'assets/main images/user.svg', menuType: MenuType.User }

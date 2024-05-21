@@ -4,7 +4,7 @@ import { ToolbarButtonType } from '../../../models/enum_collection/toolbar-butto
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { MatSelectChange } from '@angular/material/select';
-import { AllRawMaterialVM, PaginatedRawMaterials, QuantityType, RawMaterialListAdvanceFilter } from 'src/app/models/RawMaterials/RawMaterial';
+import { AllRawMaterialVM, LocationType, PaginatedRawMaterials, QuantityType, RawMaterialListAdvanceFilter } from 'src/app/models/RawMaterials/RawMaterial';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -30,12 +30,18 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = [ 'select', 'Name', 'MeasureUnit', 'Quantity', 'Price', 'Location', 'AddedDate', 'ModifiedDate'];
   dataSource = new MatTableDataSource<AllRawMaterialVM>();
   QuantityType = QuantityType; // Import the enum
+  LocationType = LocationType;
   toolBarButtons: ToolbarButtonType[];
   selectedId: string | null = null;
   id: number
   getQuantityType(value: number): string {
     return QuantityType[value];
   }
+
+  getLocationType(value: number): string {
+    return LocationType[value];
+  }
+
 
 
   constructor(private toolbarService: ToolbarService,

@@ -7,11 +7,12 @@ import { FoodTypeService } from '../../../services/bakery/food-type.service';
 import { FoodType } from '../../../models/Products/foodType';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ProductService } from '../../../services/bakery/product.service';
-import { AddProduct, ProductVM, UpdateProduct } from '../../../models/Products/product';
+import { AddProduct, AddProductRequest, ProductVM, RecipeListSimpleVM, UpdateProduct } from '../../../models/Products/product';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { ToastrService } from 'ngx-toastr';
 import { CustomValidators } from '../../../shared/utils/custom-validators';
+import { RecipeService } from '../../../services/bakery/reipe.service';
 @Component({
   selector: 'app-add-food-item',
   templateUrl: './add-product.component.html',
@@ -22,7 +23,7 @@ export class AddProductComponent implements OnInit, OnDestroy {
   header: string;
   mode: string;
   productId: number;
-  foodTypes: FoodType[] = [];
+  recipes: RecipeListSimpleVM[] = [];
   productGroup: FormGroup;
   batchId: any;
   updateProduct: UpdateProduct = new UpdateProduct();
@@ -32,7 +33,28 @@ export class AddProductComponent implements OnInit, OnDestroy {
   imagePreview: string = "assets/main images/placeholder.png";
   productCount:FormControl;
   saveCloseValue: boolean = false;
-
+  units: any[] = [
+    {Id: 0, name: "PCS"}, {Id: 1, name: "HRS"}
+  ];
+  costCodes: any[] = [
+    {
+      Id: 0,
+      Costcode: "CC001",
+      Description: "Bakery products"
+  },
+  {
+      Id: 2,
+      Costcode: "CC002",
+      Description: "Vegetables"
+  },
+  {
+    Id: 3,
+    Costcode: "CC003",
+    Description: "Diary products"
+},
+  ];
+  costPrice:FormControl;
+  sellingPrice:FormControl;
   constructor(
     private route: ActivatedRoute,
     private toolbarService: ToolbarService,
@@ -42,7 +64,8 @@ export class AddProductComponent implements OnInit, OnDestroy {
     private toastr: ToastrService,
     private dialog: MatDialog,
     private cd: ChangeDetectorRef,
-    private router: Router
+    private router: Router,
+    private recipeService: RecipeService
   ) {
   }
   ngOnInit() {
@@ -56,12 +79,11 @@ export class AddProductComponent implements OnInit, OnDestroy {
     this.createFormGroup();
 
     this.toolbarService.updateCustomButtons([ToolbarButtonType.Save, ToolbarButtonType.SaveClose, ToolbarButtonType.Cancel ]);
-    this.getListSimpleFoodTypes();
+    this.getListSimpleRecipes();
     if(this.mode === 'edit') {
       this.isEdit =  true;
       this.header = 'Update product';
       this.getProductById(this.productId);
-      this.disableFields();
     } else {
       this.header = 'Add product';
     }
@@ -73,10 +95,10 @@ export class AddProductComponent implements OnInit, OnDestroy {
     this.setValidators();
   }
 
-  private handleButtonClick(buttonType: ToolbarButtonType): void {
+   handleButtonClick(buttonType: ToolbarButtonType): void {
     switch (buttonType) {
       case ToolbarButtonType.Save:
-        this.isEdit ? this.openDialog(): this.addProduct();
+        this.isEdit ? this.updateItem(): this.addProduct();
         this.saveCloseValue = false;
         break;
       case ToolbarButtonType.Update:
@@ -84,7 +106,7 @@ export class AddProductComponent implements OnInit, OnDestroy {
         break;
       case ToolbarButtonType.SaveClose:
         this.saveCloseValue = true;
-        this.isEdit ? this.openDialog(): this.addProduct();
+        this.isEdit ? this.updateItem(): this.addProduct();
         break;
       case ToolbarButtonType.Cancel:
         this.saveClose();
@@ -95,31 +117,27 @@ export class AddProductComponent implements OnInit, OnDestroy {
   }
 
 
-  disableFields(): void {
-    this.productGroup.controls['foodTypId'].disable();
-    this.productGroup.controls['productCode'].disable();
-    this.productGroup.controls['batchId'].disable();
-  }
 
   createFormGroup(): void {
     this.productGroup = this.fb.group({
-      foodTypId: [null, Validators.required],
-      productPrice: [null, Validators.required],
-      productCode: [null],
-      addedDate: [null, Validators.required],
-      batchId: [null],
-      available: [false],
+      name: [null, Validators.required],
+      unit: [null, Validators.required],
+      costCode: [null, Validators.required],
+      recipeId: [null, Validators.required],
       productDescription: [null, Validators.required],
-      image:  [null],
+      imageURL:  [null],
+      addedDate: [null, Validators.required]
     });
-
-    this.productCount = new FormControl(null);
+    this.sellingPrice = new FormControl(null);
+    this.sellingPrice.setValidators([Validators.required, CustomValidators.nonNegative()]);
+    this.costPrice = new FormControl(null);
+    this.costPrice.setValidators([Validators.required, CustomValidators.nonNegative()]);
   }
 
 
-  public  getListSimpleFoodTypes(): void {
-    this.subscription.push(this.foodTypeService.getListSimpleFoodTypes().subscribe((foodTypes: FoodType[]) => {
-      this.foodTypes = foodTypes;
+  public  getListSimpleRecipes(): void {
+    this.subscription.push(this.recipeService.listSimpleRecipes().subscribe((recipe: RecipeListSimpleVM[]) => {
+      this.recipes = recipe;
     }))
   }
 
@@ -134,18 +152,18 @@ export class AddProductComponent implements OnInit, OnDestroy {
   setValuestoForm(foodItem: ProductVM): void {
     if(foodItem != null) {
       this.productGroup.setValue({
-        foodTypId: foodItem.FoodTypeId,
-        productPrice: foodItem.ProductPrice,
-        productCode: foodItem.ProductCode,
+        name: foodItem.Name,
+        unit: foodItem.Unit,
+        recipeId: foodItem.RecipeId,
         addedDate: foodItem.AddedDate,
-        batchId: foodItem.BatchId,
-        available: foodItem.IsSold,
         productDescription: foodItem.ProductDescription,
-        image: foodItem.ImageURL,
+        costCode: foodItem.CostCode,
+        imageURL: foodItem.ImageURL,
       });
     }
     this.imagePreview = foodItem.ImageURL;
-    this.batchId =  this.productGroup.controls['batchId'].value;
+    this.costPrice.setValue(foodItem.CostPrice);
+    this.sellingPrice.setValue(foodItem.SellingPrice);
   }
 
   openDialog(): void {
@@ -170,27 +188,30 @@ export class AddProductComponent implements OnInit, OnDestroy {
   addProduct(): void {
     Object.values(this.productGroup.controls).forEach(control => {
       control.markAsTouched();
-      this.productCount.markAsTouched();
     });
 
     if (this.productGroup.valid) {
 
       try {
+        this.toolbarService.enableButtons(false)
         const formData = this.productGroup.value;
-        const addProduct: AddProduct = {
+        const addProduct: AddProductRequest = {
           ProductDescription: formData.productDescription,
-          ProductPrice: formData.productPrice,
-          ImageURL: formData.image,
+          Name: formData.name,
+          ImageURL: formData.imageURL,
           AddedDate: formData.addedDate,
-          FoodTypeId: formData.foodTypId,
-          ProductCount: this.productCount.value
+          Unit: formData.unit,
+          CostCode: formData.costCode,
+          CostPrice: this.costPrice.value,
+          SellingPrice: this.sellingPrice.value,
+          RecipeId: formData.recipeId,
+
         };
         const updateResponse = this.productService.addProduct( addProduct);
         this.subscription.push(updateResponse.subscribe((res: any) => {
-          console.log(res);
           if (res != null) {
             this.toolbarService.enableButtons(true)
-            this.toastr.success('Success!', 'Food item updated!');
+            this.toastr.success('Success!', 'Product updated!');
             this.getProductById(res);
           }
         }));
@@ -208,14 +229,18 @@ export class AddProductComponent implements OnInit, OnDestroy {
 
   updateItem(): void {
     try {
-      this.updateProduct.ImageURL =  this.productGroup.controls['image'].value;
+      this.toolbarService.enableButtons(false)
+      this.updateProduct.ImageURL =  this.productGroup.controls['imageURL'].value;
       this.updateProduct.ProductDescription = this.productGroup.controls['productDescription'].value;
-      this.updateProduct.AddedDate = this.productGroup.controls['addedDate'].value;
-      this.updateProduct.ProductPrice = this.productGroup.controls['productPrice'].value;
-      this.updateProduct.IsSold = this.productGroup.controls['available'].value;
-      this.updateProduct.Id = this.productId;
+      this.updateProduct.Name = this.productGroup.controls['name'].value;
+      this.updateProduct.Unit = this.productGroup.controls['unit'].value;
+      this.updateProduct.CostCode = this.productGroup.controls['costCode'].value;
+      this.updateProduct.RecipeId = this.productGroup.controls['recipeId'].value;
+      this.updateProduct.SellingPrice = this.sellingPrice.value;
+      this.updateProduct.CostPrice =  this.costPrice.value;
 
-      const updateResponse = this.productService.updateProductByBatchId(this.batchId, this.updateProduct);
+
+      const updateResponse = this.productService.updateProductById(this.productId, this.updateProduct);
       this.subscription.push(updateResponse.subscribe((res: any) => {
         console.log(res);
         if (res != null) {
@@ -234,10 +259,10 @@ export class AddProductComponent implements OnInit, OnDestroy {
 
   setValidators(): void {
     if(!this.isEdit) {
-      this.productCount.setValidators([Validators.required, CustomValidators.nonNegative()]);
+     // this.productCount.setValidators([Validators.required, CustomValidators.nonNegative()]);
     } else {
-      this.productCount.clearValidators();
-    this.productCount.updateValueAndValidity();
+      //this.productCount.clearValidators();
+  //  this.productCount.updateValueAndValidity();
     }
   }
 
@@ -248,6 +273,7 @@ export class AddProductComponent implements OnInit, OnDestroy {
     // Trigger a click on the file input when the button is clicked
     this.fileInput.nativeElement.click();
   }
+
   onFileChange(event: any): void {
     const fileEvnet = event.target.files[0];
     const uploadData = new FormData();
@@ -261,12 +287,12 @@ export class AddProductComponent implements OnInit, OnDestroy {
         this.imagePreview = reader.result as string;
         console.log(file.name);
         this.productGroup.patchValue({
-          image: reader.result,
+          imageURL: reader.result,
         });
       };
       this.cd.markForCheck();
     }
-    this.productGroup.patchValue({image:file})
+    this.productGroup.patchValue({imageURL:file})
   }
 
   ngOnDestroy(): void {

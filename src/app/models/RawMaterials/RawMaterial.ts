@@ -5,6 +5,7 @@ export enum QuantityType {
   L = 1
 }
 
+
 export enum LocationType {
   Matara =0,
   Colombo = 1

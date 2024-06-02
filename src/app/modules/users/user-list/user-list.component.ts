@@ -1,149 +1,134 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ToolbarService } from '../../../services/layout/toolbar.service';
+import { ToolbarButtonType } from '../../../models/enum_collection/toolbar-button';
+import { Subscription } from 'rxjs';
+import { Router } from '@angular/router';
+import { MatSelectChange } from '@angular/material/select';
+import { AllRawMaterialVM, GenderType, LocationType, PaginatedRawMaterials, QuantityType, RawMaterialListAdvanceFilter, RoleType } from 'src/app/models/RawMaterials/RawMaterial';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
+import { RawMaterialService } from 'src/app/services/bakery/raw-material.service';
 import { MatTableDataSource } from '@angular/material/table';
-import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
-import { FoodType } from '../../../models/Products/foodType';
-import { AllProductVM, CostCode, PaginatedProducts, RecipeListSimpleVM, Unit } from '../../../models/Products/product';
-import { ProductListAdvanceFilter } from '../../../models/Products/productListAdvanceFilter';
-import { ToolbarButtonType } from '../../../models/enum_collection/toolbar-button';
-import { FoodTypeService } from '../../../services/bakery/food-type.service';
-import { ProductService } from '../../../services/bakery/product.service';
-import { RecipeService } from '../../../services/bakery/reipe.service';
-import { ToolbarService } from '../../../services/layout/toolbar.service';
 import { MatCheckboxChange } from '@angular/material/checkbox';
+import { AllUserVM, PaginatedUsers, UserAdvanceListFilter } from 'src/app/models/User/User';
+import { LoginServiceService } from 'src/app/services/bakery/login-service.service';
 @Component({
-  selector: 'app-product-list',
-  templateUrl: './product-list.component.html',
-  styleUrls: ['./product-list.component.css']
+  selector: 'app-user-list',
+  templateUrl: './user-list.component.html',
+  styleUrls: ['./user-list.component.css']
 })
-export class ProductListComponent implements OnInit, OnDestroy {
-  header: string = 'Products';
+export class UserListComponent {
+  header: string = 'Users';
   subscription: Subscription[] = [];
-  displayedColumns: string[] = ['select', 'Name', 'RecipeName','CostCode', 'Unit', 'SellingPrice', 'CostPrice', 'AddedDate', 'ModifiedDate',  'ProductDescription'];
-  dataSource = new MatTableDataSource<AllProductVM>();
-  foodTypes: FoodType[] = [];
-  searchProduct: FormGroup;
+
+  searchUserForm: FormGroup;
+  quantityType: string;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
-  recipes: RecipeListSimpleVM[] = [];
+  displayedColumns: string[] = [ 'select', 'FirstName', 'LastName', 'PhoneNumber', 'Role',
+   'AddedDate', 'Email', 'Gender', 'Address', 'ModifiedDate'];
+  dataSource = new MatTableDataSource<AllUserVM>();
+  QuantityType = QuantityType; // Import the enum
+  LocationType = LocationType;
   toolBarButtons: ToolbarButtonType[];
   selectedId: string | null = null;
-  id: number;
-  units: any[] = [
-    {Id: 0, name: "PCS"}, {Id: 1, name: "HRS"}
+  id: number
+
+  genders: any[] = [
+    { Id: 0, name: 'Male' },
+    { Id: 1, name: 'Female' },
   ];
-  costCodes: any[] = [
-    {
-      Id: 0,
-      Costcode: "CC001",
-      Description: "Bakery products"
-  },
-  {
-      Id: 2,
-      Costcode: "CC002",
-      Description: "Vegetables"
-  },
-  {
-    Id: 3,
-    Costcode: "CC003",
-    Description: "Diary products"
-},
+  roles: any[] = [
+    { Id: 0, name: 'Admin' },
+    { Id: 1, name: 'User' },
+  ];
+  countries: any[] = [
+    { Id: 0, name: 'Sri Lanka' },
+    { Id: 1, name: 'Finland' },
   ];
 
-  CostCode = CostCode;
-  Unit = Unit;
-  getCostCodeType(value: number): string {
-    return CostCode[value];
-  }
-  getUnitType(value: number): string {
-    return Unit[value];
+  getGenderType(value: number): string {
+    return GenderType[value];
   }
 
-  constructor(
-    private foodItemService: ProductService,
-    private toolbarService: ToolbarService,
-    private foodTypeService: FoodTypeService,
-    private fb: FormBuilder,
+  getRoleType(value: number): string {
+    return RoleType[value];
+  }
+
+  constructor(private toolbarService: ToolbarService,
     private router: Router,
-    private recipeService: RecipeService
-  ) {}
+    private fb: FormBuilder,
+    private loginService: LoginServiceService
+  ) {
 
+  }
   ngOnInit() {
     this.searchFormGroup();
     this.toolbarService.updateToolbarContent(this.header);
     this.toolBarButtons = [ToolbarButtonType.New];
-    this.toolbarService.updateCustomButtons([ToolbarButtonType.New]);
-    this.getListSimpleRecipes();
-
-    this.getFoodItemsList();
-
+    this.toolbarService.updateCustomButtons(this.toolBarButtons);
+    this.getUserList();
 
   }
+
 
 
   search(): void {
-    this.getFoodItemsList();
+    this.getUserList();
   }
 
   clear(): void {
-    this.searchProduct.reset();
-    this.getFoodItemsList();
+    this.searchUserForm.reset();
+    this.getUserList();
   }
 
   searchFormGroup(): void {
-    this.searchProduct = this.fb.group({
-      sellingPrice: [null],
-      costPrice: [null],
+    this.searchUserForm = this.fb.group({
+      firstName: [null],
+      lastName: [null],
       searchString: [null],
       addedDate: [null],
-      unit:[null],
-      costCode: [null],
-      recipeId: [null],
+      gender:[null],
+      role: [null],
+      phoneNumber: [null],
+      email: [null],
     });
   }
 
   ngAfterViewInit(): void {
     this.sort.sortChange.subscribe(() => {
       if (this.paginator) {
-        this.paginator.pageIndex = 0; // Reset pageIndex when sorting
-        this.getFoodItemsList();
+        this.paginator.pageIndex = 0;
+        this.getUserList();
       }
     });
 
     this.subscription.push(
-      this.paginator.page.subscribe(() => this.getFoodItemsList())
+      this.paginator.page.subscribe(() => this.getUserList())
     );
   }
 
-  public  getListSimpleRecipes(): void {
-    this.subscription.push(this.recipeService.listSimpleRecipes().subscribe((recipe: RecipeListSimpleVM[]) => {
-      this.recipes = recipe;
-    }))
-  }
 
-  public getFoodItemsList(): void {
+
+  public getUserList(): void {
     this.dataSource.data =  null;
-    const filter: ProductListAdvanceFilter = {
+    const filter: UserAdvanceListFilter = {
       SortBy: this.sort?.active || 'Id',
       IsAscending: false,
-      SellingPrice: this.searchProduct.get('sellingPrice').value,
-      Unit: this.searchProduct.get('unit').value,
-      SearchString: this.searchProduct.get('searchString').value,
-      AddedDate: this.searchProduct.get('addedDate').value ?? null,
-      CostCode: this.searchProduct.get('costCode').value,
-      RecipeId: this.searchProduct.get('recipeId').value,
-      CostPrice: this.searchProduct.get('costPrice').value,
-
+      PhoneNumber: this.searchUserForm.get('phoneNumber').value,
+      Role: this.searchUserForm.get('role').value,
+      SearchString: this.searchUserForm.get('searchString').value,
+      AddedDate: this.searchUserForm.get('addedDate').value ?? null,
+      Email: this.searchUserForm.get('email').value,
+      Gender: this.searchUserForm.get('gender').value,
       Pagination: {
         PageIndex: this.paginator?.pageIndex + 1 || 1,
         PageSize: this.paginator?.pageSize || 5,
       },
     };
 
-    this.foodItemService.getProducts(filter).subscribe((res: PaginatedProducts) => {
+    this.loginService.getUsers(filter).subscribe((res: PaginatedUsers) => {
       this.dataSource.data = res.Items;
       this.dataSource.paginator = this.paginator;
       this.paginator.length = res.TotalCount || 0; // Update paginator length
@@ -160,7 +145,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
         this.handleUpdateButton();
         break;
         case ToolbarButtonType.Edit:
-       this.navigateToEditproduct(this.id);
+       this.navigateToEditUser(this.id);
         break;
         case ToolbarButtonType.Delete:
         //this.handleUpdateButton();
@@ -171,13 +156,13 @@ export class ProductListComponent implements OnInit, OnDestroy {
   }
 
 
-  navigateToEditproduct(id: number) {
-    this.router.navigate(['base/product/add', 'edit', id]);
+  navigateToEditUser(id: number) {
+    this.router.navigate(['base/user/add', 'edit', id]);
 
   }
 
   public handleNewButton(): void {
-    this.router.navigate(['base/product/add', 'add']);
+    this.router.navigate(['base/user/add', 'add']);
   }
 
   private handleUpdateButton(): void {
@@ -239,6 +224,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
     }
     this.toolbarService.updateCustomButtons(this.toolBarButtons);
   }
+
+
 
   ngOnDestroy(): void {
     this.toolbarService.updateCustomButtons([]);

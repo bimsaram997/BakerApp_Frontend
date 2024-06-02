@@ -6,6 +6,7 @@ import { MainheaderComponent } from './mainheader/mainheader.component';
 import { SidenavbarComponent } from './sidenavbar/sidenavbar.component';
 import { ToolBarComponent } from './tool-bar/tool-bar.component';
 import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
+import { AddressLookupComponent } from './address-lookup/address-lookup.component';
 
 
 
@@ -16,7 +17,8 @@ import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.componen
     MainheaderComponent,
     SidenavbarComponent,
     ToolBarComponent,
-    ConfirmDialogComponent
+    ConfirmDialogComponent,
+    AddressLookupComponent
   ],
   entryComponents: [ConfirmDialogComponent],
   imports: [
@@ -25,6 +27,6 @@ import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.componen
 
   ],
   exports: [MainheaderComponent,
-    SidenavbarComponent, ToolBarComponent],
+    SidenavbarComponent, ToolBarComponent, AddressLookupComponent],
 })
 export class ComponentsModule { }

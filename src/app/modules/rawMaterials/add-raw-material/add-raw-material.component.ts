@@ -143,7 +143,7 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy  {
           console.log(res);
           if (res != null) {
             this.toolbarService.enableButtons(true)
-            this.toastr.success('Success!', 'Raw material updated!');
+            this.toastr.success('Success!', 'Raw material added!');
             this.getRawMaterialById(res);
           }
         }));
@@ -159,29 +159,36 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy  {
   }
 
   updateItem(): void {
-    try {
-      this.toolbarService.enableButtons(false)
-      this.updateRawMaterial.ImageURL =  this.rawMaterialGroup.controls['imageURL'].value;
-      this.updateRawMaterial.Name = this.rawMaterialGroup.controls['name'].value;
-      this.updateRawMaterial.Quantity = this.quantity.value;
-      this.updateRawMaterial.MeasureUnit = this.rawMaterialGroup.controls['measureUnit'].value;
-      this.updateRawMaterial.Price =  this.unitPrice.value;
-      this.updateRawMaterial.LocationId = this.rawMaterialGroup.controls['locationId'].value;
+    Object.values(this.rawMaterialGroup.controls).forEach((control) => {
+      control.markAsTouched();
 
-      const updateResponse = this.rawMaterialService.updateRawMaterialById(this.rawMaterialId, this.updateRawMaterial);
-      this.subscription.push(updateResponse.subscribe((res: any) => {
-        if (res != null) {
-          this.toastr.success('Success!', 'Food item updated!');
-          this.toolbarService.enableButtons(true)
+    });
+    if (this.rawMaterialGroup.valid ) {
+      try {
+        this.toolbarService.enableButtons(false)
+        this.updateRawMaterial.ImageURL =  this.rawMaterialGroup.controls['imageURL'].value;
+        this.updateRawMaterial.Name = this.rawMaterialGroup.controls['name'].value;
+        this.updateRawMaterial.Quantity = this.quantity.value;
+        this.updateRawMaterial.MeasureUnit = this.rawMaterialGroup.controls['measureUnit'].value;
+        this.updateRawMaterial.Price =  this.unitPrice.value;
+        this.updateRawMaterial.LocationId = this.rawMaterialGroup.controls['locationId'].value;
 
-          this.getRawMaterialById(res);
-        }
-      }));
-    } catch (error) {
-      this.toolbarService.enableButtons(true)
-      console.error('An error occurred while updating the food item:', error);
-      this.toastr.error('Error!', 'Failed to update food item.');
+        const updateResponse = this.rawMaterialService.updateRawMaterialById(this.rawMaterialId, this.updateRawMaterial);
+        this.subscription.push(updateResponse.subscribe((res: any) => {
+          if (res != null) {
+            this.toastr.success('Success!', 'Raw material updated!');
+            this.toolbarService.enableButtons(true)
+
+            this.getRawMaterialById(res);
+          }
+        }));
+      } catch (error) {
+        this.toolbarService.enableButtons(true)
+        console.error('An error occurred while updating the food item:', error);
+        this.toastr.error('Error!', 'Failed to update food item.');
+      }
     }
+
   }
 
   setValidators(): void {

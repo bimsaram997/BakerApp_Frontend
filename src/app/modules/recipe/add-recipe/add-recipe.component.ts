@@ -1,4 +1,11 @@
-import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ToolbarService } from '../../../services/layout/toolbar.service';
@@ -8,17 +15,25 @@ import { ToolbarButtonType } from '../../../models/enum_collection/toolbar-butto
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
-import { AddRecipeRequest, RecipeRawMaterial, RecipeVM, UpdateRecipe } from '../../../models/Recipe/Recipe';
+import {
+  AddRecipeRequest,
+  RecipeRawMaterial,
+  RecipeVM,
+  UpdateRecipe,
+} from '../../../models/Recipe/Recipe';
 import { RecipeService } from '../../../services/bakery/reipe.service';
 import { RawMaterialService } from '../../../services/bakery/raw-material.service';
-import { QuantityType, RawMaterialListSimpleVM } from '../../../models/RawMaterials/RawMaterial';
+import {
+  QuantityType,
+  RawMaterialListSimpleVM,
+} from '../../../models/RawMaterials/RawMaterial';
 import { MatSelectChange } from '@angular/material/select';
 @Component({
   selector: 'app-add-recipe',
   templateUrl: './add-recipe.component.html',
-  styleUrls: ['./add-recipe.component.css']
+  styleUrls: ['./add-recipe.component.css'],
 })
-export class AddRecipeComponent implements OnInit, OnDestroy, AfterViewInit   {
+export class AddRecipeComponent implements OnInit, OnDestroy, AfterViewInit {
   subscription: Subscription[] = [];
   header: string;
   mode: string;
@@ -30,7 +45,7 @@ export class AddRecipeComponent implements OnInit, OnDestroy, AfterViewInit   {
   dataSource: MatTableDataSource<any>;
   displayedColumns = ['RawMaterial', 'Measureunit', 'Quantity', 'Action'];
   @ViewChild(MatPaginator) paginator: MatPaginator;
-rawMaterialList:RawMaterialListSimpleVM[]
+  rawMaterialList: RawMaterialListSimpleVM[];
   matHint: string;
   recipeId: number;
   updateRecipeValues: UpdateRecipe = new UpdateRecipe();
@@ -43,28 +58,29 @@ rawMaterialList:RawMaterialListSimpleVM[]
     private router: Router,
     private changeDetectorRefs: ChangeDetectorRef,
     private recipeService: RecipeService,
-    private rawMaterialService:RawMaterialService
-
-  ) {
-  }
+    private rawMaterialService: RawMaterialService
+  ) {}
 
   ngOnInit() {
     this.getListRawMaterials();
     this.route.params.subscribe((params) => {
       this.mode = params['mode'];
-      const id: number= +params['id'];
+      const id: number = +params['id'];
       if (id !== null) {
-        this.recipeId  =  id;
-
+        this.recipeId = id;
       }
     });
 
     this.createFormGroup();
 
-    this.toolbarService.updateCustomButtons([ToolbarButtonType.Save, ToolbarButtonType.SaveClose, ToolbarButtonType.Cancel ]);
+    this.toolbarService.updateCustomButtons([
+      ToolbarButtonType.Save,
+      ToolbarButtonType.SaveClose,
+      ToolbarButtonType.Cancel,
+    ]);
 
-    if(this.mode === 'edit') {
-      this.isEdit =  true;
+    if (this.mode === 'edit') {
+      this.isEdit = true;
       this.header = 'Update recipe';
       this.getRecipeById(this.recipeId);
       //this.disableFields();
@@ -72,7 +88,7 @@ rawMaterialList:RawMaterialListSimpleVM[]
       this.header = 'Add recipe';
     }
     this.toolbarService.updateToolbarContent(this.header);
-   // this.setValidators();
+    // this.setValidators();
   }
 
   ngAfterViewInit() {
@@ -81,43 +97,38 @@ rawMaterialList:RawMaterialListSimpleVM[]
     }
   }
 
-
   createFormGroup(): void {
     this.recipeGroup = this.fb.group({
       name: [null, Validators.required],
       addedDate: [null, Validators.required],
       description: [null, Validators.required],
-      content: ['', [
-        Validators.required
-      ]],
-      rawMaterials: this.fb.array([])
+      content: ['', [Validators.required]],
+      rawMaterials: this.fb.array([]),
     });
-
   }
 
   get rawMaterials() {
     return this.recipeGroup.get('rawMaterials') as FormArray;
   }
 
-
   addRow() {
-
-
-
-    this.rawMaterials.push(this.fb.group({
-      rawMaterialId: [null, Validators.required],
-      rawMaterialQuantity: [null, Validators.required],
-      measureunit: [null, Validators.required]
-    }));
+    this.rawMaterials.push(
+      this.fb.group({
+        rawMaterialId: [null, Validators.required],
+        rawMaterialQuantity: [null, Validators.required],
+        measureunit: [null, Validators.required],
+      })
+    );
 
     this.dataSource = new MatTableDataSource(this.rawMaterials.controls);
     this.dataSource.paginator = this.paginator;
     this.changeDetectorRefs.detectChanges();
-
   }
 
   get rawMaterialIdControl() {
-    return this.recipeGroup.get('rawMaterials').get(`${this.rawMaterials.length - 1}.rawMaterialId`);
+    return this.recipeGroup
+      .get('rawMaterials')
+      .get(`${this.rawMaterials.length - 1}.rawMaterialId`);
   }
 
   removeRow(index: number) {
@@ -128,7 +139,7 @@ rawMaterialList:RawMaterialListSimpleVM[]
   public handleButtonClick(buttonType: ToolbarButtonType): void {
     switch (buttonType) {
       case ToolbarButtonType.Save:
-       this.isEdit ? this.updateItem():  this.addRecipe();
+        this.isEdit ? this.updateItem() : this.addRecipe();
 
         this.saveCloseValue = false;
         break;
@@ -137,7 +148,7 @@ rawMaterialList:RawMaterialListSimpleVM[]
         break;
       case ToolbarButtonType.SaveClose:
         this.saveCloseValue = true;
-        this.isEdit ? this.updateItem(): this.addRecipe();
+        this.isEdit ? this.updateItem() : this.addRecipe();
         break;
       case ToolbarButtonType.Cancel:
         this.saveClose();
@@ -148,11 +159,13 @@ rawMaterialList:RawMaterialListSimpleVM[]
     }
   }
 
-  getRecipeById(id: number): void  {
-    if (id> 0) {
-      this.subscription.push (this.recipeService.getRecipeById(id).subscribe((recipe: RecipeVM) => {
-       this.setValuestoForm(recipe);
-      }));
+  getRecipeById(id: number): void {
+    if (id > 0) {
+      this.subscription.push(
+        this.recipeService.getRecipeById(id).subscribe((recipe: RecipeVM) => {
+          this.setValuestoForm(recipe);
+        })
+      );
     }
   }
 
@@ -160,62 +173,67 @@ rawMaterialList:RawMaterialListSimpleVM[]
     this.recipeGroup.reset();
     this.rawMaterials.clear();
     this.recipeGroup.controls['name'].setValue(recipe.RecipeName);
-    this.recipeGroup.controls['addedDate'].setValue( recipe.AddedDate);
-    this.recipeGroup.controls['description'].setValue( recipe.Description);
+    this.recipeGroup.controls['addedDate'].setValue(recipe.AddedDate);
+    this.recipeGroup.controls['description'].setValue(recipe.Description);
     this.recipeGroup.controls['content'].setValue(recipe.Instructions);
     const rawMaterialArray = this.recipeGroup.get('rawMaterials') as FormArray;
-    const rawMateriaList =  recipe.RawMaterials;
+    const rawMateriaList = recipe.RawMaterials;
     rawMateriaList.forEach((data, index) => {
       this.rawMaterials.push(
         this.fb.group({
           rawMaterialId: [data.rawMaterialId, Validators.required],
-          measureunit: ["Kg"],
-          rawMaterialQuantity: [(data.rawMaterialQuantity)*1000, Validators.required],
+          measureunit: ['Kg'],
+          rawMaterialQuantity: [
+            data.rawMaterialQuantity * 1000,
+            Validators.required,
+          ],
         })
       );
     });
     this.dataSource = new MatTableDataSource(this.rawMaterials.controls);
     this.changeDetectorRefs.detectChanges();
-    console.log(this.recipeGroup.value)
+    console.log(this.recipeGroup.value);
   }
 
   addRecipe(): void {
-    Object.values(this.recipeGroup.controls).forEach(control => {
+    Object.values(this.recipeGroup.controls).forEach((control) => {
       control.markAsTouched();
     });
     const rawMaterialsArray = this.rawMaterials;
-const length = rawMaterialsArray.length;
+    const length = rawMaterialsArray.length;
     if (length <= 0) {
       this.toastr.error('Error!', 'Please add atleast one raw material');
-      this.toolbarService.enableButtons(true)
+      this.toolbarService.enableButtons(true);
       return;
     }
 
-    if(this.recipeGroup.valid && this.getRawMaterialArray().length > 0) {
+    if (this.recipeGroup.valid && this.getRawMaterialArray().length > 0) {
       try {
-        this.toolbarService.enableButtons(false)
+        this.toolbarService.enableButtons(false);
         const recipeRequest: AddRecipeRequest = {
           AddedDate: this.recipeGroup.get('addedDate').value,
           RecipeName: this.recipeGroup.get('name').value,
           Description: this.recipeGroup.get('description').value,
           Instructions: this.recipeGroup.get('content').value,
-          rawMaterials: this.getRawMaterialArray()
+          rawMaterials: this.getRawMaterialArray(),
         };
         console.log(recipeRequest);
-        const updateResponse = this.recipeService.addRecipe( recipeRequest);
-        this.subscription.push(updateResponse.subscribe((res: any) => {
-          console.log(res);
-          if (res != null) {
-            this.toolbarService.enableButtons(true)
-            this.toastr.success('Success!', 'Raw material updated!');
-           this.getRecipeById(res);
-          }
-        }));
-        if ( this.saveCloseValue) {
+        const updateResponse = this.recipeService.addRecipe(recipeRequest);
+        this.subscription.push(
+          updateResponse.subscribe((res: any) => {
+            console.log(res);
+            if (res != null) {
+              this.toolbarService.enableButtons(true);
+              this.toastr.success('Success!', 'Raw material updated!');
+              this.getRecipeById(res);
+            }
+          })
+        );
+        if (this.saveCloseValue) {
           this.saveClose();
         }
-      }catch (error) {
-        this.toolbarService.enableButtons(true)
+      } catch (error) {
+        this.toolbarService.enableButtons(true);
         console.error('An error occurred while updating the food item:', error);
         this.toastr.error('Error!', 'Failed to update food item.');
       }
@@ -223,102 +241,129 @@ const length = rawMaterialsArray.length;
   }
 
   updateItem(): void {
-    try {
-      this.toolbarService.enableButtons(false)
-      this.updateRecipeValues.RecipeName =  this.recipeGroup.controls['name'].value;
-      this.updateRecipeValues.Description = this.recipeGroup.controls['description'].value;
-      this.updateRecipeValues.Instructions = this.recipeGroup.controls['content'].value;
-      this.updateRecipeValues.RawMaterials= this.getRawMaterialArray()
+    Object.values(this.recipeGroup.controls).forEach((control) => {
+      control.markAsTouched();
+    });
+    const rawMaterialsArray = this.rawMaterials;
+    const length = rawMaterialsArray.length;
+    if (length <= 0) {
+      this.toastr.error('Error!', 'Please add atleast one raw material');
+      this.toolbarService.enableButtons(true);
+      return;
+    }
 
-      const updateResponse = this.recipeService.updateRecipeById(this.recipeId, this.updateRecipeValues);
-      this.subscription.push(updateResponse.subscribe((res: any) => {
-        if (res != null) {
-          this.toastr.success('Success!', 'Recipe updated!');
-          this.toolbarService.enableButtons(true)
-          if (this.saveCloseValue) {
-            this.saveClose();
-          } else {
-             this.getRecipeById(res);
-          }
+    if (this.recipeGroup.valid && this.getRawMaterialArray().length > 0) {
+      try {
+        this.toolbarService.enableButtons(false);
+        this.updateRecipeValues.RecipeName =
+          this.recipeGroup.controls['name'].value;
+        this.updateRecipeValues.Description =
+          this.recipeGroup.controls['description'].value;
+        this.updateRecipeValues.Instructions =
+          this.recipeGroup.controls['content'].value;
+        this.updateRecipeValues.RawMaterials = this.getRawMaterialArray();
 
-        }
-      }));
-    } catch (error) {
-      this.toolbarService.enableButtons(true)
-      console.error('An error occurred while updating the recipe:', error);
-      this.toastr.error('Error!', 'Failed to update recipe.');
+        const updateResponse = this.recipeService.updateRecipeById(
+          this.recipeId,
+          this.updateRecipeValues
+        );
+        this.subscription.push(
+          updateResponse.subscribe((res: any) => {
+            if (res != null) {
+              this.toastr.success('Success!', 'Recipe updated!');
+              this.toolbarService.enableButtons(true);
+              if (this.saveCloseValue) {
+                this.saveClose();
+              } else {
+                this.getRecipeById(res);
+              }
+            }
+          })
+        );
+      } catch (error) {
+        this.toolbarService.enableButtons(true);
+        console.error('An error occurred while updating the recipe:', error);
+        this.toastr.error('Error!', 'Failed to update recipe.');
+      }
     }
   }
 
   saveClose(): void {
-    this.router.navigate(['base/recipe/recipe'])
+    this.router.navigate(['base/recipe/recipe']);
   }
-
 
   getRawMaterialArray(): RecipeRawMaterial[] {
     const rawMaterialsArray: RecipeRawMaterial[] = [];
-    this.rawMaterials.controls.forEach(control => {
+    this.rawMaterials.controls.forEach((control) => {
       const rawMaterial: RecipeRawMaterial = {
         rawMaterialId: control.get('rawMaterialId').value,
-        rawMaterialQuantity: ((control.get('rawMaterialQuantity').value)/1000)
+        rawMaterialQuantity: control.get('rawMaterialQuantity').value / 1000,
       };
       rawMaterialsArray.push(rawMaterial);
     });
     return rawMaterialsArray;
   }
 
-  public  getListRawMaterials(): void {
-    this.subscription.push(this.rawMaterialService.listSimpleRawmaterials().subscribe((rawMaterials: RawMaterialListSimpleVM[]) => {
-      this.rawMaterialList = rawMaterials;
-    }))
+  public getListRawMaterials(): void {
+    this.subscription.push(
+      this.rawMaterialService
+        .listSimpleRawmaterials()
+        .subscribe((rawMaterials: RawMaterialListSimpleVM[]) => {
+          this.rawMaterialList = rawMaterials;
+        })
+    );
   }
   selectRawMaterial(value: MatSelectChange, rowIndex: number): void {
     const Id = value.value;
     if (this.rawMaterials.length > 0) {
-      if (this.rawMaterials.controls[rowIndex].get('rawMaterialId').value !== null) {
-
-        const isDuplicate = this.rawMaterials.controls.some((control, index) =>
-          control.get('rawMaterialId').value === Id && index !== rowIndex
+      if (
+        this.rawMaterials.controls[rowIndex].get('rawMaterialId').value !== null
+      ) {
+        const isDuplicate = this.rawMaterials.controls.some(
+          (control, index) =>
+            control.get('rawMaterialId').value === Id && index !== rowIndex
         );
 
         if (isDuplicate) {
-;
-          this.toastr.error('Duplicate ID. Cannot add the same raw material again.');
-          this.rawMaterials.controls[rowIndex].get('rawMaterialId').setValue(null);
+          this.toastr.error(
+            'Duplicate ID. Cannot add the same raw material again.'
+          );
+          this.rawMaterials.controls[rowIndex]
+            .get('rawMaterialId')
+            .setValue(null);
           return;
         }
       }
     }
-    const material = this.rawMaterialList.find(item => item.Id === Id);
+    const material = this.rawMaterialList.find((item) => item.Id === Id);
     if (material) {
       this.selectType(material.MeasureUnit);
-      this.rawMaterials.at(rowIndex).get('measureunit').setValue(this.getQuantityType(material.MeasureUnit));
+      this.rawMaterials
+        .at(rowIndex)
+        .get('measureunit')
+        .setValue(this.getQuantityType(material.MeasureUnit));
     }
   }
-  selectType(value: number): void{
-
+  selectType(value: number): void {
     switch (value) {
       case QuantityType.Kg:
-        this.matHint = "Please add in grams";
+        this.matHint = 'Please add in grams';
         break;
       case QuantityType.L:
-        this.matHint = "Please add in milliliters";
+        this.matHint = 'Please add in milliliters';
         break;
       default:
-        this.matHint = "";
-
+        this.matHint = '';
     }
   }
 
-
   isIdAlreadySelected(id: number): boolean {
-    return this.rawMaterials.value.some(row => row.rawMaterialId === id);
+    return this.rawMaterials.value.some((row) => row.rawMaterialId === id);
   }
 
   getQuantityType(value: number): string {
     return QuantityType[value];
   }
-
 
   ngOnDestroy(): void {
     this.toolbarService.updateCustomButtons([]);

@@ -190,7 +190,7 @@ export class AddProductComponent implements OnInit, OnDestroy {
       control.markAsTouched();
     });
 
-    if (this.productGroup.valid) {
+    if (this.productGroup.valid && this.costPrice.valid && this.sellingPrice.valid) {
 
       try {
         this.toolbarService.enableButtons(false)
@@ -211,7 +211,7 @@ export class AddProductComponent implements OnInit, OnDestroy {
         this.subscription.push(updateResponse.subscribe((res: any) => {
           if (res != null) {
             this.toolbarService.enableButtons(true)
-            this.toastr.success('Success!', 'Product updated!');
+            this.toastr.success('Success!', 'Product added!');
             this.getProductById(res);
           }
         }));
@@ -228,32 +228,39 @@ export class AddProductComponent implements OnInit, OnDestroy {
   }
 
   updateItem(): void {
-    try {
-      this.toolbarService.enableButtons(false)
-      this.updateProduct.ImageURL =  this.productGroup.controls['imageURL'].value;
-      this.updateProduct.ProductDescription = this.productGroup.controls['productDescription'].value;
-      this.updateProduct.Name = this.productGroup.controls['name'].value;
-      this.updateProduct.Unit = this.productGroup.controls['unit'].value;
-      this.updateProduct.CostCode = this.productGroup.controls['costCode'].value;
-      this.updateProduct.RecipeId = this.productGroup.controls['recipeId'].value;
-      this.updateProduct.SellingPrice = this.sellingPrice.value;
-      this.updateProduct.CostPrice =  this.costPrice.value;
+    Object.values(this.productGroup.controls).forEach(control => {
+      control.markAsTouched();
+    });
+
+    if (this.productGroup.valid && this.costPrice.valid && this.sellingPrice.valid)  {
+      try {
+        this.toolbarService.enableButtons(false)
+        this.updateProduct.ImageURL =  this.productGroup.controls['imageURL'].value;
+        this.updateProduct.ProductDescription = this.productGroup.controls['productDescription'].value;
+        this.updateProduct.Name = this.productGroup.controls['name'].value;
+        this.updateProduct.Unit = this.productGroup.controls['unit'].value;
+        this.updateProduct.CostCode = this.productGroup.controls['costCode'].value;
+        this.updateProduct.RecipeId = this.productGroup.controls['recipeId'].value;
+        this.updateProduct.SellingPrice = this.sellingPrice.value;
+        this.updateProduct.CostPrice =  this.costPrice.value;
 
 
-      const updateResponse = this.productService.updateProductById(this.productId, this.updateProduct);
-      this.subscription.push(updateResponse.subscribe((res: any) => {
-        console.log(res);
-        if (res != null) {
-          this.toolbarService.enableButtons(true)
-          this.toastr.success('Success!', 'Food item updated!');
-          this.getProductById(res);
-        }
-      }));
-    } catch (error) {
-      this.toolbarService.enableButtons(true)
-      console.error('An error occurred while updating the food item:', error);
-      this.toastr.error('Error!', 'Failed to update food item.');
+        const updateResponse = this.productService.updateProductById(this.productId, this.updateProduct);
+        this.subscription.push(updateResponse.subscribe((res: any) => {
+          console.log(res);
+          if (res != null) {
+            this.toolbarService.enableButtons(true)
+            this.toastr.success('Success!', 'Product updated!');
+            this.getProductById(res);
+          }
+        }));
+      } catch (error) {
+        this.toolbarService.enableButtons(true)
+        console.error('An error occurred while updating the food item:', error);
+        this.toastr.error('Error!', 'Failed to update food item.');
+      }
     }
+
   }
 
 

@@ -1,15 +1,26 @@
-import { Pagination } from "../shared/pagination";
+import { Pagination } from '../shared/pagination';
 
 export enum QuantityType {
-  Kg =0,
-  L = 1
+  Kg = 0,
+  L = 1,
 }
-
 
 export enum LocationType {
-  Matara =0,
-  Colombo = 1
+  Matara = 0,
+  Colombo = 1,
 }
+
+export enum GenderType {
+  Male = 0,
+  Female = 1,
+}
+
+export enum RoleType {
+  Admin = 0,
+  User = 1,
+}
+
+
 
 export class AddRawMaterial {
   Name: string;
@@ -35,12 +46,11 @@ export class RawMaterialVM {
   LocationId: number;
 }
 
-
 export class AllRawMaterialVM {
   Id: number;
   Name: string;
   AddedDate: string | null;
-  MeasureUnit:  QuantityType;
+  MeasureUnit: QuantityType;
   Quantity: number | null;
   ImageURL: string;
   ModifiedDate: string | null;
@@ -65,7 +75,6 @@ export class RawMaterialListAdvanceFilter {
   IsAscending: boolean;
 }
 
-
 export class UpdateRawMaterial {
   Name: string;
   Quantity: number;
@@ -74,7 +83,6 @@ export class UpdateRawMaterial {
   Price: number;
   LocationId: number;
 }
-
 
 export class RawMaterialListSimpleVM {
   Id: number;

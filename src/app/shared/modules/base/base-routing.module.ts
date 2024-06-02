@@ -20,6 +20,10 @@ const routes: Routes = [
       {
         path:'recipe',
         loadChildren: () => import('../../../modules/recipe/recipe.module').then(m => m.RecipeModule)
+      },
+      {
+        path:'user',
+        loadChildren: () => import('../../../modules/users/user.module').then(m => m.UserModule)
       }
     ]
 }];

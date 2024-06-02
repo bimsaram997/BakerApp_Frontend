@@ -1,0 +1,14 @@
+.image {
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  max-width: 90%;
+  max-height: 90%;
+
+}
+
+.form-body {
+  margin-top: 80px;
+  margin-left: 20px;
+  margin-right: 20px;
+}

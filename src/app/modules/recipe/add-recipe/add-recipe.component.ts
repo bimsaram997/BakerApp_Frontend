@@ -223,31 +223,45 @@ const length = rawMaterialsArray.length;
   }
 
   updateItem(): void {
-    try {
-      this.toolbarService.enableButtons(false)
-      this.updateRecipeValues.RecipeName =  this.recipeGroup.controls['name'].value;
-      this.updateRecipeValues.Description = this.recipeGroup.controls['description'].value;
-      this.updateRecipeValues.Instructions = this.recipeGroup.controls['content'].value;
-      this.updateRecipeValues.RawMaterials= this.getRawMaterialArray()
-
-      const updateResponse = this.recipeService.updateRecipeById(this.recipeId, this.updateRecipeValues);
-      this.subscription.push(updateResponse.subscribe((res: any) => {
-        if (res != null) {
-          this.toastr.success('Success!', 'Recipe updated!');
-          this.toolbarService.enableButtons(true)
-          if (this.saveCloseValue) {
-            this.saveClose();
-          } else {
-             this.getRecipeById(res);
-          }
-
-        }
-      }));
-    } catch (error) {
+    Object.values(this.recipeGroup.controls).forEach(control => {
+      control.markAsTouched();
+    });
+    const rawMaterialsArray = this.rawMaterials;
+const length = rawMaterialsArray.length;
+    if (length <= 0) {
+      this.toastr.error('Error!', 'Please add atleast one raw material');
       this.toolbarService.enableButtons(true)
-      console.error('An error occurred while updating the recipe:', error);
-      this.toastr.error('Error!', 'Failed to update recipe.');
+      return;
     }
+
+    if(this.recipeGroup.valid && this.getRawMaterialArray().length > 0) {
+      try {
+        this.toolbarService.enableButtons(false)
+        this.updateRecipeValues.RecipeName =  this.recipeGroup.controls['name'].value;
+        this.updateRecipeValues.Description = this.recipeGroup.controls['description'].value;
+        this.updateRecipeValues.Instructions = this.recipeGroup.controls['content'].value;
+        this.updateRecipeValues.RawMaterials= this.getRawMaterialArray()
+
+        const updateResponse = this.recipeService.updateRecipeById(this.recipeId, this.updateRecipeValues);
+        this.subscription.push(updateResponse.subscribe((res: any) => {
+          if (res != null) {
+            this.toastr.success('Success!', 'Recipe updated!');
+            this.toolbarService.enableButtons(true)
+            if (this.saveCloseValue) {
+              this.saveClose();
+            } else {
+               this.getRecipeById(res);
+            }
+
+          }
+        }));
+      } catch (error) {
+        this.toolbarService.enableButtons(true)
+        console.error('An error occurred while updating the recipe:', error);
+        this.toastr.error('Error!', 'Failed to update recipe.');
+      }
+    }
+
   }
 
   saveClose(): void {

@@ -5,7 +5,11 @@ import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { RecipeService } from '../../../services/bakery/reipe.service';
-import { RecipeListAdvanceFilter, AllRecipeVM, PaginatedRawMaterials } from '../../../models/Recipe/Recipe';
+import {
+  RecipeListAdvanceFilter,
+  AllRecipeVM,
+  PaginatedRawMaterials,
+} from '../../../models/Recipe/Recipe';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
@@ -16,7 +20,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 @Component({
   selector: 'app-recipe-list',
   templateUrl: './recipe-list.component.html',
-  styleUrls: ['./recipe-list.component.css']
+  styleUrls: ['./recipe-list.component.css'],
 })
 export class RecipeListComponent implements OnInit, OnDestroy {
   header: string = 'Recipes';
@@ -25,20 +29,27 @@ export class RecipeListComponent implements OnInit, OnDestroy {
   searchRecipeForm: FormGroup;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
-  displayedColumns: string[] = [ 'select', 'RecipeName', 'Description', 'RawMaterial',  'AddedDate', 'ModifiedDate', 'Instructions'];
+  displayedColumns: string[] = [
+    'select',
+    'RecipeName',
+    'Description',
+    'RawMaterial',
+    'AddedDate',
+    'ModifiedDate',
+    'Instructions',
+  ];
   dataSource = new MatTableDataSource<AllRecipeVM>();
   selectedId: string | null = null;
-  id: number
-  rawMaterialList:RawMaterialListSimpleVM[]
-  constructor(private toolbarService: ToolbarService,
+  id: number;
+  rawMaterialList: RawMaterialListSimpleVM[];
+  constructor(
+    private toolbarService: ToolbarService,
     private router: Router,
     private fb: FormBuilder,
     private recipeService: RecipeService,
-    private rawMaterialService:RawMaterialService,
-    private sanitizer: DomSanitizer) {
-
-  }
-
+    private rawMaterialService: RawMaterialService,
+    private sanitizer: DomSanitizer
+  ) {}
 
   ngOnInit() {
     this.searchFormGroup();
@@ -47,13 +58,16 @@ export class RecipeListComponent implements OnInit, OnDestroy {
     this.toolBarButtons = [ToolbarButtonType.New];
     this.toolbarService.updateCustomButtons(this.toolBarButtons);
     this.getRecipeList();
-
   }
 
-  public  getListRawMaterials(): void {
-    this.subscription.push(this.rawMaterialService.listSimpleRawmaterials().subscribe((rawMaterials: RawMaterialListSimpleVM[]) => {
-      this.rawMaterialList = rawMaterials;
-    }))
+  public getListRawMaterials(): void {
+    this.subscription.push(
+      this.rawMaterialService
+        .listSimpleRawmaterials()
+        .subscribe((rawMaterials: RawMaterialListSimpleVM[]) => {
+          this.rawMaterialList = rawMaterials;
+        })
+    );
   }
 
   isSelected(id: string): boolean {
@@ -64,8 +78,12 @@ export class RecipeListComponent implements OnInit, OnDestroy {
   checkboxChanged(event: MatCheckboxChange, id: string): void {
     if (event.checked) {
       // Check if Edit and Delete buttons are not already in the array
-      const hasEditButton = this.toolBarButtons.includes(ToolbarButtonType.Edit);
-      const hasDeleteButton = this.toolBarButtons.includes(ToolbarButtonType.Delete);
+      const hasEditButton = this.toolBarButtons.includes(
+        ToolbarButtonType.Edit
+      );
+      const hasDeleteButton = this.toolBarButtons.includes(
+        ToolbarButtonType.Delete
+      );
 
       // Add Edit and Delete buttons if they are not already present
       if (!hasEditButton) {
@@ -85,19 +103,17 @@ export class RecipeListComponent implements OnInit, OnDestroy {
     if (this.selectedId === id) {
       // Uncheck the checkbox if it's already selected
       this.selectedId = null;
-      this.id =  null;
+      this.id = null;
     } else {
       // Check the checkbox and update selectedId
       this.selectedId = id;
       this.id = +id;
       console.log(this.selectedId); // Output the selected ID to console
     }
-
   }
 
   removeSpecificButtons(): void {
     const deleteIndex = this.toolBarButtons.indexOf(ToolbarButtonType.Delete);
-
 
     // Check if the buttons exist in the array before removing
     if (deleteIndex !== -1) {
@@ -116,12 +132,12 @@ export class RecipeListComponent implements OnInit, OnDestroy {
         this.handleNewButton();
         break;
       case ToolbarButtonType.Update:
-       // this.handleUpdateButton();
+        // this.handleUpdateButton();
         break;
-        case ToolbarButtonType.Edit:
+      case ToolbarButtonType.Edit:
         this.navigateToEditRecipe(this.id);
         break;
-        case ToolbarButtonType.Delete:
+      case ToolbarButtonType.Delete:
         //this.handleUpdateButton();
         break;
       default:
@@ -139,11 +155,11 @@ export class RecipeListComponent implements OnInit, OnDestroy {
   }
 
   public getRecipeList(): void {
-    this.dataSource.data =  null;
+    this.dataSource.data = null;
     const filter: RecipeListAdvanceFilter = {
       SortBy: this.sort?.active || 'Id',
       IsAscending: false,
-      Description:  this.searchRecipeForm.get('description').value,
+      Description: this.searchRecipeForm.get('description').value,
       RawMaterialIds: this.searchRecipeForm.get('rawMaterialIds').value,
       SearchString: this.searchRecipeForm.get('searchString').value,
       AddedDate: this.searchRecipeForm.get('addedDate').value ?? null,
@@ -154,13 +170,14 @@ export class RecipeListComponent implements OnInit, OnDestroy {
       },
     };
 
-    this.recipeService.getRecipes(filter).subscribe((res: PaginatedRawMaterials) => {
-
-      this.dataSource.data = res.Items;
-      this.dataSource.paginator = this.paginator;
-      this.paginator.length = res.TotalCount || 0; // Update paginator length
-      this.dataSource.sort = this.sort;
-    });
+    this.recipeService
+      .getRecipes(filter)
+      .subscribe((res: PaginatedRawMaterials) => {
+        this.dataSource.data = res.Items;
+        this.dataSource.paginator = this.paginator;
+        this.paginator.length = res.TotalCount || 0; // Update paginator length
+        this.dataSource.sort = this.sort;
+      });
   }
 
   private handleNewButton(): void {
@@ -174,13 +191,10 @@ export class RecipeListComponent implements OnInit, OnDestroy {
   clear(): void {
     this.searchRecipeForm.reset();
     this.getRecipeList();
-
   }
-
 
   navigateToEditRecipe(id: number) {
     this.router.navigate(['base/recipe/add', 'edit', id]);
-
   }
 
   ngAfterViewInit(): void {
@@ -208,7 +222,7 @@ export class RecipeListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.toolbarService.updateCustomButtons([]);
-    this.toolbarService.updateToolbarContent("");
+    this.toolbarService.updateToolbarContent('');
     this.subscription.forEach((subscription: Subscription) => {
       subscription.unsubscribe();
     });

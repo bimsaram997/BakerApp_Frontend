@@ -4,19 +4,31 @@ import { ToolbarButtonType } from '../../../models/enum_collection/toolbar-butto
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { MatSelectChange } from '@angular/material/select';
-import { AllRawMaterialVM, GenderType, LocationType, PaginatedRawMaterials, QuantityType, RawMaterialListAdvanceFilter, RoleType } from 'src/app/models/RawMaterials/RawMaterial';
+import {
+  AllRawMaterialVM,
+  GenderType,
+  LocationType,
+  PaginatedRawMaterials,
+  QuantityType,
+  RawMaterialListAdvanceFilter,
+  RoleType,
+} from 'src/app/models/RawMaterials/RawMaterial';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { RawMaterialService } from 'src/app/services/bakery/raw-material.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatCheckboxChange } from '@angular/material/checkbox';
-import { AllUserVM, PaginatedUsers, UserAdvanceListFilter } from 'src/app/models/User/User';
+import {
+  AllUserVM,
+  PaginatedUsers,
+  UserAdvanceListFilter,
+} from 'src/app/models/User/User';
 import { LoginServiceService } from 'src/app/services/bakery/login-service.service';
 @Component({
   selector: 'app-user-list',
   templateUrl: './user-list.component.html',
-  styleUrls: ['./user-list.component.css']
+  styleUrls: ['./user-list.component.css'],
 })
 export class UserListComponent {
   header: string = 'Users';
@@ -26,14 +38,24 @@ export class UserListComponent {
   quantityType: string;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
-  displayedColumns: string[] = [ 'select', 'FirstName', 'LastName', 'PhoneNumber', 'Role',
-   'AddedDate', 'Email', 'Gender', 'Address', 'ModifiedDate'];
+  displayedColumns: string[] = [
+    'select',
+    'FirstName',
+    'LastName',
+    'PhoneNumber',
+    'Role',
+    'AddedDate',
+    'Email',
+    'Gender',
+    'Address',
+    'ModifiedDate',
+  ];
   dataSource = new MatTableDataSource<AllUserVM>();
   QuantityType = QuantityType; // Import the enum
   LocationType = LocationType;
   toolBarButtons: ToolbarButtonType[];
   selectedId: string | null = null;
-  id: number
+  id: number;
 
   genders: any[] = [
     { Id: 0, name: 'Male' },
@@ -56,23 +78,19 @@ export class UserListComponent {
     return RoleType[value];
   }
 
-  constructor(private toolbarService: ToolbarService,
+  constructor(
+    private toolbarService: ToolbarService,
     private router: Router,
     private fb: FormBuilder,
     private loginService: LoginServiceService
-  ) {
-
-  }
+  ) {}
   ngOnInit() {
     this.searchFormGroup();
     this.toolbarService.updateToolbarContent(this.header);
     this.toolBarButtons = [ToolbarButtonType.New];
     this.toolbarService.updateCustomButtons(this.toolBarButtons);
     this.getUserList();
-
   }
-
-
 
   search(): void {
     this.getUserList();
@@ -89,7 +107,7 @@ export class UserListComponent {
       lastName: [null],
       searchString: [null],
       addedDate: [null],
-      gender:[null],
+      gender: [null],
       role: [null],
       phoneNumber: [null],
       email: [null],
@@ -109,10 +127,8 @@ export class UserListComponent {
     );
   }
 
-
-
   public getUserList(): void {
-    this.dataSource.data =  null;
+    this.dataSource.data = null;
     const filter: UserAdvanceListFilter = {
       SortBy: this.sort?.active || 'Id',
       IsAscending: false,
@@ -144,10 +160,10 @@ export class UserListComponent {
       case ToolbarButtonType.Update:
         this.handleUpdateButton();
         break;
-        case ToolbarButtonType.Edit:
-       this.navigateToEditUser(this.id);
+      case ToolbarButtonType.Edit:
+        this.navigateToEditUser(this.id);
         break;
-        case ToolbarButtonType.Delete:
+      case ToolbarButtonType.Delete:
         //this.handleUpdateButton();
         break;
       default:
@@ -155,10 +171,8 @@ export class UserListComponent {
     }
   }
 
-
   navigateToEditUser(id: number) {
     this.router.navigate(['base/user/add', 'edit', id]);
-
   }
 
   public handleNewButton(): void {
@@ -175,12 +189,15 @@ export class UserListComponent {
     return this.selectedId === id;
   }
 
-
   checkboxChanged(event: MatCheckboxChange, id: string): void {
     if (event.checked) {
       // Check if Edit and Delete buttons are not already in the array
-      const hasEditButton = this.toolBarButtons.includes(ToolbarButtonType.Edit);
-      const hasDeleteButton = this.toolBarButtons.includes(ToolbarButtonType.Delete);
+      const hasEditButton = this.toolBarButtons.includes(
+        ToolbarButtonType.Edit
+      );
+      const hasDeleteButton = this.toolBarButtons.includes(
+        ToolbarButtonType.Delete
+      );
 
       // Add Edit and Delete buttons if they are not already present
       if (!hasEditButton) {
@@ -200,19 +217,17 @@ export class UserListComponent {
     if (this.selectedId === id) {
       // Uncheck the checkbox if it's already selected
       this.selectedId = null;
-      this.id =  null;
+      this.id = null;
     } else {
       // Check the checkbox and update selectedId
       this.selectedId = id;
       this.id = +id;
       console.log(this.selectedId); // Output the selected ID to console
     }
-
   }
 
   removeSpecificButtons(): void {
     const deleteIndex = this.toolBarButtons.indexOf(ToolbarButtonType.Delete);
-
 
     // Check if the buttons exist in the array before removing
     if (deleteIndex !== -1) {
@@ -225,11 +240,9 @@ export class UserListComponent {
     this.toolbarService.updateCustomButtons(this.toolBarButtons);
   }
 
-
-
   ngOnDestroy(): void {
     this.toolbarService.updateCustomButtons([]);
-    this.toolbarService.updateToolbarContent("");
+    this.toolbarService.updateToolbarContent('');
     this.toolbarService.unsubscribeAll();
     this.subscription.forEach((subscription: Subscription) => {
       subscription.unsubscribe();

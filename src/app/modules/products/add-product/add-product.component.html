@@ -6,12 +6,16 @@
   </div>
   <div class="row form-body">
     <div class="col-md-6">
-      <form action="" [formGroup]="productGroup" >
+      <form action="" [formGroup]="productGroup">
         <div class="row">
           <div class="col-md-12">
-            <mat-form-field appearance="outline" >
+            <mat-form-field appearance="outline">
               <mat-label>Product name</mat-label>
-              <input matInput placeholder="Product name"  formControlName="name"/>
+              <input
+                matInput
+                placeholder="Product name"
+                formControlName="name"
+              />
             </mat-form-field>
           </div>
         </div>
@@ -19,16 +23,16 @@
           <div class="col-md-12">
             <mat-form-field appearance="outline">
               <mat-label>Recipe</mat-label>
-              <mat-select  formControlName="recipeId">
-                <mat-option
-                  *ngFor="let recipe of recipes"
-                  [value]="recipe.Id">
+              <mat-select formControlName="recipeId">
+                <mat-option *ngFor="let recipe of recipes" [value]="recipe.Id">
                   {{ recipe.RecipeName }}
                 </mat-option>
               </mat-select>
-              <mat-error *ngIf="productGroup.get('recipeId').hasError('required')">
-               Recipe is required
-            </mat-error>
+              <mat-error
+                *ngIf="productGroup.get('recipeId').hasError('required')"
+              >
+                Recipe is required
+              </mat-error>
             </mat-form-field>
           </div>
         </div>
@@ -36,54 +40,61 @@
           <div class="col-md-12">
             <mat-form-field appearance="outline">
               <mat-label>Unit</mat-label>
-              <mat-select  formControlName="unit">
-                <mat-option
-                  *ngFor="let unit of units"
-                  [value]="unit.Id">
+              <mat-select formControlName="unit">
+                <mat-option *ngFor="let unit of units" [value]="unit.Id">
                   {{ unit.name }}
                 </mat-option>
               </mat-select>
               <mat-error *ngIf="productGroup.get('unit').hasError('required')">
-               Unit is required
-            </mat-error>
+                Unit is required
+              </mat-error>
             </mat-form-field>
           </div>
-
         </div>
         <div class="row">
           <div class="col-md-12">
             <mat-form-field appearance="outline">
               <mat-label>Cost code</mat-label>
-              <mat-select  formControlName="costCode">
+              <mat-select formControlName="costCode">
                 <mat-option
                   *ngFor="let costcode of costCodes"
-                  [value]="costcode.Id">
-                  {{ costcode.
-                  Costcode + " " + costcode.Description }}
+                  [value]="costcode.Id"
+                >
+                  {{ costcode.Costcode + " " + costcode.Description }}
                 </mat-option>
               </mat-select>
-              <mat-error *ngIf="productGroup.get('costCode').hasError('required')">
-               Cost code is required
-            </mat-error>
+              <mat-error
+                *ngIf="productGroup.get('costCode').hasError('required')"
+              >
+                Cost code is required
+              </mat-error>
             </mat-form-field>
           </div>
-
         </div>
         <div class="row">
           <div class="col-md-12">
             <mat-form-field appearance="outline">
               <mat-label>Cost price</mat-label>
-              <input matInput type="number" placeholder="0" [formControl]="costPrice" />
-                  <span matTextSuffix>$</span>
-                  <mat-error *ngIf="costPrice.invalid && (costPrice.dirty || costPrice.touched)">
-                    <span *ngIf="sellingPrice.hasError('required')">
-                      Cost price is required
-                    </span>
+              <input
+                matInput
+                type="number"
+                placeholder="0"
+                [formControl]="costPrice"
+              />
+              <span matTextSuffix>$</span>
+              <mat-error
+                *ngIf="
+                  costPrice.invalid && (costPrice.dirty || costPrice.touched)
+                "
+              >
+                <span *ngIf="sellingPrice.hasError('required')">
+                  Cost price is required
+                </span>
 
-                    <span *ngIf="sellingPrice.hasError('nonNegative')">
-                      Cost price cannot be negative
-                  </span>
-                </mat-error>
+                <span *ngIf="sellingPrice.hasError('nonNegative')">
+                  Cost price cannot be negative
+                </span>
+              </mat-error>
             </mat-form-field>
           </div>
         </div>
@@ -91,75 +102,94 @@
           <div class="col-md-12">
             <mat-form-field appearance="outline">
               <mat-label>Selling Price</mat-label>
-              <input matInput type="number" placeholder="0" [formControl]="sellingPrice" />
-                  <span matTextSuffix>$</span>
-                  <mat-error *ngIf="sellingPrice.invalid && (sellingPrice.dirty || sellingPrice.touched)">
-                    <span *ngIf="sellingPrice.hasError('required')">
-                        Selling price is required
-                    </span>
+              <input
+                matInput
+                type="number"
+                placeholder="0"
+                [formControl]="sellingPrice"
+              />
+              <span matTextSuffix>$</span>
+              <mat-error
+                *ngIf="
+                  sellingPrice.invalid &&
+                  (sellingPrice.dirty || sellingPrice.touched)
+                "
+              >
+                <span *ngIf="sellingPrice.hasError('required')">
+                  Selling price is required
+                </span>
 
-                    <span *ngIf="sellingPrice.hasError('nonNegative')">
-                      Selling price cannot be negative
-                  </span>
-                </mat-error>
+                <span *ngIf="sellingPrice.hasError('nonNegative')">
+                  Selling price cannot be negative
+                </span>
+              </mat-error>
             </mat-form-field>
           </div>
         </div>
         <div class="row">
           <div class="col-md-12">
-            <mat-form-field appearance="outline" >
+            <mat-form-field appearance="outline">
               <mat-label>Added date</mat-label>
-              <input matInput [matDatepicker]="picker" formControlName="addedDate" >
+              <input
+                matInput
+                [matDatepicker]="picker"
+                formControlName="addedDate"
+              />
               <mat-hint>MM/DD/YYYY</mat-hint>
-              <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker-toggle
+                matIconSuffix
+                [for]="picker"
+              ></mat-datepicker-toggle>
               <mat-datepicker #picker></mat-datepicker>
-              <mat-error *ngIf="productGroup.get('addedDate').hasError('required')">
+              <mat-error
+                *ngIf="productGroup.get('addedDate').hasError('required')"
+              >
                 Date is required
-            </mat-error>
+              </mat-error>
             </mat-form-field>
-
           </div>
         </div>
         <div class="row">
           <div class="col-md-12">
-            <mat-form-field appearance="outline" >
+            <mat-form-field appearance="outline">
               <mat-label>Description</mat-label>
-              <textarea matInput formControlName="productDescription"></textarea>
-              <mat-error *ngIf="productGroup.get('productDescription').hasError('required')">
+              <textarea
+                matInput
+                formControlName="productDescription"
+              ></textarea>
+              <mat-error
+                *ngIf="
+                  productGroup.get('productDescription').hasError('required')
+                "
+              >
                 Description is required
-            </mat-error>
+              </mat-error>
             </mat-form-field>
           </div>
         </div>
 
         <div class="row">
           <div class="col-md-6">
-            <input type="file" #fileInput style="display: none" (change)="onFileChange($event)" />
-            <button mat-raised-button (click)="triggerFileInput()"> {{this.isEdit ? 'Update image': 'Add image'}}</button>
-
+            <input
+              type="file"
+              #fileInput
+              style="display: none"
+              (change)="onFileChange($event)"
+            />
+            <button mat-raised-button (click)="triggerFileInput()">
+              {{ this.isEdit ? "Update image" : "Add image" }}
+            </button>
           </div>
         </div>
-
       </form>
     </div>
     <div class="col-md-6">
       <div class="row">
-        <div class="col-md-1">
-
-        </div>
+        <div class="col-md-1"></div>
         <div class="col-md-11">
-          <img
-          class="image"
-          [src]="imagePreview"
-          alt=""
-          srcset=""
-        />
+          <img class="image" [src]="imagePreview" alt="" srcset="" />
         </div>
       </div>
-
     </div>
-
-
   </div>
 </div>
-

@@ -4,7 +4,13 @@ import { ToolbarButtonType } from '../../../models/enum_collection/toolbar-butto
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { MatSelectChange } from '@angular/material/select';
-import { AllRawMaterialVM, LocationType, PaginatedRawMaterials, QuantityType, RawMaterialListAdvanceFilter } from 'src/app/models/RawMaterials/RawMaterial';
+import {
+  AllRawMaterialVM,
+  LocationType,
+  PaginatedRawMaterials,
+  QuantityType,
+  RawMaterialListAdvanceFilter,
+} from 'src/app/models/RawMaterials/RawMaterial';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -15,25 +21,35 @@ import { MatCheckboxChange } from '@angular/material/checkbox';
 @Component({
   selector: 'app-raw-material-list',
   templateUrl: './raw-material-list.component.html',
-  styleUrls: ['./raw-material-list.component.css']
+  styleUrls: ['./raw-material-list.component.css'],
 })
 export class RawMaterialListComponent implements OnInit, OnDestroy {
   header: string = 'Raw materials';
   subscription: Subscription[] = [];
   quantityTypes: any[] = [
-    {MeasureUnit: 0, name: "Kg"}, {MeasureUnit: 1, name: "L"}
-  ]
+    { MeasureUnit: 0, name: 'Kg' },
+    { MeasureUnit: 1, name: 'L' },
+  ];
   searchRawMaterialForm: FormGroup;
   quantityType: string;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
-  displayedColumns: string[] = [ 'select', 'Name', 'MeasureUnit', 'Quantity', 'Price', 'Location', 'AddedDate', 'ModifiedDate'];
+  displayedColumns: string[] = [
+    'select',
+    'Name',
+    'MeasureUnit',
+    'Quantity',
+    'Price',
+    'Location',
+    'AddedDate',
+    'ModifiedDate',
+  ];
   dataSource = new MatTableDataSource<AllRawMaterialVM>();
   QuantityType = QuantityType; // Import the enum
   LocationType = LocationType;
   toolBarButtons: ToolbarButtonType[];
   selectedId: string | null = null;
-  id: number
+  id: number;
   getQuantityType(value: number): string {
     return QuantityType[value];
   }
@@ -42,25 +58,19 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
     return LocationType[value];
   }
 
-
-
-  constructor(private toolbarService: ToolbarService,
+  constructor(
+    private toolbarService: ToolbarService,
     private router: Router,
     private fb: FormBuilder,
-    private rawMaterialService:RawMaterialService
-  ) {
-
-  }
+    private rawMaterialService: RawMaterialService
+  ) {}
   ngOnInit() {
     this.searchFormGroup();
     this.toolbarService.updateToolbarContent(this.header);
     this.toolBarButtons = [ToolbarButtonType.New];
     this.toolbarService.updateCustomButtons(this.toolBarButtons);
     this.getRawMaterialList();
-
   }
-
-
 
   isSelected(id: string): boolean {
     this.id = +id;
@@ -70,8 +80,12 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
   checkboxChanged(event: MatCheckboxChange, id: string): void {
     if (event.checked) {
       // Check if Edit and Delete buttons are not already in the array
-      const hasEditButton = this.toolBarButtons.includes(ToolbarButtonType.Edit);
-      const hasDeleteButton = this.toolBarButtons.includes(ToolbarButtonType.Delete);
+      const hasEditButton = this.toolBarButtons.includes(
+        ToolbarButtonType.Edit
+      );
+      const hasDeleteButton = this.toolBarButtons.includes(
+        ToolbarButtonType.Delete
+      );
 
       // Add Edit and Delete buttons if they are not already present
       if (!hasEditButton) {
@@ -91,19 +105,17 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
     if (this.selectedId === id) {
       // Uncheck the checkbox if it's already selected
       this.selectedId = null;
-      this.id =  null;
+      this.id = null;
     } else {
       // Check the checkbox and update selectedId
       this.selectedId = id;
       this.id = +id;
       console.log(this.selectedId); // Output the selected ID to console
     }
-
   }
 
   removeSpecificButtons(): void {
     const deleteIndex = this.toolBarButtons.indexOf(ToolbarButtonType.Delete);
-
 
     // Check if the buttons exist in the array before removing
     if (deleteIndex !== -1) {
@@ -132,10 +144,10 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
       case ToolbarButtonType.Update:
         this.handleUpdateButton();
         break;
-        case ToolbarButtonType.Edit:
+      case ToolbarButtonType.Edit:
         this.navigateToEditRawMaterial(this.id);
         break;
-        case ToolbarButtonType.Delete:
+      case ToolbarButtonType.Delete:
         //this.handleUpdateButton();
         break;
       default:
@@ -144,11 +156,11 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
   }
 
   public getRawMaterialList(): void {
-    this.dataSource.data =  null;
+    this.dataSource.data = null;
     const filter: RawMaterialListAdvanceFilter = {
       SortBy: this.sort?.active || 'Id',
       IsAscending: false,
-      Quantity:  this.searchRawMaterialForm.get('quantity').value,
+      Quantity: this.searchRawMaterialForm.get('quantity').value,
       MeasureUnit: this.searchRawMaterialForm.get('measureUnit').value,
       SearchString: this.searchRawMaterialForm.get('searchString').value,
       AddedDate: this.searchRawMaterialForm.get('addedDate').value ?? null,
@@ -159,13 +171,14 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
       },
     };
 
-    this.rawMaterialService.getRawMaterials(filter).subscribe((res: PaginatedRawMaterials) => {
-
-      this.dataSource.data = res.Items;
-      this.dataSource.paginator = this.paginator;
-      this.paginator.length = res.TotalCount || 0; // Update paginator length
-      this.dataSource.sort = this.sort;
-    });
+    this.rawMaterialService
+      .getRawMaterials(filter)
+      .subscribe((res: PaginatedRawMaterials) => {
+        this.dataSource.data = res.Items;
+        this.dataSource.paginator = this.paginator;
+        this.paginator.length = res.TotalCount || 0; // Update paginator length
+        this.dataSource.sort = this.sort;
+      });
   }
 
   search(): void {
@@ -175,7 +188,6 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
   clear(): void {
     this.searchRawMaterialForm.reset();
     this.getRawMaterialList();
-
   }
 
   ngAfterViewInit(): void {
@@ -191,25 +203,21 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
     );
   }
 
-
-  selectType(value: MatSelectChange): void{
+  selectType(value: MatSelectChange): void {
     switch (value.value) {
       case QuantityType.Kg:
-        this.quantityType = "Kg";
+        this.quantityType = 'Kg';
         break;
       case QuantityType.L:
-        this.quantityType = "L";
+        this.quantityType = 'L';
         break;
       default:
-        this.quantityType = "";
-
+        this.quantityType = '';
     }
   }
 
-
   navigateToEditRawMaterial(id: number) {
     this.router.navigate(['base/rawMaterial/add', 'edit', id]);
-
   }
 
   private handleNewButton(): void {
@@ -223,7 +231,7 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.toolbarService.updateCustomButtons([]);
-    this.toolbarService.updateToolbarContent("");
+    this.toolbarService.updateToolbarContent('');
     this.subscription.forEach((subscription: Subscription) => {
       subscription.unsubscribe();
     });

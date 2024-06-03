@@ -46,20 +46,17 @@
                 matInput
                 placeholder="+(358) 000-0000-000"
                 formControlName="phoneNumber"
-
               />
               <mat-error
-                *ngIf="
-                  userGroup.get('phoneNumber').hasError('pattern')
-                ">
-               Please enter valid phone number
+                *ngIf="userGroup.get('phoneNumber').hasError('pattern')"
+              >
+                Please enter valid phone number
               </mat-error>
               <mat-error
-              *ngIf="
-                userGroup.get('phoneNumber').hasError('required')
-              ">
-             Phone number required
-            </mat-error>
+                *ngIf="userGroup.get('phoneNumber').hasError('required')"
+              >
+                Phone number required
+              </mat-error>
             </mat-form-field>
           </div>
           <div class="col-md-6">
@@ -133,11 +130,8 @@
               <mat-error *ngIf="userGroup.get('email').hasError('required')">
                 Email is required
               </mat-error>
-              <mat-error
-                *ngIf="
-                  userGroup.get('email').hasError('pattern')
-                ">
-               Please enter valid email
+              <mat-error *ngIf="userGroup.get('email').hasError('pattern')">
+                Please enter valid email
               </mat-error>
             </mat-form-field>
           </div>

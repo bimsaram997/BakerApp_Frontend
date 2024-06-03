@@ -6,7 +6,13 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FoodType } from '../../../models/Products/foodType';
-import { AllProductVM, CostCode, PaginatedProducts, RecipeListSimpleVM, Unit } from '../../../models/Products/product';
+import {
+  AllProductVM,
+  CostCode,
+  PaginatedProducts,
+  RecipeListSimpleVM,
+  Unit,
+} from '../../../models/Products/product';
 import { ProductListAdvanceFilter } from '../../../models/Products/productListAdvanceFilter';
 import { ToolbarButtonType } from '../../../models/enum_collection/toolbar-button';
 import { FoodTypeService } from '../../../services/bakery/food-type.service';
@@ -17,12 +23,23 @@ import { MatCheckboxChange } from '@angular/material/checkbox';
 @Component({
   selector: 'app-product-list',
   templateUrl: './product-list.component.html',
-  styleUrls: ['./product-list.component.css']
+  styleUrls: ['./product-list.component.css'],
 })
 export class ProductListComponent implements OnInit, OnDestroy {
   header: string = 'Products';
   subscription: Subscription[] = [];
-  displayedColumns: string[] = ['select', 'Name', 'RecipeName','CostCode', 'Unit', 'SellingPrice', 'CostPrice', 'AddedDate', 'ModifiedDate',  'ProductDescription'];
+  displayedColumns: string[] = [
+    'select',
+    'Name',
+    'RecipeName',
+    'CostCode',
+    'Unit',
+    'SellingPrice',
+    'CostPrice',
+    'AddedDate',
+    'ModifiedDate',
+    'ProductDescription',
+  ];
   dataSource = new MatTableDataSource<AllProductVM>();
   foodTypes: FoodType[] = [];
   searchProduct: FormGroup;
@@ -33,24 +50,25 @@ export class ProductListComponent implements OnInit, OnDestroy {
   selectedId: string | null = null;
   id: number;
   units: any[] = [
-    {Id: 0, name: "PCS"}, {Id: 1, name: "HRS"}
+    { Id: 0, name: 'PCS' },
+    { Id: 1, name: 'HRS' },
   ];
   costCodes: any[] = [
     {
       Id: 0,
-      Costcode: "CC001",
-      Description: "Bakery products"
-  },
-  {
+      Costcode: 'CC001',
+      Description: 'Bakery products',
+    },
+    {
       Id: 2,
-      Costcode: "CC002",
-      Description: "Vegetables"
-  },
-  {
-    Id: 3,
-    Costcode: "CC003",
-    Description: "Diary products"
-},
+      Costcode: 'CC002',
+      Description: 'Vegetables',
+    },
+    {
+      Id: 3,
+      Costcode: 'CC003',
+      Description: 'Diary products',
+    },
   ];
 
   CostCode = CostCode;
@@ -79,10 +97,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.getListSimpleRecipes();
 
     this.getFoodItemsList();
-
-
   }
-
 
   search(): void {
     this.getFoodItemsList();
@@ -99,7 +114,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
       costPrice: [null],
       searchString: [null],
       addedDate: [null],
-      unit:[null],
+      unit: [null],
       costCode: [null],
       recipeId: [null],
     });
@@ -118,14 +133,18 @@ export class ProductListComponent implements OnInit, OnDestroy {
     );
   }
 
-  public  getListSimpleRecipes(): void {
-    this.subscription.push(this.recipeService.listSimpleRecipes().subscribe((recipe: RecipeListSimpleVM[]) => {
-      this.recipes = recipe;
-    }))
+  public getListSimpleRecipes(): void {
+    this.subscription.push(
+      this.recipeService
+        .listSimpleRecipes()
+        .subscribe((recipe: RecipeListSimpleVM[]) => {
+          this.recipes = recipe;
+        })
+    );
   }
 
   public getFoodItemsList(): void {
-    this.dataSource.data =  null;
+    this.dataSource.data = null;
     const filter: ProductListAdvanceFilter = {
       SortBy: this.sort?.active || 'Id',
       IsAscending: false,
@@ -143,12 +162,14 @@ export class ProductListComponent implements OnInit, OnDestroy {
       },
     };
 
-    this.foodItemService.getProducts(filter).subscribe((res: PaginatedProducts) => {
-      this.dataSource.data = res.Items;
-      this.dataSource.paginator = this.paginator;
-      this.paginator.length = res.TotalCount || 0; // Update paginator length
-      this.dataSource.sort = this.sort;
-    });
+    this.foodItemService
+      .getProducts(filter)
+      .subscribe((res: PaginatedProducts) => {
+        this.dataSource.data = res.Items;
+        this.dataSource.paginator = this.paginator;
+        this.paginator.length = res.TotalCount || 0; // Update paginator length
+        this.dataSource.sort = this.sort;
+      });
   }
 
   public handleButtonClick(buttonType: ToolbarButtonType): void {
@@ -159,10 +180,10 @@ export class ProductListComponent implements OnInit, OnDestroy {
       case ToolbarButtonType.Update:
         this.handleUpdateButton();
         break;
-        case ToolbarButtonType.Edit:
-       this.navigateToEditproduct(this.id);
+      case ToolbarButtonType.Edit:
+        this.navigateToEditproduct(this.id);
         break;
-        case ToolbarButtonType.Delete:
+      case ToolbarButtonType.Delete:
         //this.handleUpdateButton();
         break;
       default:
@@ -170,10 +191,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
     }
   }
 
-
   navigateToEditproduct(id: number) {
     this.router.navigate(['base/product/add', 'edit', id]);
-
   }
 
   public handleNewButton(): void {
@@ -190,12 +209,15 @@ export class ProductListComponent implements OnInit, OnDestroy {
     return this.selectedId === id;
   }
 
-
   checkboxChanged(event: MatCheckboxChange, id: string): void {
     if (event.checked) {
       // Check if Edit and Delete buttons are not already in the array
-      const hasEditButton = this.toolBarButtons.includes(ToolbarButtonType.Edit);
-      const hasDeleteButton = this.toolBarButtons.includes(ToolbarButtonType.Delete);
+      const hasEditButton = this.toolBarButtons.includes(
+        ToolbarButtonType.Edit
+      );
+      const hasDeleteButton = this.toolBarButtons.includes(
+        ToolbarButtonType.Delete
+      );
 
       // Add Edit and Delete buttons if they are not already present
       if (!hasEditButton) {
@@ -215,19 +237,17 @@ export class ProductListComponent implements OnInit, OnDestroy {
     if (this.selectedId === id) {
       // Uncheck the checkbox if it's already selected
       this.selectedId = null;
-      this.id =  null;
+      this.id = null;
     } else {
       // Check the checkbox and update selectedId
       this.selectedId = id;
       this.id = +id;
       console.log(this.selectedId); // Output the selected ID to console
     }
-
   }
 
   removeSpecificButtons(): void {
     const deleteIndex = this.toolBarButtons.indexOf(ToolbarButtonType.Delete);
-
 
     // Check if the buttons exist in the array before removing
     if (deleteIndex !== -1) {
@@ -242,7 +262,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.toolbarService.updateCustomButtons([]);
-    this.toolbarService.updateToolbarContent("");
+    this.toolbarService.updateToolbarContent('');
     this.toolbarService.unsubscribeAll();
     this.subscription.forEach((subscription: Subscription) => {
       subscription.unsubscribe();

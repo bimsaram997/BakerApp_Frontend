@@ -150,13 +150,15 @@ export class AddUserComponent {
       });
     });
 
-    if (this.userGroup.valid ) {
-      if (this.userGroup.controls['password'].value !== this.userGroup.controls['rePassword'].value ) {
+    if (this.userGroup.valid) {
+      if (
+        this.userGroup.controls['password'].value !==
+        this.userGroup.controls['rePassword'].value
+      ) {
         this.toastr.error('Error!', 'Password mismatch');
         return;
       }
       try {
-
         this.toolbarService.enableButtons(false);
 
         const formData = this.userGroup.value;
@@ -200,22 +202,24 @@ export class AddUserComponent {
         console.error('An error occurred while adding user:', error);
         this.toastr.error('Error!', 'Failed to add user.');
       }
-    } else if  (this.userGroup.controls['imageURL'].value === null) {
+    } else if (this.userGroup.controls['imageURL'].value === null) {
       this.toastr.error('Error!', 'Please add profile picture');
       return;
     }
   }
 
   public getUserId(userId: number): void {
-    if (userId> 0) {
-      this.subscription.push (this.loginService.getUserId(userId).subscribe((user: UserDetailVM) => {
-       this.setValuestoForm(user);
-      }));
+    if (userId > 0) {
+      this.subscription.push(
+        this.loginService.getUserId(userId).subscribe((user: UserDetailVM) => {
+          this.setValuestoForm(user);
+        })
+      );
     }
   }
 
   setValuestoForm(user: UserDetailVM): void {
-    if(user != null) {
+    if (user != null) {
       this.userGroup.controls['firstName'].setValue(user.FirstName);
       this.userGroup.controls['lastName'].setValue(user.LastName);
       this.userGroup.controls['gender'].setValue(user.Gender);
@@ -224,17 +228,16 @@ export class AddUserComponent {
       this.userGroup.controls['email'].setValue(user.Email);
       this.userGroup.controls['addedDate'].setValue(user.AddedDate);
       this.userGroup.controls['imageURL'].setValue(user.ImageUrl);
-      this.addrressId = user.AddressId
+      this.addrressId = user.AddressId;
       this.addressForm.setValue({
         street1: user.Address.Street1,
         street2: user.Address.Street2,
         city: user.Address.City,
         country: user.Address.Country,
         postalCode: user.Address.PostalCode,
-      })
+      });
     }
     this.imagePreview = user.ImageUrl;
-
   }
 
   removeValidators() {
@@ -251,40 +254,48 @@ export class AddUserComponent {
         control.markAsTouched();
       });
     });
-    if (this.userGroup.valid ) {
+    if (this.userGroup.valid) {
       try {
-        this.toolbarService.enableButtons(false)
-        this.updateUserRequest.ImageUrl =  this.userGroup.controls['imageURL'].value;
-        this.updateUserRequest.FirstName = this.userGroup.controls['firstName'].value;
-        this.updateUserRequest.LastName = this.userGroup.controls['lastName'].value;
+        this.toolbarService.enableButtons(false);
+        this.updateUserRequest.ImageUrl =
+          this.userGroup.controls['imageURL'].value;
+        this.updateUserRequest.FirstName =
+          this.userGroup.controls['firstName'].value;
+        this.updateUserRequest.LastName =
+          this.userGroup.controls['lastName'].value;
         this.updateUserRequest.Gender = this.userGroup.controls['gender'].value;
-        this.updateUserRequest.PhoneNumber = this.userGroup.controls['phoneNumber'].value;
+        this.updateUserRequest.PhoneNumber =
+          this.userGroup.controls['phoneNumber'].value;
         this.updateUserRequest.Role = this.userGroup.controls['role'].value;
         this.updateUserRequest.Email = this.userGroup.controls['email'].value;
-        this.updateUserRequest.AddressId =   this.addrressId;
+        this.updateUserRequest.AddressId = this.addrressId;
         const address: AddressRequest = new AddressRequest();
-        const formData =  this.userGroup.controls['address'].value;
+        const formData = this.userGroup.controls['address'].value;
         address.City = formData.city;
         address.Street1 = formData.street1;
         address.Street2 = formData.street2;
         address.Country = formData.country;
         address.PostalCode = formData.postalCode;
         this.updateUserRequest.Address = address;
-        const updateResponse = this.loginService.updateUserById(this.userId, this.updateUserRequest);
-        this.subscription.push(updateResponse.subscribe((res: any) => {
-          if (res != null) {
-            this.toastr.success('Success!', 'Food item updated!');
-            this.toolbarService.enableButtons(true)
-            this.getUserId(res);
-          }
-        }));
+        const updateResponse = this.loginService.updateUserById(
+          this.userId,
+          this.updateUserRequest
+        );
+        this.subscription.push(
+          updateResponse.subscribe((res: any) => {
+            if (res != null) {
+              this.toastr.success('Success!', 'Food item updated!');
+              this.toolbarService.enableButtons(true);
+              this.getUserId(res);
+            }
+          })
+        );
       } catch (error) {
-        this.toolbarService.enableButtons(true)
+        this.toolbarService.enableButtons(true);
         console.error('An error occurred while updating the food item:', error);
         this.toastr.error('Error!', 'Failed to update food item.');
       }
     }
-
   }
 
   saveClose(): void {

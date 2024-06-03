@@ -101,17 +101,16 @@
               matSort
               class="mat-elevation-z8"
             >
-            <ng-container matColumnDef="select">
-              <th mat-header-cell *matHeaderCellDef>
-              </th>
-              <td mat-cell *matCellDef="let element">
-                <mat-checkbox
-                color="primary"
-                  (change)="checkboxChanged($event, element.Id)"
-                  [checked]="isSelected(element.Id)"
-                ></mat-checkbox>
-              </td>
-            </ng-container>
+              <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let element">
+                  <mat-checkbox
+                    color="primary"
+                    (change)="checkboxChanged($event, element.Id)"
+                    [checked]="isSelected(element.Id)"
+                  ></mat-checkbox>
+                </td>
+              </ng-container>
               <ng-container matColumnDef="Name">
                 <th mat-header-cell *matHeaderCellDef>Name</th>
                 <td mat-cell *matCellDef="let element" class="link">
@@ -149,7 +148,7 @@
                   Location
                 </th>
                 <td mat-cell *matCellDef="let element">
-                  {{getLocationType ( element.LocationId) }}
+                  {{ getLocationType(element.LocationId) }}
                 </td>
               </ng-container>
 

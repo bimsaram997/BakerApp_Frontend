@@ -3,6 +3,8 @@ export enum MenuType {
   RawMaterial,
   Recipe,
   User,
-  FoodType
+  Settings,
+  MasterData,
+  SubSetting2
 }
 

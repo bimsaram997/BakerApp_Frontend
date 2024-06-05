@@ -2,6 +2,8 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
+  OnDestroy,
+  OnInit,
   ViewChild,
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -18,7 +20,7 @@ import { LoginServiceService } from '../../../services/bakery/login-service.serv
   templateUrl: './add-user.component.html',
   styleUrls: ['./add-user.component.css'],
 })
-export class AddUserComponent {
+export class AddUserComponent implements OnInit, OnDestroy  {
   @ViewChild('fileInput') fileInput: ElementRef;
   subscription: Subscription[] = [];
   header: string;

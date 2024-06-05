@@ -5,4 +5,6 @@ export class Menu{
   name: string;
   icon: string;
   menuType: MenuType;
+  visible?: boolean;
+  subItems?: Menu[];
 }

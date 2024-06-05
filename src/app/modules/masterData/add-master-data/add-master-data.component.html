@@ -1,0 +1,91 @@
+<div class="container-fluid dialog">
+  <h2 mat-dialog-title>
+    {{ isEdit ? "Update master data" : "Add master data" }}
+  </h2>
+  <mat-dialog-content class="mat-typography">
+    <div class="row mt-2" [formGroup]="masterDataGroup">
+      <div class="row">
+        <div class="col-md-4">
+          <mat-form-field appearance="outline">
+            <mat-label>Master data name</mat-label>
+            <input
+              matInput
+              placeholder="Placeholder"
+              formControlName="masterDataName"
+            />
+            <mat-error
+              *ngIf="masterDataGroup.get('masterDataName').hasError('required')"
+            >
+              First name is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-md-4">
+          <mat-form-field appearance="outline">
+            <mat-label>Master data symbol</mat-label>
+            <input
+              matInput
+              placeholder="Placeholder"
+              formControlName="masterDataSymbol"
+            />
+          </mat-form-field>
+        </div>
+        <div class="col-md-4">
+          <mat-form-field appearance="outline">
+            <mat-label>Master color code</mat-label>
+            <input
+              matInput
+              placeholder="Placeholder"
+              formControlName="masterColorCode"
+            />
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-4">
+          <mat-form-field appearance="outline">
+            <mat-label>Enum type</mat-label>
+            <mat-select formControlName="enumTypeId">
+              <mat-option *ngFor="let item of enumDataList" [value]="item.Id">
+                {{ item.EnumTypeDisplayValue }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-md-4">
+          <mat-form-field appearance="outline">
+            <mat-label>Added date</mat-label>
+            <input
+              matInput
+              [matDatepicker]="picker"
+              formControlName="addedDate"
+            />
+            <mat-hint>MM/DD/YYYY</mat-hint>
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="picker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-error
+              *ngIf="masterDataGroup.get('addedDate').hasError('required')"
+            >
+              Date is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close [disabled]="this.isSave">Cancel</button>
+    <button
+      mat-raised-button
+      color="primary"
+      [disabled]="this.isSave"
+      cdkFocusInitial
+      (click)="click()"
+    >
+      Save
+    </button>
+  </mat-dialog-actions>
+</div>

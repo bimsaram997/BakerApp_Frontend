@@ -29,9 +29,9 @@
               >
                 <mat-option
                   *ngFor="let quantityType of quantityTypes"
-                  [value]="quantityType.measureUnit"
+                  [value]="quantityType.Id"
                 >
-                  {{ quantityType.name }}
+                  {{ quantityType.MasterDataName }}
                 </mat-option>
               </mat-select>
               <mat-error

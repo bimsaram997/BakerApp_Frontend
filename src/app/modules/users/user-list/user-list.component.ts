@@ -20,6 +20,9 @@ import {
 import { LoginServiceService } from 'src/app/services/bakery/login-service.service';
 import { ToolbarButtonType } from '../../../models/enum_collection/toolbar-button';
 import { ToolbarService } from '../../../services/layout/toolbar.service';
+import { MasterDataService } from '../../../services/bakery/master-data.service';
+import { EnumType } from '../../../models/enum_collection/enumType';
+import { AllMasterData, MasterDataVM } from '../../../models/MasterData/MasterData';
 @Component({
   selector: 'app-user-list',
   templateUrl: './user-list.component.html',
@@ -52,14 +55,8 @@ export class UserListComponent {
   selectedId: string | null = null;
   id: number;
 
-  genders: any[] = [
-    { Id: 0, name: 'Male' },
-    { Id: 1, name: 'Female' },
-  ];
-  roles: any[] = [
-    { Id: 0, name: 'Admin' },
-    { Id: 1, name: 'User' },
-  ];
+  genders: MasterDataVM[];
+  roles: MasterDataVM[];
   countries: any[] = [
     { Id: 0, name: 'Sri Lanka' },
     { Id: 1, name: 'Finland' },
@@ -77,14 +74,29 @@ export class UserListComponent {
     private toolbarService: ToolbarService,
     private router: Router,
     private fb: FormBuilder,
-    private loginService: LoginServiceService
+    private loginService: LoginServiceService,
+    private masterDataService: MasterDataService,
   ) {}
   ngOnInit() {
     this.searchFormGroup();
+    this.getGenders();
     this.toolbarService.updateToolbarContent(this.header);
     this.toolBarButtons = [ToolbarButtonType.New];
     this.toolbarService.updateCustomButtons(this.toolBarButtons);
     this.getUserList();
+    this.getRoles();
+  }
+
+  public getGenders(): void {
+    this.subscription.push(this.masterDataService.getMasterDataByEnumTypeId(EnumType.Gender).subscribe((res: AllMasterData) => {
+      this.genders = res.Items;
+    }))
+  }
+
+  public getRoles(): void {
+    this.subscription.push(this.masterDataService.getMasterDataByEnumTypeId(EnumType.Roles).subscribe((res: AllMasterData) => {
+      this.roles = res.Items;
+    }))
   }
 
   search(): void {

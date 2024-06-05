@@ -39,7 +39,7 @@
                       *ngFor="let gender of genders"
                       [value]="gender.Id"
                     >
-                      {{ gender.name }}
+                      {{ gender.MasterDataName }}
                     </mat-option>
                   </mat-select>
                 </mat-form-field>
@@ -49,7 +49,7 @@
                   <mat-label>Role</mat-label>
                   <mat-select formControlName="role">
                     <mat-option *ngFor="let role of roles" [value]="role.Id">
-                      {{ role.name }}
+                      {{ role.MasterDataName }}
                     </mat-option>
                   </mat-select>
                 </mat-form-field>
@@ -160,7 +160,7 @@
               <ng-container matColumnDef="Role">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header>Role</th>
                 <td mat-cell *matCellDef="let element">
-                  {{ getRoleType(element.Role) }}
+                  {{ element.RoleName }}
                 </td>
               </ng-container>
 
@@ -174,7 +174,7 @@
                   Gender
                 </th>
                 <td mat-cell *matCellDef="let element">
-                  {{ getGenderType(element.Gender) }}
+                  {{ element.GenderName }}
                 </td>
               </ng-container>
 

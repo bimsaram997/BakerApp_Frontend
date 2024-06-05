@@ -15,6 +15,9 @@ import { ToolbarButtonType } from '../../../models/enum_collection/toolbar-butto
 import { AdduserRequest, UpdateUser } from '../../../models/User/User';
 import { AddressRequest, UserDetailVM } from 'src/app/models/Address/Address';
 import { LoginServiceService } from '../../../services/bakery/login-service.service';
+import { MasterDataService } from '../../../services/bakery/master-data.service';
+import { EnumType } from '../../../models/enum_collection/enumType';
+import { AllMasterData, MasterDataVM } from '../../../models/MasterData/MasterData';
 @Component({
   selector: 'app-add-user',
   templateUrl: './add-user.component.html',
@@ -29,14 +32,8 @@ export class AddUserComponent implements OnInit, OnDestroy  {
   saveCloseValue: boolean = false;
   userGroup: FormGroup;
   imagePreview: string = 'assets/main images/placeholder.png';
-  genders: any[] = [
-    { Id: 0, name: 'Male' },
-    { Id: 1, name: 'Female' },
-  ];
-  roles: any[] = [
-    { Id: 0, name: 'Admin' },
-    { Id: 1, name: 'User' },
-  ];
+  genders: MasterDataVM[];
+  roles: MasterDataVM[]
   countries: any[] = [
     { Id: 0, name: 'Sri Lanka' },
     { Id: 1, name: 'Finland' },
@@ -52,7 +49,8 @@ export class AddUserComponent implements OnInit, OnDestroy  {
     private toastr: ToastrService,
     private cd: ChangeDetectorRef,
     private router: Router,
-    private loginService: LoginServiceService
+    private loginService: LoginServiceService,
+    private masterDataService: MasterDataService,
   ) {}
 
   ngOnInit() {
@@ -81,6 +79,8 @@ export class AddUserComponent implements OnInit, OnDestroy  {
       this.header = 'Add user';
     }
     this.toolbarService.updateToolbarContent(this.header);
+    this.getGenders();
+    this.getRoles();
     //this.setValidators();
   }
 
@@ -142,6 +142,18 @@ export class AddUserComponent implements OnInit, OnDestroy  {
       default:
         console.warn(`Unknown button type: ${buttonType}`);
     }
+  }
+
+  public getGenders(): void {
+    this.subscription.push(this.masterDataService.getMasterDataByEnumTypeId(EnumType.Gender).subscribe((res: AllMasterData) => {
+      this.genders = res.Items;
+    }))
+  }
+
+  public getRoles(): void {
+    this.subscription.push(this.masterDataService.getMasterDataByEnumTypeId(EnumType.Roles).subscribe((res: AllMasterData) => {
+      this.roles = res.Items;
+    }))
   }
 
   addUser() {
@@ -289,9 +301,13 @@ export class AddUserComponent implements OnInit, OnDestroy  {
               this.toastr.success('Success!', 'Food item updated!');
               this.toolbarService.enableButtons(true);
               this.getUserId(res);
+              if (this.saveCloseValue) {
+                this.saveClose();
+              }
             }
           })
         );
+
       } catch (error) {
         this.toolbarService.enableButtons(true);
         console.error('An error occurred while updating the food item:', error);

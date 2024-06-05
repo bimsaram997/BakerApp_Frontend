@@ -3,6 +3,7 @@ import { Pagination } from "../shared/pagination";
 export class RecipeRawMaterial {
   rawMaterialId: number;
   rawMaterialQuantity: number;
+  measureUnit: number
 }
 
 export class AddRecipeRequest {

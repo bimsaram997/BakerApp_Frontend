@@ -14,16 +14,18 @@ export class AuthService {
 
   setToken(token: string): void {
     this.token = token;
+    localStorage.setItem("access_token", token);
     this.setTokenExpiration(token);
   }
 
   getToken(): string | null {
-    return this.token;
+    const token = localStorage.getItem("access_token");
+    return token;
   }
 
   clearToken(): void {
     this.toastr.info('Logging out!', 'Please login again');
-    this.token = null;
+    localStorage.removeItem("access_token");
     clearTimeout(this.tokenExpirationTimeout);
     this.router.navigate(['']); // Redirect to login page after token is cleared
   }

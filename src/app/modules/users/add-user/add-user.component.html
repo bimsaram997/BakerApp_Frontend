@@ -64,7 +64,7 @@
               <mat-label>Gender</mat-label>
               <mat-select formControlName="gender">
                 <mat-option *ngFor="let gender of genders" [value]="gender.Id">
-                  {{ gender.name }}
+                  {{ gender.MasterDataName }}
                 </mat-option>
               </mat-select>
               <mat-error *ngIf="userGroup.get('gender').hasError('required')">
@@ -79,7 +79,7 @@
               <mat-label>Role</mat-label>
               <mat-select formControlName="role">
                 <mat-option *ngFor="let role of roles" [value]="role.Id">
-                  {{ role.name }}
+                  {{ role.MasterDataName }}
                 </mat-option>
               </mat-select>
               <mat-error *ngIf="userGroup.get('gender').hasError('required')">

@@ -11,7 +11,6 @@ import { Subscription, concatAll } from 'rxjs';
 import { ToolbarService } from '../../../services/layout/toolbar.service';
 import { ToolbarButtonType } from 'src/app/models/enum_collection/toolbar-button';
 import { FoodTypeService } from '../../../services/bakery/food-type.service';
-import { FoodType } from '../../../models/Products/foodType';
 import {
   FormBuilder,
   FormControl,
@@ -31,6 +30,13 @@ import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog
 import { ToastrService } from 'ngx-toastr';
 import { CustomValidators } from '../../../shared/utils/custom-validators';
 import { RecipeService } from '../../../services/bakery/reipe.service';
+import { MasterDataService } from '../../../services/bakery/master-data.service';
+import {
+  AllMasterData,
+  MasterDataVM,
+} from '../../../models/MasterData/MasterData';
+import { EnumType } from '../../../models/enum_collection/enumType';
+
 @Component({
   selector: 'app-add-food-item',
   templateUrl: './add-product.component.html',
@@ -51,10 +57,7 @@ export class AddProductComponent implements OnInit, OnDestroy {
   imagePreview: string = 'assets/main images/placeholder.png';
   productCount: FormControl;
   saveCloseValue: boolean = false;
-  units: any[] = [
-    { Id: 0, name: 'PCS' },
-    { Id: 1, name: 'HRS' },
-  ];
+
   costCodes: any[] = [
     {
       Id: 0,
@@ -74,6 +77,8 @@ export class AddProductComponent implements OnInit, OnDestroy {
   ];
   costPrice: FormControl;
   sellingPrice: FormControl;
+  units: MasterDataVM[];
+
   constructor(
     private route: ActivatedRoute,
     private toolbarService: ToolbarService,
@@ -84,7 +89,8 @@ export class AddProductComponent implements OnInit, OnDestroy {
     private dialog: MatDialog,
     private cd: ChangeDetectorRef,
     private router: Router,
-    private recipeService: RecipeService
+    private recipeService: RecipeService,
+    private masterDataService: MasterDataService
   ) {}
   ngOnInit() {
     this.route.params.subscribe((params) => {
@@ -94,6 +100,7 @@ export class AddProductComponent implements OnInit, OnDestroy {
         this.productId = id;
       }
     });
+    this.getUnits();
     this.createFormGroup();
 
     this.toolbarService.updateCustomButtons([
@@ -109,12 +116,16 @@ export class AddProductComponent implements OnInit, OnDestroy {
     } else {
       this.header = 'Add product';
     }
-    this.toolbarService.updateToolbarContent(this.header);
-    // this.toolbarService.subscribeToButtonClick((buttonType: ToolbarButtonType) => {
-    //   this.handleButtonClick(buttonType);
-    // });
+  }
 
-    this.setValidators();
+  public getUnits(): void {
+    this.subscription.push(
+      this.masterDataService
+        .getMasterDataByEnumTypeId(EnumType.ItemUnit)
+        .subscribe((res: AllMasterData) => {
+          this.units = res.Items;
+        })
+    );
   }
 
   handleButtonClick(buttonType: ToolbarButtonType): void {
@@ -202,7 +213,7 @@ export class AddProductComponent implements OnInit, OnDestroy {
   openDialog(): void {
     if (this.isEdit) {
       const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-        width: '500px', // Set the width as per your requirement
+        width: '500px',
         data: {
           title: 'Confirm Save',
           text: `You are updating a record with Batch ID ${this.batchId}. This will also update other records with the same Batch ID. Are you sure you want to proceed?`,
@@ -251,7 +262,6 @@ export class AddProductComponent implements OnInit, OnDestroy {
             }
           })
         );
-        // Now you can do something with the addProduct object, such as sending it to a service
         if (this.saveCloseValue) {
           this.saveClose();
         }
@@ -302,6 +312,9 @@ export class AddProductComponent implements OnInit, OnDestroy {
             }
           })
         );
+        if (this.saveCloseValue) {
+          this.saveClose();
+        }
       } catch (error) {
         this.toolbarService.enableButtons(true);
         console.error('An error occurred while updating the food item:', error);
@@ -310,33 +323,21 @@ export class AddProductComponent implements OnInit, OnDestroy {
     }
   }
 
-  setValidators(): void {
-    if (!this.isEdit) {
-      // this.productCount.setValidators([Validators.required, CustomValidators.nonNegative()]);
-    } else {
-      //this.productCount.clearValidators();
-      //  this.productCount.updateValueAndValidity();
-    }
-  }
-
   saveClose(): void {
     this.router.navigate(['base/product/product']);
   }
   triggerFileInput() {
-    // Trigger a click on the file input when the button is clicked
     this.fileInput.nativeElement.click();
   }
 
   onFileChange(event: any): void {
     const fileEvnet = event.target.files[0];
     const uploadData = new FormData();
-    // uploadData.append('file', fileItem);
-    let reader = new FileReader(); // HTML5 FileReader API
+    let reader = new FileReader();
     let file = event.target.files[0];
     if (event.target.files && event.target.files[0]) {
       reader.readAsDataURL(file);
       reader.onload = () => {
-        // this.imagePreview = reader.result;
         this.imagePreview = reader.result as string;
         console.log(file.name);
         this.productGroup.patchValue({

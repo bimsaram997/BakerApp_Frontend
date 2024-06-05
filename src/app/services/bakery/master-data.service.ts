@@ -23,6 +23,10 @@ export class MasterDataService {
     return this.http.get(`${this.myUrl}/MasterData/getMasterDataById/${id}`);
   }
 
+  public getMasterDataByEnumTypeId(id: number): Observable<any> {
+    return this.http.get(`${this.myUrl}/MasterData/getMasterDataByEnumTypeId/${id}`);
+  }
+
   public updateMasterData(masterDataId: number, updateMasterData:UpdateMasterData): Observable<any> {
     return this.http.post(`${this.myUrl}/MasterData/updateMasterDataById/${masterDataId}`, updateMasterData);
   }

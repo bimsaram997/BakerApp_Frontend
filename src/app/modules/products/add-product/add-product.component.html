@@ -42,7 +42,7 @@
               <mat-label>Unit</mat-label>
               <mat-select formControlName="unit">
                 <mat-option *ngFor="let unit of units" [value]="unit.Id">
-                  {{ unit.name }}
+                  {{ unit.MasterDataName }}
                 </mat-option>
               </mat-select>
               <mat-error *ngIf="productGroup.get('unit').hasError('required')">

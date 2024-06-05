@@ -17,7 +17,12 @@ import { MatSort } from '@angular/material/sort';
 import { RawMaterialService } from 'src/app/services/bakery/raw-material.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatCheckboxChange } from '@angular/material/checkbox';
-
+import { MasterDataService } from '../../../services/bakery/master-data.service';
+import { EnumType } from '../../../models/enum_collection/enumType';
+import {
+  AllMasterData,
+  MasterDataVM,
+} from '../../../models/MasterData/MasterData';
 @Component({
   selector: 'app-raw-material-list',
   templateUrl: './raw-material-list.component.html',
@@ -26,10 +31,7 @@ import { MatCheckboxChange } from '@angular/material/checkbox';
 export class RawMaterialListComponent implements OnInit, OnDestroy {
   header: string = 'Raw materials';
   subscription: Subscription[] = [];
-  quantityTypes: any[] = [
-    { MeasureUnit: 0, name: 'Kg' },
-    { MeasureUnit: 1, name: 'L' },
-  ];
+  quantityTypes: MasterDataVM[];
   searchRawMaterialForm: FormGroup;
   quantityType: string;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -45,7 +47,7 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
     'ModifiedDate',
   ];
   dataSource = new MatTableDataSource<AllRawMaterialVM>();
-  QuantityType = QuantityType; // Import the enum
+  QuantityType = QuantityType;
   LocationType = LocationType;
   toolBarButtons: ToolbarButtonType[];
   selectedId: string | null = null;
@@ -62,9 +64,11 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
     private toolbarService: ToolbarService,
     private router: Router,
     private fb: FormBuilder,
-    private rawMaterialService: RawMaterialService
+    private rawMaterialService: RawMaterialService,
+    private masterDataService: MasterDataService
   ) {}
   ngOnInit() {
+    this.getMeasureUnits();
     this.searchFormGroup();
     this.toolbarService.updateToolbarContent(this.header);
     this.toolBarButtons = [ToolbarButtonType.New];
@@ -77,56 +81,16 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
     return this.selectedId === id;
   }
 
-  checkboxChanged(event: MatCheckboxChange, id: string): void {
-    if (event.checked) {
-      // Check if Edit and Delete buttons are not already in the array
-      const hasEditButton = this.toolBarButtons.includes(
-        ToolbarButtonType.Edit
-      );
-      const hasDeleteButton = this.toolBarButtons.includes(
-        ToolbarButtonType.Delete
-      );
-
-      // Add Edit and Delete buttons if they are not already present
-      if (!hasEditButton) {
-        this.toolBarButtons.push(ToolbarButtonType.Edit);
-      }
-      if (!hasDeleteButton) {
-        this.toolBarButtons.push(ToolbarButtonType.Delete);
-      }
-
-      // Update custom buttons
-      this.toolbarService.updateCustomButtons(this.toolBarButtons);
-    } else {
-      this.removeSpecificButtons();
-    }
-
-    // Rest of your logic remains the same
-    if (this.selectedId === id) {
-      // Uncheck the checkbox if it's already selected
-      this.selectedId = null;
-      this.id = null;
-    } else {
-      // Check the checkbox and update selectedId
-      this.selectedId = id;
-      this.id = +id;
-      console.log(this.selectedId); // Output the selected ID to console
-    }
+  public getMeasureUnits(): void {
+    this.subscription.push(
+      this.masterDataService
+        .getMasterDataByEnumTypeId(EnumType.MeasuringUnit)
+        .subscribe((res: AllMasterData) => {
+          this.quantityTypes = res.Items;
+        })
+    );
   }
 
-  removeSpecificButtons(): void {
-    const deleteIndex = this.toolBarButtons.indexOf(ToolbarButtonType.Delete);
-
-    // Check if the buttons exist in the array before removing
-    if (deleteIndex !== -1) {
-      this.toolBarButtons.splice(deleteIndex, 1); // Remove Delete button
-    }
-    const editIndex = this.toolBarButtons.indexOf(ToolbarButtonType.Edit);
-    if (editIndex !== -1) {
-      this.toolBarButtons.splice(editIndex, 1); // Remove Edit button
-    }
-    this.toolbarService.updateCustomButtons(this.toolBarButtons);
-  }
   searchFormGroup(): void {
     this.searchRawMaterialForm = this.fb.group({
       quantity: [null],
@@ -176,7 +140,7 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
       .subscribe((res: PaginatedRawMaterials) => {
         this.dataSource.data = res.Items;
         this.dataSource.paginator = this.paginator;
-        this.paginator.length = res.TotalCount || 0; // Update paginator length
+        this.paginator.length = res.TotalCount || 0;
         this.dataSource.sort = this.sort;
       });
   }
@@ -193,7 +157,7 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
   ngAfterViewInit(): void {
     this.sort.sortChange.subscribe(() => {
       if (this.paginator) {
-        this.paginator.pageIndex = 0; // Reset pageIndex when sorting
+        this.paginator.pageIndex = 0;
         this.getRawMaterialList();
       }
     });
@@ -226,7 +190,47 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
 
   private handleUpdateButton(): void {
     console.log('Update button clicked - Dummy implementation');
-    // Add your update logic here
+  }
+
+  checkboxChanged(event: MatCheckboxChange, id: string): void {
+    if (event.checked) {
+      const hasEditButton = this.toolBarButtons.includes(
+        ToolbarButtonType.Edit
+      );
+      const hasDeleteButton = this.toolBarButtons.includes(
+        ToolbarButtonType.Delete
+      );
+      if (!hasEditButton) {
+        this.toolBarButtons.push(ToolbarButtonType.Edit);
+      }
+      if (!hasDeleteButton) {
+        this.toolBarButtons.push(ToolbarButtonType.Delete);
+      }
+
+      this.toolbarService.updateCustomButtons(this.toolBarButtons);
+    } else {
+      this.removeSpecificButtons();
+    }
+    if (this.selectedId === id) {
+      this.selectedId = null;
+      this.id = null;
+    } else {
+      this.selectedId = id;
+      this.id = +id;
+      console.log(this.selectedId);
+    }
+  }
+
+  removeSpecificButtons(): void {
+    const deleteIndex = this.toolBarButtons.indexOf(ToolbarButtonType.Delete);
+    if (deleteIndex !== -1) {
+      this.toolBarButtons.splice(deleteIndex, 1);
+    }
+    const editIndex = this.toolBarButtons.indexOf(ToolbarButtonType.Edit);
+    if (editIndex !== -1) {
+      this.toolBarButtons.splice(editIndex, 1);
+    }
+    this.toolbarService.updateCustomButtons(this.toolBarButtons);
   }
 
   ngOnDestroy(): void {

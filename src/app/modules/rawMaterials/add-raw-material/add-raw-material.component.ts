@@ -27,6 +27,12 @@ import { ToolbarButtonType } from '../../../models/enum_collection/toolbar-butto
 import { RawMaterialService } from '../../../services/bakery/raw-material.service';
 import { ToolbarService } from '../../../services/layout/toolbar.service';
 import { CustomValidators } from '../../../shared/utils/custom-validators';
+import { MasterDataService } from '../../../services/bakery/master-data.service';
+import { EnumType } from '../../../models/enum_collection/enumType';
+import {
+  AllMasterData,
+  MasterDataVM,
+} from '../../../models/MasterData/MasterData';
 @Component({
   selector: 'app-add-raw-material',
   templateUrl: './add-raw-material.component.html',
@@ -40,10 +46,7 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy {
   saveCloseValue: boolean = false;
   rawMaterialGroup: FormGroup;
   imagePreview: string = 'assets/main images/placeholder.png';
-  quantityTypes: any[] = [
-    { measureUnit: 0, name: 'Kg' },
-    { measureUnit: 1, name: 'L' },
-  ];
+  quantityTypes: MasterDataVM[];
   locations: any[] = [
     { locationId: 0, name: 'Matara' },
     { locationId: 1, name: 'Colombo' },
@@ -62,7 +65,8 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy {
     private dialog: MatDialog,
     private cd: ChangeDetectorRef,
     private router: Router,
-    private rawMaterialService: RawMaterialService
+    private rawMaterialService: RawMaterialService,
+    private masterDataService: MasterDataService
   ) {}
 
   ngOnInit() {
@@ -73,6 +77,7 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy {
         this.rawMaterialId = id;
       }
     });
+    this.getMeasureUnits();
     this.createFormGroup();
 
     this.toolbarService.updateCustomButtons([
@@ -85,7 +90,6 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy {
       this.isEdit = true;
       this.header = 'Update raw material';
       this.getRawMaterialById(this.rawMaterialId);
-      //this.disableFields();
     } else {
       this.header = 'Add raw material';
     }
@@ -134,6 +138,16 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy {
       Validators.required,
       CustomValidators.nonNegative(),
     ]);
+  }
+
+  public getMeasureUnits(): void {
+    this.subscription.push(
+      this.masterDataService
+        .getMasterDataByEnumTypeId(EnumType.MeasuringUnit)
+        .subscribe((res: AllMasterData) => {
+          this.quantityTypes = res.Items;
+        })
+    );
   }
 
   addRawMaterial() {
@@ -207,11 +221,13 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy {
             if (res != null) {
               this.toastr.success('Success!', 'Raw material updated!');
               this.toolbarService.enableButtons(true);
-
               this.getRawMaterialById(res);
             }
           })
         );
+        if (this.saveCloseValue) {
+          this.saveClose();
+        }
       } catch (error) {
         this.toolbarService.enableButtons(true);
         console.error('An error occurred while updating the food item:', error);
@@ -283,13 +299,11 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy {
   onFileChange(event: any): void {
     const fileEvnet = event.target.files[0];
     const uploadData = new FormData();
-    // uploadData.append('file', fileItem);
-    let reader = new FileReader(); // HTML5 FileReader API
+    let reader = new FileReader();
     let file = event.target.files[0];
     if (event.target.files && event.target.files[0]) {
       reader.readAsDataURL(file);
       reader.onload = () => {
-        // this.imagePreview = reader.result;
         this.imagePreview = reader.result as string;
         console.log(file.name);
         this.rawMaterialGroup.patchValue({
@@ -301,7 +315,6 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy {
     this.rawMaterialGroup.patchValue({ imageURL: file });
   }
   triggerFileInput() {
-    // Trigger a click on the file input when the button is clicked
     this.fileInput.nativeElement.click();
   }
   ngOnDestroy(): void {

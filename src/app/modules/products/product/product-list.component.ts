@@ -20,6 +20,9 @@ import { ProductService } from '../../../services/bakery/product.service';
 import { RecipeService } from '../../../services/bakery/reipe.service';
 import { ToolbarService } from '../../../services/layout/toolbar.service';
 import { MatCheckboxChange } from '@angular/material/checkbox';
+import { MasterDataService } from '../../../services/bakery/master-data.service';
+import { EnumType } from '../../../models/enum_collection/enumType';
+import { AllMasterData, MasterDataVM } from '../../../models/MasterData/MasterData';
 @Component({
   selector: 'app-product-list',
   templateUrl: './product-list.component.html',
@@ -49,10 +52,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
   toolBarButtons: ToolbarButtonType[];
   selectedId: string | null = null;
   id: number;
-  units: any[] = [
-    { Id: 0, name: 'PCS' },
-    { Id: 1, name: 'HRS' },
-  ];
+  units: MasterDataVM[];
+
   costCodes: any[] = [
     {
       Id: 0,
@@ -76,9 +77,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   getCostCodeType(value: number): string {
     return CostCode[value];
   }
-  getUnitType(value: number): string {
-    return Unit[value];
-  }
+
 
   constructor(
     private foodItemService: ProductService,
@@ -86,11 +85,13 @@ export class ProductListComponent implements OnInit, OnDestroy {
     private foodTypeService: FoodTypeService,
     private fb: FormBuilder,
     private router: Router,
-    private recipeService: RecipeService
+    private recipeService: RecipeService,
+    private masterDataService: MasterDataService,
   ) {}
 
   ngOnInit() {
     this.searchFormGroup();
+    this.getUnits();
     this.toolbarService.updateToolbarContent(this.header);
     this.toolBarButtons = [ToolbarButtonType.New];
     this.toolbarService.updateCustomButtons([ToolbarButtonType.New]);
@@ -123,7 +124,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   ngAfterViewInit(): void {
     this.sort.sortChange.subscribe(() => {
       if (this.paginator) {
-        this.paginator.pageIndex = 0; // Reset pageIndex when sorting
+        this.paginator.pageIndex = 0;
         this.getFoodItemsList();
       }
     });
@@ -141,6 +142,12 @@ export class ProductListComponent implements OnInit, OnDestroy {
           this.recipes = recipe;
         })
     );
+  }
+
+  public getUnits(): void {
+    this.subscription.push(this.masterDataService.getMasterDataByEnumTypeId(EnumType.ItemUnit).subscribe((res: AllMasterData) => {
+      this.units = res.Items;
+    }))
   }
 
   public getFoodItemsList(): void {
@@ -167,7 +174,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
       .subscribe((res: PaginatedProducts) => {
         this.dataSource.data = res.Items;
         this.dataSource.paginator = this.paginator;
-        this.paginator.length = res.TotalCount || 0; // Update paginator length
+        this.paginator.length = res.TotalCount || 0;
         this.dataSource.sort = this.sort;
       });
   }
@@ -201,7 +208,6 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   private handleUpdateButton(): void {
     console.log('Update button clicked - Dummy implementation');
-    // Add your update logic here
   }
 
   isSelected(id: string): boolean {
@@ -211,7 +217,6 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   checkboxChanged(event: MatCheckboxChange, id: string): void {
     if (event.checked) {
-      // Check if Edit and Delete buttons are not already in the array
       const hasEditButton = this.toolBarButtons.includes(
         ToolbarButtonType.Edit
       );
@@ -219,43 +224,34 @@ export class ProductListComponent implements OnInit, OnDestroy {
         ToolbarButtonType.Delete
       );
 
-      // Add Edit and Delete buttons if they are not already present
       if (!hasEditButton) {
         this.toolBarButtons.push(ToolbarButtonType.Edit);
       }
       if (!hasDeleteButton) {
         this.toolBarButtons.push(ToolbarButtonType.Delete);
       }
-
-      // Update custom buttons
       this.toolbarService.updateCustomButtons(this.toolBarButtons);
     } else {
       this.removeSpecificButtons();
     }
-
-    // Rest of your logic remains the same
     if (this.selectedId === id) {
-      // Uncheck the checkbox if it's already selected
       this.selectedId = null;
       this.id = null;
     } else {
-      // Check the checkbox and update selectedId
       this.selectedId = id;
       this.id = +id;
-      console.log(this.selectedId); // Output the selected ID to console
+      console.log(this.selectedId);
     }
   }
 
   removeSpecificButtons(): void {
     const deleteIndex = this.toolBarButtons.indexOf(ToolbarButtonType.Delete);
-
-    // Check if the buttons exist in the array before removing
     if (deleteIndex !== -1) {
-      this.toolBarButtons.splice(deleteIndex, 1); // Remove Delete button
+      this.toolBarButtons.splice(deleteIndex, 1);
     }
     const editIndex = this.toolBarButtons.indexOf(ToolbarButtonType.Edit);
     if (editIndex !== -1) {
-      this.toolBarButtons.splice(editIndex, 1); // Remove Edit button
+      this.toolBarButtons.splice(editIndex, 1);
     }
     this.toolbarService.updateCustomButtons(this.toolBarButtons);
   }

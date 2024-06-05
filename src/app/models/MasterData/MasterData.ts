@@ -55,3 +55,8 @@ export class UpdateMasterData {
   MasterDataSymbol: string | null;
   MasterColorCode: string | null;
 }
+
+
+export class AllMasterData {
+  Items: MasterDataVM[];
+}

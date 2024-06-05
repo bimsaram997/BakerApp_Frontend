@@ -1,4 +1,4 @@
-export interface AllProductVM {
+export class AllProductVM {
   Id: number;
   Name: string | null;
   ProductCode: string;
@@ -12,6 +12,7 @@ export interface AllProductVM {
   CostCode: number | null;
   RecipeId: number | null;
   RecipeName: string;
+  UnitName: string
 }
 export class PaginatedProducts {
   Items: AllProductVM[];

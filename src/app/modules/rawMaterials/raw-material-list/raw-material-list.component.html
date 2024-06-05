@@ -18,7 +18,7 @@
                     placeholder="Placeholder"
                     formControlName="searchString"
                   />
-                  <mat-hint><b>Search by</b>Name</mat-hint>
+                  <mat-hint><b>  Search by</b> Name</mat-hint>
                 </mat-form-field>
               </div>
               <div class="col-md-3">
@@ -30,9 +30,9 @@
                   >
                     <mat-option
                       *ngFor="let quantityType of quantityTypes"
-                      [value]="quantityType.rawMaterialQuantityType"
+                      [value]="quantityType.Id"
                     >
-                      {{ quantityType.name }}
+                      {{ quantityType.MasterDataName }}
                     </mat-option>
                   </mat-select>
                 </mat-form-field>
@@ -125,7 +125,7 @@
                   Measurimg unit
                 </th>
                 <td mat-cell *matCellDef="let element">
-                  {{ getQuantityType(element.MeasureUnit) }}
+                   {{element.MeasureUnitName }}
                 </td>
               </ng-container>
 

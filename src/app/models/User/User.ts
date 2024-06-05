@@ -29,6 +29,8 @@ export class AllUserVM {
   IsDeleted: boolean;
   AddressId: number;
   Addresses: Addresses;
+  GenderName: string;
+  RoleName: string;
 }
 
 export class UserAdvanceListFilter {

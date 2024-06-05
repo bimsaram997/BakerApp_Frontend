@@ -56,7 +56,8 @@ export class MasterDataListComponent {
     private masterDataService: MasterDataService,
     private enumTranslationService: EnumTranslationService,
     public dialog: MatDialog,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+
   ) {}
   ngOnInit() {
     this.searchFormGroup();

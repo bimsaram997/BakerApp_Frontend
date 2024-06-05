@@ -18,6 +18,8 @@ import { LoginServiceService } from '../../../services/bakery/login-service.serv
 import { MasterDataService } from '../../../services/bakery/master-data.service';
 import { EnumType } from '../../../models/enum_collection/enumType';
 import { AllMasterData, MasterDataVM } from '../../../models/MasterData/MasterData';
+import { RolesService } from '../../../services/bakery/roles.service';
+import { ReturnRoles, RolesVM } from 'src/app/models/Roles/roles';
 @Component({
   selector: 'app-add-user',
   templateUrl: './add-user.component.html',
@@ -33,7 +35,7 @@ export class AddUserComponent implements OnInit, OnDestroy  {
   userGroup: FormGroup;
   imagePreview: string = 'assets/main images/placeholder.png';
   genders: MasterDataVM[];
-  roles: MasterDataVM[]
+  roles: RolesVM[]
   countries: any[] = [
     { Id: 0, name: 'Sri Lanka' },
     { Id: 1, name: 'Finland' },
@@ -51,6 +53,7 @@ export class AddUserComponent implements OnInit, OnDestroy  {
     private router: Router,
     private loginService: LoginServiceService,
     private masterDataService: MasterDataService,
+    private roleService: RolesService
   ) {}
 
   ngOnInit() {
@@ -151,7 +154,7 @@ export class AddUserComponent implements OnInit, OnDestroy  {
   }
 
   public getRoles(): void {
-    this.subscription.push(this.masterDataService.getMasterDataByEnumTypeId(EnumType.Roles).subscribe((res: AllMasterData) => {
+    this.subscription.push(this.roleService.getRoles().subscribe((res: ReturnRoles) => {
       this.roles = res.Items;
     }))
   }

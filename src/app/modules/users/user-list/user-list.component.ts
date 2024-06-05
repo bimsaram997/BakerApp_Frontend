@@ -23,6 +23,8 @@ import { ToolbarService } from '../../../services/layout/toolbar.service';
 import { MasterDataService } from '../../../services/bakery/master-data.service';
 import { EnumType } from '../../../models/enum_collection/enumType';
 import { AllMasterData, MasterDataVM } from '../../../models/MasterData/MasterData';
+import { RolesService } from '../../../services/bakery/roles.service';
+import { ReturnRoles, RolesVM } from 'src/app/models/Roles/roles';
 @Component({
   selector: 'app-user-list',
   templateUrl: './user-list.component.html',
@@ -56,7 +58,7 @@ export class UserListComponent {
   id: number;
 
   genders: MasterDataVM[];
-  roles: MasterDataVM[];
+  roles: RolesVM[];
   countries: any[] = [
     { Id: 0, name: 'Sri Lanka' },
     { Id: 1, name: 'Finland' },
@@ -76,6 +78,7 @@ export class UserListComponent {
     private fb: FormBuilder,
     private loginService: LoginServiceService,
     private masterDataService: MasterDataService,
+    private roleService: RolesService
   ) {}
   ngOnInit() {
     this.searchFormGroup();
@@ -94,7 +97,7 @@ export class UserListComponent {
   }
 
   public getRoles(): void {
-    this.subscription.push(this.masterDataService.getMasterDataByEnumTypeId(EnumType.Roles).subscribe((res: AllMasterData) => {
+    this.subscription.push(this.roleService.getRoles().subscribe((res: ReturnRoles) => {
       this.roles = res.Items;
     }))
   }

@@ -28,6 +28,9 @@ import {
   RawMaterialListSimpleVM,
 } from '../../../models/RawMaterials/RawMaterial';
 import { MatSelectChange } from '@angular/material/select';
+import { MasterDataService } from '../../../services/bakery/master-data.service';
+import { EnumType } from '../../../models/enum_collection/enumType';
+import { AllMasterData, MasterDataVM } from '../../../models/MasterData/MasterData';
 @Component({
   selector: 'app-add-recipe',
   templateUrl: './add-recipe.component.html',
@@ -49,7 +52,7 @@ export class AddRecipeComponent implements OnInit, OnDestroy, AfterViewInit {
   matHint: string;
   recipeId: number;
   updateRecipeValues: UpdateRecipe = new UpdateRecipe();
-
+measureUnits:MasterDataVM[];
   constructor(
     private route: ActivatedRoute,
     private toolbarService: ToolbarService,
@@ -58,11 +61,13 @@ export class AddRecipeComponent implements OnInit, OnDestroy, AfterViewInit {
     private router: Router,
     private changeDetectorRefs: ChangeDetectorRef,
     private recipeService: RecipeService,
-    private rawMaterialService: RawMaterialService
+    private rawMaterialService: RawMaterialService,
+    private masterDataService: MasterDataService,
   ) {}
 
   ngOnInit() {
     this.getListRawMaterials();
+    this.getMeasureUnits();
     this.route.params.subscribe((params) => {
       this.mode = params['mode'];
       const id: number = +params['id'];
@@ -96,6 +101,8 @@ export class AddRecipeComponent implements OnInit, OnDestroy, AfterViewInit {
       this.dataSource.paginator = this.paginator;
     }
   }
+
+
 
   createFormGroup(): void {
     this.recipeGroup = this.fb.group({
@@ -159,6 +166,12 @@ export class AddRecipeComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  public getMeasureUnits(): void {
+    this.subscription.push(this.masterDataService.getMasterDataByEnumTypeId(EnumType.MeasuringUnit).subscribe((res: AllMasterData) => {
+      this.measureUnits = res.Items;
+    }))
+  }
+
   getRecipeById(id: number): void {
     if (id > 0) {
       this.subscription.push(
@@ -182,7 +195,7 @@ export class AddRecipeComponent implements OnInit, OnDestroy, AfterViewInit {
       this.rawMaterials.push(
         this.fb.group({
           rawMaterialId: [data.rawMaterialId, Validators.required],
-          measureunit: ['Kg'],
+          measureunit: [data.measureUnit],
           rawMaterialQuantity: [
             data.rawMaterialQuantity * 1000,
             Validators.required,
@@ -298,6 +311,7 @@ export class AddRecipeComponent implements OnInit, OnDestroy, AfterViewInit {
       const rawMaterial: RecipeRawMaterial = {
         rawMaterialId: control.get('rawMaterialId').value,
         rawMaterialQuantity: control.get('rawMaterialQuantity').value / 1000,
+        measureUnit: control.get('measureunit').value,
       };
       rawMaterialsArray.push(rawMaterial);
     });
@@ -341,7 +355,7 @@ export class AddRecipeComponent implements OnInit, OnDestroy, AfterViewInit {
       this.rawMaterials
         .at(rowIndex)
         .get('measureunit')
-        .setValue(this.getQuantityType(material.MeasureUnit));
+        .setValue(material.MeasureUnit);
     }
   }
   selectType(value: number): void {

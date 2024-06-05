@@ -5,149 +5,194 @@
     </div>
   </div>
   <div class="row form-body">
-
-      <form action="" [formGroup]="recipeGroup" >
-        <div class="row">
-          <div class="col-md-6">
-            <div class="row">
-              <div class="col-md-12">
-                <mat-form-field appearance="outline" >
-                  <mat-label>Recipe name</mat-label>
-                  <input matInput placeholder="Placeholder"  formControlName="name"/>
-                  <mat-error *ngIf="recipeGroup.get('name').hasError('required')">
-                 Name is required
+    <form action="" [formGroup]="recipeGroup">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="row">
+            <div class="col-md-12">
+              <mat-form-field appearance="outline">
+                <mat-label>Recipe name</mat-label>
+                <input
+                  matInput
+                  placeholder="Placeholder"
+                  formControlName="name"
+                />
+                <mat-error *ngIf="recipeGroup.get('name').hasError('required')">
+                  Name is required
                 </mat-error>
-                </mat-form-field>
-              </div>
+              </mat-form-field>
             </div>
-            <div class="row">
-              <div class="col-md-12">
-                <mat-form-field appearance="outline" >
-                  <mat-label>Added date</mat-label>
-                  <input matInput [matDatepicker]="picker" formControlName="addedDate" >
-                  <mat-hint>MM/DD/YYYY</mat-hint>
-                  <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-                  <mat-datepicker #picker></mat-datepicker>
-                  <mat-error *ngIf="recipeGroup.get('addedDate').hasError('required')">
-                    Date is required
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <mat-form-field appearance="outline">
+                <mat-label>Added date</mat-label>
+                <input
+                  matInput
+                  [matDatepicker]="picker"
+                  formControlName="addedDate"
+                />
+                <mat-hint>MM/DD/YYYY</mat-hint>
+                <mat-datepicker-toggle
+                  matIconSuffix
+                  [for]="picker"
+                ></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+                <mat-error
+                  *ngIf="recipeGroup.get('addedDate').hasError('required')"
+                >
+                  Date is required
                 </mat-error>
-                </mat-form-field>
-
-              </div>
+              </mat-form-field>
             </div>
-            <div class="row">
-              <div class="col-md-12">
-                <mat-form-field appearance="outline" >
-                  <mat-label>Description</mat-label>
-                  <textarea matInput formControlName="description"></textarea>
-                  <mat-error *ngIf="recipeGroup.get('description').hasError('required')">
-                    Description is required
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <mat-form-field appearance="outline">
+                <mat-label>Description</mat-label>
+                <textarea matInput formControlName="description"></textarea>
+                <mat-error
+                  *ngIf="recipeGroup.get('description').hasError('required')"
+                >
+                  Description is required
                 </mat-error>
-                </mat-form-field>
-              </div>
+              </mat-form-field>
             </div>
-            <div class="row">
-              <div class="col-md-12">
-                <p>Instructions</p>
-                <ckeditor [editor]="Editor" formControlName="content"  ></ckeditor>
-                <mat-error class="cutom-error" *ngIf="recipeGroup.get('content').hasError('required')">
-                  Instructions are required
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <p>Instructions</p>
+              <ckeditor [editor]="Editor" formControlName="content"></ckeditor>
+              <mat-error
+                class="cutom-error"
+                *ngIf="recipeGroup.get('content').hasError('required')"
+              >
+                Instructions are required
               </mat-error>
-              </div>
             </div>
           </div>
-          <div class="col-md-6">
-            <div class="row">
-              <div class="col-md-12">
-                <button class="mb-1" mat-raised-button color="primary" (click)="addRow()">Add raw materials</button>
-                <table
-                mat-table [dataSource]="dataSource" >
-                  <ng-container formArrayName="rawMaterials" class="mb-1">
-
-                    <!-- Cant Column -->
-                    <ng-container matColumnDef="RawMaterial">
-                      <th mat-header-cell *matHeaderCellDef>Raw material</th>
-                      <td mat-cell *matCellDef="let element;  index as i" [formGroup]="element">
-                        <mat-form-field appearance="outline" class="mt-2">
-                          <mat-label>Name</mat-label>
-                          <mat-select  formControlName="rawMaterialId" (selectionChange)="selectRawMaterial($event, i)">
-                            <mat-option
-                              *ngFor="let rawMaterial of rawMaterialList"
-                              [value]="rawMaterial.Id">
-                              {{ rawMaterial.Name }}
-                            </mat-option>
-                          </mat-select>
-                        </mat-form-field>
-                      </td>
-                    </ng-container>
-
-                    <!-- Precio Column -->
-                    <ng-container matColumnDef="Measureunit">
-                      <th mat-header-cell *matHeaderCellDef>Measure unit</th>
-                      <mat-cell *matCellDef="let element; " [formGroup]="element">
-                        <mat-form-field appearance="outline" class="mt-2">
-                          <mat-label>Measure unit</mat-label>
-                          <input matInput  formControlName="measureunit" required>
-                        </mat-form-field>
-                      </mat-cell>
-                    </ng-container>
-                    <ng-container matColumnDef="Quantity">
-                      <th mat-header-cell *matHeaderCellDef>Quantity
-                      <td mat-cell *matCellDef="let element;" [formGroup]="element">
-                        <mat-form-field appearance="outline" class="mt-2">
-                          <mat-label>Quanity</mat-label>
-                          <input matInput placeholder="Precio" formControlName="rawMaterialQuantity" required>
-                          <mat-hint>{{matHint}} </mat-hint>
-                        </mat-form-field>
-                      </td>
-                    </ng-container>
-
-                    <!-- Delete Column -->
-                    <ng-container matColumnDef="Action">
-                      <mat-header-cell *matHeaderCellDef></mat-header-cell>
-                      <td mat-cell *matCellDef="let element; index as i" [formGroup]="element">
-
-                        <button type="button" (click)="removeRow(i)">
-                          <mat-icon matSuffix>delete</mat-icon>
-                        </button>
-
-                      </td>
-                    </ng-container>
-
-                    <!-- header titles -->
-
-                  </ng-container>
-                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-                </table>
-
-                <mat-paginator [pageSizeOptions]="[5, 10, 20]"
-                showFirstLastButtons
-                aria-label="Select page of periodic elements">
- </mat-paginator>
-
-            </div>
-
-            </div>
-
-          </div>
-
         </div>
+        <div class="col-md-6">
+          <div class="row">
+            <div class="col-md-12">
+              <button
+                class="mb-1"
+                mat-raised-button
+                color="primary"
+                (click)="addRow()"
+              >
+                Add raw materials
+              </button>
+              <table mat-table [dataSource]="dataSource">
+                <ng-container formArrayName="rawMaterials" class="mb-1">
+                  <!-- Cant Column -->
+                  <ng-container matColumnDef="RawMaterial">
+                    <th mat-header-cell *matHeaderCellDef>Raw material</th>
+                    <td
+                      mat-cell
+                      *matCellDef="let element; index as i"
+                      [formGroup]="element"
+                    >
+                      <mat-form-field appearance="outline" class="mt-2">
+                        <mat-label>Name</mat-label>
+                        <mat-select
+                          formControlName="rawMaterialId"
+                          (selectionChange)="selectRawMaterial($event, i)"
+                        >
+                          <mat-option
+                            *ngFor="let rawMaterial of rawMaterialList"
+                            [value]="rawMaterial.Id"
+                          >
+                            {{ rawMaterial.Name }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
 
+                  <!-- Precio Column -->
+                  <ng-container matColumnDef="Measureunit">
+                    <th mat-header-cell *matHeaderCellDef>Measure unit</th>
+                    <mat-cell *matCellDef="let element" [formGroup]="element">
+                      <mat-form-field appearance="outline" class="mt-2">
+                        <mat-label>Measure unit</mat-label>
+                        <mat-select
+                        formControlName="measureunit"
 
-        <!-- <div class="row">
+                      >
+                        <mat-option
+                          *ngFor="let quantityType of measureUnits"
+                          [value]="quantityType.Id"
+                        >
+                          {{ quantityType.MasterDataName }}
+                        </mat-option>
+                      </mat-select>
+                      </mat-form-field>
+                    </mat-cell>
+                  </ng-container>
+                  <ng-container matColumnDef="Quantity">
+                    <th mat-header-cell *matHeaderCellDef>Quantity  (mg or ml)</th>
+                    <td
+                      mat-cell
+                      *matCellDef="let element"
+                      [formGroup]="element"
+                    >
+                      <mat-form-field appearance="outline" class="mt-2">
+                        <mat-label>Quanity</mat-label>
+                        <input
+                          matInput
+                          placeholder="Precio"
+                          formControlName="rawMaterialQuantity"
+                          required
+                        />
+                        <mat-hint>{{ matHint }} </mat-hint>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+
+                  <!-- Delete Column -->
+                  <ng-container matColumnDef="Action">
+                    <mat-header-cell *matHeaderCellDef></mat-header-cell>
+                    <td
+                      mat-cell
+                      *matCellDef="let element; index as i"
+                      [formGroup]="element"
+                    >
+                      <button type="button" (click)="removeRow(i)">
+                        <mat-icon matSuffix>delete</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+
+                  <!-- header titles -->
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr
+                  mat-row
+                  *matRowDef="let row; columns: displayedColumns"
+                ></tr>
+              </table>
+
+              <mat-paginator
+                [pageSizeOptions]="[5, 10, 20]"
+                showFirstLastButtons
+                aria-label="Select page of periodic elements"
+              >
+              </mat-paginator>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- <div class="row">
           <div class="col-md-6">
             <input type="file" #fileInput style="display: none" (change)="onFileChange($event)" />
             <button mat-raised-button (click)="triggerFileInput()"> {{this.isEdit ? 'Update image': 'Add image'}}</button>
 
           </div>
         </div> -->
-
-      </form>
-    </div>
-
-
-
+    </form>
+  </div>
 </div>
 
 -

@@ -1,14 +1,27 @@
 <mat-sidenav mode="side" opened class="sidenav">
   <!-- Add your sidenav content here -->
-
   <mat-nav-list>
-    <a class="p" *ngFor="let menu of menuArray" mat-list-item (click)="navigateTo(menu.menuType)">
-      <div class="menu-item">
-        <img class="menu-image" [src]="menu.icon" alt="{{ menu.name }}">
-        <span class="nav-caption">{{menu.name}}</span>
-      </div>
-  </a>
+    <ng-container *ngFor="let menu of menuArray">
+      <a *ngIf="menu.visible" class="p" mat-list-item (click)="navigateTo(menu.menuType)">
+        <div class="menu-item">
+          <img class="menu-image" [src]="menu.icon" alt="{{ menu.name }}">
+          <span class="nav-caption">{{menu.name}}</span>
+          <mat-icon *ngIf="menu.subItems"  (click)="expand(menu.subItems)" class="mt-1">
+            {{ isShow ? 'expand_less' : 'expand_more' }}
+          </mat-icon>
+        </div>
+      </a>
 
-    <!-- Add other sidenav items as needed -->
+      <!-- Sub-items -->
+      <div *ngIf="menu.subItems && isShow" class="sub-menu">
+        <ng-container *ngFor="let subItem of menu.subItems">
+          <a *ngIf="subItem.visible" class="p" mat-list-item (click)="navigateTo(subItem.menuType)">
+            <div class="sub-menu-item">
+              <span class="nav-caption">{{subItem.name}}</span>
+            </div>
+          </a>
+        </ng-container>
+      </div>
+    </ng-container>
   </mat-nav-list>
 </mat-sidenav>

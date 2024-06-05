@@ -1,197 +1,173 @@
 import { Component, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
-import { MatCheckboxChange } from '@angular/material/checkbox';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
-import { MatTableDataSource } from '@angular/material/table';
-import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
-import {
-  GenderType,
-  LocationType,
-  QuantityType,
-  RoleType
-} from 'src/app/models/RawMaterials/RawMaterial';
-import {
-  AllUserVM,
-  PaginatedUsers,
-  UserAdvanceListFilter,
-} from 'src/app/models/User/User';
-import { LoginServiceService } from 'src/app/services/bakery/login-service.service';
-import { ToolbarButtonType } from '../../../models/enum_collection/toolbar-button';
 import { ToolbarService } from '../../../services/layout/toolbar.service';
+import { ToolbarButtonType } from '../../../models/enum_collection/toolbar-button';
+import { Subscription } from 'rxjs';
+import { Router } from '@angular/router';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { MatSort } from '@angular/material/sort';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatTableDataSource } from '@angular/material/table';
+import {
+  AllMasterDataVM,
+  MasterDataListAdvanceFilter,
+  PaginateMasterData,
+} from '../../../models/MasterData/MasterData';
 import { MasterDataService } from '../../../services/bakery/master-data.service';
-import { EnumType } from '../../../models/enum_collection/enumType';
-import { AllMasterData, MasterDataVM } from '../../../models/MasterData/MasterData';
-import { RolesService } from '../../../services/bakery/roles.service';
-import { ReturnRoles, RolesVM } from 'src/app/models/Roles/roles';
+import { MatCheckboxChange } from '@angular/material/checkbox';
+import { EnumTranslationService } from '../../../services/bakery/enum-translation.service';
+import {
+  AllEnumTypeVM,
+  PaginateEnumTypeData,
+} from '../../../models/enum_collection/enumType';
+import { MatDialog } from '@angular/material/dialog';
+import { AddMasterDataComponent } from '../add-master-data/add-master-data.component';
+import { ToastrService } from 'ngx-toastr';
 @Component({
-  selector: 'app-user-list',
-  templateUrl: './user-list.component.html',
-  styleUrls: ['./user-list.component.css'],
+  selector: 'app-master-data-list',
+  templateUrl: './master-data-list.component.html',
+  styleUrls: ['./master-data-list.component.css'],
 })
-export class UserListComponent {
-  header: string = 'Users';
+export class MasterDataListComponent {
   subscription: Subscription[] = [];
-
+  header: string = 'Master data';
+  toolBarButtons: ToolbarButtonType[];
   searchUserForm: FormGroup;
-  quantityType: string;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   displayedColumns: string[] = [
     'select',
-    'FirstName',
-    'LastName',
-    'PhoneNumber',
-    'Role',
+    'MasterDataCode',
+    'MasterDataName',
+    'MasterDataSymbol',
+    'MasterColorCode',
+    'EnumType',
     'AddedDate',
-    'Email',
-    'Gender',
-    'Address',
     'ModifiedDate',
   ];
-  dataSource = new MatTableDataSource<AllUserVM>();
-  QuantityType = QuantityType; // Import the enum
-  LocationType = LocationType;
-  toolBarButtons: ToolbarButtonType[];
+  dataSource = new MatTableDataSource<AllMasterDataVM>();
   selectedId: string | null = null;
   id: number;
-
-  genders: MasterDataVM[];
-  roles: RolesVM[];
-  countries: any[] = [
-    { Id: 0, name: 'Sri Lanka' },
-    { Id: 1, name: 'Finland' },
-  ];
-
-  getGenderType(value: number): string {
-    return GenderType[value];
-  }
-
-  getRoleType(value: number): string {
-    return RoleType[value];
-  }
-
+  enumDataList: AllEnumTypeVM[];
+  isEdit: boolean = false;
   constructor(
     private toolbarService: ToolbarService,
     private router: Router,
     private fb: FormBuilder,
-    private loginService: LoginServiceService,
     private masterDataService: MasterDataService,
-    private roleService: RolesService
+    private enumTranslationService: EnumTranslationService,
+    public dialog: MatDialog,
+    private toastr: ToastrService,
+
   ) {}
   ngOnInit() {
     this.searchFormGroup();
-    this.getGenders();
+    this.loadEnumTypeData();
     this.toolbarService.updateToolbarContent(this.header);
     this.toolBarButtons = [ToolbarButtonType.New];
     this.toolbarService.updateCustomButtons(this.toolBarButtons);
-    this.getUserList();
-    this.getRoles();
+    this.getMasterData();
   }
 
-  public getGenders(): void {
-    this.subscription.push(this.masterDataService.getMasterDataByEnumTypeId(EnumType.Gender).subscribe((res: AllMasterData) => {
-      this.genders = res.Items;
-    }))
-  }
+  openDialog(): void {
+    const dialogRef = this.dialog.open(AddMasterDataComponent, {
+      data: { edit: this.isEdit, id: this.selectedId },
+    });
 
-  public getRoles(): void {
-    this.subscription.push(this.roleService.getRoles().subscribe((res: ReturnRoles) => {
-      this.roles = res.Items;
-    }))
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.getMasterData();
+      }
+    });
   }
 
   search(): void {
-    this.getUserList();
+    this.getMasterData();
   }
 
   clear(): void {
     this.searchUserForm.reset();
-    this.getUserList();
+    this.getMasterData();
   }
-
-  searchFormGroup(): void {
-    this.searchUserForm = this.fb.group({
-      firstName: [null],
-      lastName: [null],
-      searchString: [null],
-      addedDate: [null],
-      gender: [null],
-      role: [null],
-      phoneNumber: [null],
-      email: [null],
-    });
-  }
-
-  ngAfterViewInit(): void {
-    this.sort.sortChange.subscribe(() => {
-      if (this.paginator) {
-        this.paginator.pageIndex = 0;
-        this.getUserList();
-      }
-    });
-
-    this.subscription.push(
-      this.paginator.page.subscribe(() => this.getUserList())
-    );
-  }
-
-  public getUserList(): void {
+  public getMasterData(): void {
     this.dataSource.data = null;
-    const filter: UserAdvanceListFilter = {
+    const filter: MasterDataListAdvanceFilter = {
       SortBy: this.sort?.active || 'Id',
       IsAscending: false,
-      PhoneNumber: this.searchUserForm.get('phoneNumber').value,
-      Role: this.searchUserForm.get('role').value,
+      EnumTypeId: this.searchUserForm.get('enumTypeId').value,
       SearchString: this.searchUserForm.get('searchString').value,
       AddedDate: this.searchUserForm.get('addedDate').value ?? null,
-      Email: this.searchUserForm.get('email').value,
-      Gender: this.searchUserForm.get('gender').value,
+
       Pagination: {
         PageIndex: this.paginator?.pageIndex + 1 || 1,
         PageSize: this.paginator?.pageSize || 5,
       },
     };
 
-    this.loginService.getUsers(filter).subscribe((res: PaginatedUsers) => {
-      this.dataSource.data = res.Items;
-      this.dataSource.paginator = this.paginator;
-      this.paginator.length = res.TotalCount || 0; // Update paginator length
-      this.dataSource.sort = this.sort;
+    this.masterDataService
+      .getMasterData(filter)
+      .subscribe((res: PaginateMasterData) => {
+        this.dataSource.data = res.Items;
+        this.dataSource.paginator = this.paginator;
+        this.paginator.length = res.TotalCount || 0; // Update paginator length
+        this.dataSource.sort = this.sort;
+      });
+  }
+
+  loadEnumTypeData(): void {
+    this.subscription.push(
+      this.enumTranslationService
+        .getEnumData()
+        .subscribe((res: PaginateEnumTypeData) => {
+          this.enumDataList = res.Items;
+        })
+    );
+  }
+
+  searchFormGroup(): void {
+    this.searchUserForm = this.fb.group({
+      searchString: [null],
+      addedDate: [null],
+      enumTypeId: [null],
     });
   }
 
   public handleButtonClick(buttonType: ToolbarButtonType): void {
     switch (buttonType) {
       case ToolbarButtonType.New:
-        this.handleNewButton();
+        this.isEdit = false;
+        this.openDialog();
+        this.isEdit = false;
         break;
       case ToolbarButtonType.Update:
-        this.handleUpdateButton();
         break;
       case ToolbarButtonType.Edit:
-        this.navigateToEditUser(this.id);
+        this.isEdit = true;
+        this.openDialog();
         break;
       case ToolbarButtonType.Delete:
-        //this.handleUpdateButton();
+        this.handleDelete();
         break;
       default:
         console.warn(`Unknown button type: ${buttonType}`);
     }
   }
-
-  navigateToEditUser(id: number) {
-    this.router.navigate(['base/user/add', 'edit', id]);
+  navigateToEdiMasterData(id: number) {
+    this.isEdit = true;
+    this.selectedId = id.toString();
+    this.openDialog();
   }
 
-  public handleNewButton(): void {
-    this.router.navigate(['base/user/add', 'add']);
-  }
-
-  private handleUpdateButton(): void {
-    console.log('Update button clicked - Dummy implementation');
-    // Add your update logic here
+  handleDelete(): void {
+    this.subscription.push(
+      this.masterDataService
+        .deleteMasterDataById(+this.selectedId)
+        .subscribe((res: any) => {
+          if (res != null) {
+            this.toastr.success('Success!', 'Master data deleted!');
+            this.getMasterData();
+          }
+        })
+    );
   }
 
   isSelected(id: string): boolean {

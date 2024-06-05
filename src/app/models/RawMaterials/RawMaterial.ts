@@ -56,6 +56,7 @@ export class AllRawMaterialVM {
   ModifiedDate: string | null;
   RawMaterialCode: string | null;
   Location: string | null;
+  MeasureUnitName: string | null;
 }
 
 export interface PaginatedRawMaterials {
@@ -69,7 +70,7 @@ export class RawMaterialListAdvanceFilter {
   Quantity: number | null;
   SearchString: string | null;
   AddedDate: string | null;
-  MeasureUnit: QuantityType | null;
+  MeasureUnit: number | null;
   Pagination: Pagination;
   SortBy: string;
   IsAscending: boolean;
@@ -79,7 +80,7 @@ export class UpdateRawMaterial {
   Name: string;
   Quantity: number;
   ImageURL: string;
-  MeasureUnit: QuantityType;
+  MeasureUnit: number;
   Price: number;
   LocationId: number;
 }

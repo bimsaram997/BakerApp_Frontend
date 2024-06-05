@@ -18,7 +18,7 @@
                     placeholder="Placeholder"
                     formControlName="searchString"
                   />
-                  <mat-hint><b>Search by</b>Name</mat-hint>
+                  <mat-hint><b>Search by</b> Name</mat-hint>
                 </mat-form-field>
               </div>
 
@@ -51,11 +51,12 @@
               </div>
               <div class="col-md-3">
                 <mat-form-field appearance="outline">
-                  <mat-label>Name</mat-label>
-                  <mat-select  formControlName="rawMaterialIds" multiple>
+                  <mat-label>Raw material name</mat-label>
+                  <mat-select formControlName="rawMaterialIds" multiple>
                     <mat-option
                       *ngFor="let rawMaterial of rawMaterialList"
-                      [value]="rawMaterial.Id">
+                      [value]="rawMaterial.Id"
+                    >
                       {{ rawMaterial.Name }}
                     </mat-option>
                   </mat-select>
@@ -98,21 +99,20 @@
               matSort
               class="mat-elevation-z8"
             >
-            <ng-container matColumnDef="select">
-              <th mat-header-cell *matHeaderCellDef>
-              </th>
-              <td mat-cell *matCellDef="let element">
-                <mat-checkbox
-                color="primary"
-                  (change)="checkboxChanged($event, element.Id)"
-                  [checked]="isSelected(element.Id)"
-                ></mat-checkbox>
-              </td>
-            </ng-container>
+              <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let element">
+                  <mat-checkbox
+                    color="primary"
+                    (change)="checkboxChanged($event, element.Id)"
+                    [checked]="isSelected(element.Id)"
+                  ></mat-checkbox>
+                </td>
+              </ng-container>
               <ng-container matColumnDef="RecipeName">
                 <th mat-header-cell *matHeaderCellDef>Recipe Name</th>
                 <td mat-cell *matCellDef="let element" class="link">
-                  <a  (click)="navigateToEditRecipe(element.Id)">{{
+                  <a (click)="navigateToEditRecipe(element.Id)">{{
                     element.RecipeName
                   }}</a>
                 </td>
@@ -128,14 +128,11 @@
               </ng-container>
 
               <ng-container matColumnDef="RawMaterial">
-                <th mat-header-cell *matHeaderCellDef >
-                  RawMaterials
-                </th>
+                <th mat-header-cell *matHeaderCellDef>RawMaterials</th>
                 <td mat-cell *matCellDef="let element">
                   {{ element.RawMaterialDetails }}
                 </td>
               </ng-container>
-
 
               <ng-container matColumnDef="AddedDate">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header>
@@ -155,8 +152,10 @@
                 </td>
               </ng-container>
               <ng-container matColumnDef="Instructions">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Instructions</th>
-                <td mat-cell *matCellDef="let element"  class="link">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                  Instructions
+                </th>
+                <td mat-cell *matCellDef="let element" class="link">
                   <a>View instructions</a>
                 </td>
               </ng-container>

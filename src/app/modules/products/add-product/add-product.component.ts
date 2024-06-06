@@ -116,6 +116,7 @@ export class AddProductComponent implements OnInit, OnDestroy {
     } else {
       this.header = 'Add product';
     }
+    this.toolbarService.updateToolbarContent(this.header);
   }
 
   public getUnits(): void {

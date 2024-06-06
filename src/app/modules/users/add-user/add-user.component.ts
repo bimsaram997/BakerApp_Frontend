@@ -20,6 +20,8 @@ import { EnumType } from '../../../models/enum_collection/enumType';
 import { AllMasterData, MasterDataVM } from '../../../models/MasterData/MasterData';
 import { RolesService } from '../../../services/bakery/roles.service';
 import { ReturnRoles, RolesVM } from 'src/app/models/Roles/roles';
+import { MatDialog } from '@angular/material/dialog';
+import { InfoBoxComponent } from 'src/app/shared/components/info-box/info-box.component';
 @Component({
   selector: 'app-add-user',
   templateUrl: './add-user.component.html',
@@ -44,6 +46,7 @@ export class AddUserComponent implements OnInit, OnDestroy  {
   userId: number;
   updateUserRequest: UpdateUser = new UpdateUser();
   addrressId: number;
+  hide = true;
   constructor(
     private route: ActivatedRoute,
     private toolbarService: ToolbarService,
@@ -53,7 +56,8 @@ export class AddUserComponent implements OnInit, OnDestroy  {
     private router: Router,
     private loginService: LoginServiceService,
     private masterDataService: MasterDataService,
-    private roleService: RolesService
+    private roleService: RolesService,
+    public dialog: MatDialog,
   ) {}
 
   ngOnInit() {
@@ -88,6 +92,7 @@ export class AddUserComponent implements OnInit, OnDestroy  {
   }
 
   createFormGroup(): void {
+    const passwordPattern = '^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%^&*]).{8,}$';
     this.userGroup = this.fb.group({
       firstName: [null, Validators.required],
       lastName: [null, Validators.required],
@@ -97,8 +102,8 @@ export class AddUserComponent implements OnInit, OnDestroy  {
         null,
         [
           Validators.required,
-          Validators.pattern('^((\\+358-?)|0)?[0-9]{13}$'),
           Validators.minLength(10),
+          Validators.pattern(passwordPattern),
         ],
       ],
       email: [
@@ -116,11 +121,28 @@ export class AddUserComponent implements OnInit, OnDestroy  {
         postalCode: ['', [Validators.required]],
       }),
       role: [null, Validators.required],
-      password: [null, Validators.required],
+      password: [
+        null,
+        [
+          Validators.required,
+          Validators.minLength(8),
+          Validators.pattern(passwordPattern),
+        ]
+      ],
       rePassword: [null, Validators.required],
       imageURL: [null, Validators.required],
     });
   }
+
+  openDialog(): void {
+    const dialogRef = this.dialog.open(InfoBoxComponent, {
+      data: { title: "Info (Passowrd hint)", text: " Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character" },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+    });
+  }
+
 
   get addressForm() {
     return this.userGroup.get('address') as FormGroup;

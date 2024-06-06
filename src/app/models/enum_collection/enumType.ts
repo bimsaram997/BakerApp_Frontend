@@ -17,5 +17,6 @@ export enum EnumType {
   MeasuringUnit = 2,
   ItemUnit = 8,
   Gender = 9,
-  Roles = 11
+  Roles = 11,
+  Countries = 12
 }

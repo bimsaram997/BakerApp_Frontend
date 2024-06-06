@@ -1,5 +1,9 @@
-import { Component, Input, OnInit, forwardRef } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, forwardRef } from '@angular/core';
 import { ControlValueAccessor, FormBuilder, FormGroup, NG_VALUE_ACCESSOR, Validators } from '@angular/forms';
+import { Subscription } from 'rxjs';
+import { MasterDataService } from '../../../services/bakery/master-data.service';
+import { EnumType } from '../../../models/enum_collection/enumType';
+import { AllMasterData, MasterDataVM } from '../../../models/MasterData/MasterData';
 
 @Component({
   selector: 'app-address-lookup',
@@ -13,13 +17,14 @@ import { ControlValueAccessor, FormBuilder, FormGroup, NG_VALUE_ACCESSOR, Valida
     }
   ]
 })
-export class AddressLookupComponent implements ControlValueAccessor, OnInit{
+export class AddressLookupComponent implements ControlValueAccessor, OnInit, OnDestroy{
   @Input() addressForm: any;
-  countries: any[] = [
-    {Id: 0, name: "Sri Lanka"}, {Id: 1, name: "Finland"}
-  ];
+  subscription: Subscription[] = [];
+  countries: MasterDataVM[];
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder,
+    private masterDataService: MasterDataService,
+  ) {
     this.addressForm = this.fb.group({
       street1: ['', Validators.required],
       street2: [''],
@@ -37,11 +42,18 @@ export class AddressLookupComponent implements ControlValueAccessor, OnInit{
   }
 
   ngOnInit(): void {
+    this.getCountries();
     this.addressForm.valueChanges.subscribe(value => {
       this.onChange(value);
       this.onTouched();
       this.writeValue(value)
     });
+  }
+
+  public getCountries(): void {
+    this.subscription.push(this.masterDataService.getMasterDataByEnumTypeId(EnumType.Countries).subscribe((res: AllMasterData) => {
+      this.countries = res.Items;
+    }))
   }
 
   onChange: any = () => {};
@@ -68,4 +80,10 @@ export class AddressLookupComponent implements ControlValueAccessor, OnInit{
       this.addressForm.enable();
     }
   }
+  ngOnDestroy(): void {
+    this.subscription.forEach((subscription: Subscription) => {
+      subscription.unsubscribe();
+    });
+  }
+
 }

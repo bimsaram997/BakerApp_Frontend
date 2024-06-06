@@ -7,6 +7,7 @@ import { SidenavbarComponent } from './sidenavbar/sidenavbar.component';
 import { ToolBarComponent } from './tool-bar/tool-bar.component';
 import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
 import { AddressLookupComponent } from './address-lookup/address-lookup.component';
+import { InfoBoxComponent } from './info-box/info-box.component';
 
 
 
@@ -18,9 +19,10 @@ import { AddressLookupComponent } from './address-lookup/address-lookup.componen
     SidenavbarComponent,
     ToolBarComponent,
     ConfirmDialogComponent,
-    AddressLookupComponent
+    AddressLookupComponent,
+    InfoBoxComponent
   ],
-  entryComponents: [ConfirmDialogComponent],
+  entryComponents: [ConfirmDialogComponent, InfoBoxComponent],
   imports: [
     CommonModule,
     MaterialModule

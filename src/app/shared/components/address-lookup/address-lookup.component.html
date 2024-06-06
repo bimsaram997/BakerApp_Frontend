@@ -52,7 +52,7 @@
               <mat-option
                 *ngFor="let country of countries"
                 [value]="country.Id">
-                {{ country.name }}
+                {{ country.MasterDataName }}
               </mat-option>
             </mat-select>
             <mat-error *ngIf="addressForm.get('country').hasError('required')">

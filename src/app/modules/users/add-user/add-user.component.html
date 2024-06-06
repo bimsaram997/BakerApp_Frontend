@@ -141,8 +141,24 @@
           <div class="col-md-6">
             <mat-form-field appearance="outline">
               <mat-label>Password</mat-label>
-              <input matInput placeholder="" formControlName="password" />
+              <input matInput placeholder="" formControlName="password" [type]="hide ? 'password' : 'text'"  />
+              <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
+                <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+              </button>
+             <button mat-icon-button (click)="openDialog()"  matSuffix >
+              <mat-icon >help</mat-icon>
+             </button>
+              <mat-error *ngIf="userGroup.get('password').hasError('required')">
+                Password is required
+              </mat-error>
+              <mat-error *ngIf="userGroup.get('password').hasError('pattern')">
+              Password mismacth
+              </mat-error>
+              <mat-error *ngIf="userGroup.get('password').hasError('minlength')">
+                Password must be at least 8 characters long
+              </mat-error>
             </mat-form-field>
+
           </div>
           <div class="col-md-6">
             <mat-form-field appearance="outline">

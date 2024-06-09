@@ -19,7 +19,9 @@ import { AuthService } from './services/bakery/auth.service';
     AppRoutingModule,
     BrowserAnimationsModule,
     MaterialModule,
-    ToastrModule.forRoot(),
+    ToastrModule.forRoot({
+      positionClass: 'toast-top-right',
+    }),
 
   ],
   providers: [

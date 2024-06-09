@@ -17,6 +17,7 @@ import { MatCheckboxChange } from '@angular/material/checkbox';
 import { RawMaterialService } from '../../../services/bakery/raw-material.service';
 import { RawMaterialListSimpleVM } from 'src/app/models/RawMaterials/RawMaterial';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { ResultView } from 'src/app/models/ResultView';
 @Component({
   selector: 'app-recipe-list',
   templateUrl: './recipe-list.component.html',
@@ -161,10 +162,10 @@ export class RecipeListComponent implements OnInit, OnDestroy {
 
     this.recipeService
       .getRecipes(filter)
-      .subscribe((res: PaginatedRawMaterials) => {
-        this.dataSource.data = res.Items;
+      .subscribe((res:  ResultView<PaginatedRawMaterials>) => {
+        this.dataSource.data = res.Item.Items;
         this.dataSource.paginator = this.paginator;
-        this.paginator.length = res.TotalCount || 0;
+        this.paginator.length = res.Item.TotalCount || 0;
         this.dataSource.sort = this.sort;
       });
   }
@@ -183,7 +184,7 @@ export class RecipeListComponent implements OnInit, OnDestroy {
   }
 
   navigateToEditRecipe(id: number) {
-    this.router.navigate(['base/recipe/add', 'edit', id]);
+    this.router.navigate(['base/recipe/add', 'view', id]);
   }
 
   ngAfterViewInit(): void {

@@ -25,6 +25,7 @@ import { EnumType } from '../../../models/enum_collection/enumType';
 import { AllMasterData, MasterDataVM } from '../../../models/MasterData/MasterData';
 import { RolesService } from '../../../services/bakery/roles.service';
 import { ReturnRoles, RolesVM } from 'src/app/models/Roles/roles';
+import { ResultView } from 'src/app/models/ResultView';
 @Component({
   selector: 'app-user-list',
   templateUrl: './user-list.component.html',
@@ -154,10 +155,10 @@ export class UserListComponent {
       },
     };
 
-    this.loginService.getUsers(filter).subscribe((res: PaginatedUsers) => {
-      this.dataSource.data = res.Items;
+    this.loginService.getUsers(filter).subscribe((res: ResultView<PaginatedUsers>) => {
+      this.dataSource.data = res.Item.Items;
       this.dataSource.paginator = this.paginator;
-      this.paginator.length = res.TotalCount || 0; // Update paginator length
+      this.paginator.length = res.Item.TotalCount || 0; // Update paginator length
       this.dataSource.sort = this.sort;
     });
   }

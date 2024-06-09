@@ -9,7 +9,7 @@ import {
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { Subscription } from 'rxjs';
+import { Subscription, catchError } from 'rxjs';
 import { ToolbarService } from '../../../services/layout/toolbar.service';
 import { ToolbarButtonType } from '../../../models/enum_collection/toolbar-button';
 import { AdduserRequest, UpdateUser } from '../../../models/User/User';
@@ -22,6 +22,7 @@ import { RolesService } from '../../../services/bakery/roles.service';
 import { ReturnRoles, RolesVM } from 'src/app/models/Roles/roles';
 import { MatDialog } from '@angular/material/dialog';
 import { InfoBoxComponent } from 'src/app/shared/components/info-box/info-box.component';
+import { AddResultVM, ResultView } from 'src/app/models/ResultView';
 @Component({
   selector: 'app-add-user',
   templateUrl: './add-user.component.html',
@@ -102,8 +103,7 @@ export class AddUserComponent implements OnInit, OnDestroy  {
         null,
         [
           Validators.required,
-          Validators.minLength(10),
-          Validators.pattern(passwordPattern),
+          Validators.minLength(10)
         ],
       ],
       email: [
@@ -221,25 +221,25 @@ export class AddUserComponent implements OnInit, OnDestroy  {
         };
         console.log(addUser);
         const updateResponse = this.loginService.register(addUser);
-        this.subscription.push(
-          updateResponse.subscribe((res: any) => {
-            console.log(res);
-            if (res != null) {
-              this.toolbarService.enableButtons(true);
-              this.toastr.success('Success!', 'User updated!');
-              //  this.getRawMaterialById(res);
-            } else {
-              this.toolbarService.enableButtons(true);
-            }
+         this.subscription.push(updateResponse.pipe(
+          catchError(error => {
+            this.toastr.error('Error!', error.error.Message);
+            this.toolbarService.enableButtons(true);
+            return error;
           })
-        );
+        ).subscribe((res: AddResultVM) => {
+          if (res != null) {
+            this.toolbarService.enableButtons(true);
+            this.toastr.success('Success!', 'User added!');
+          this.getUserId(res.Id);
+          }
+        }));
         if (this.saveCloseValue) {
           this.saveClose();
         }
       } catch (error) {
         this.toolbarService.enableButtons(true);
-        console.error('An error occurred while adding user:', error);
-        this.toastr.error('Error!', 'Failed to add user.');
+        console.error('An error occurred while attempting to add user:', error.message);
       }
     } else if (this.userGroup.controls['imageURL'].value === null) {
       this.toastr.error('Error!', 'Please add profile picture');
@@ -249,11 +249,21 @@ export class AddUserComponent implements OnInit, OnDestroy  {
 
   public getUserId(userId: number): void {
     if (userId > 0) {
-      this.subscription.push(
-        this.loginService.getUserId(userId).subscribe((user: UserDetailVM) => {
-          this.setValuestoForm(user);
-        })
-      );
+      try {
+        const resultResponse =  this.loginService.getUserId(userId);
+        this.subscription.push(resultResponse.pipe(
+          catchError(error => {
+            this.toastr.error('Error!', error.error.Message);
+            return error;
+          })
+        ).subscribe((user: ResultView<UserDetailVM>) => {
+          if (user != null) {
+            this.setValuestoForm(user.Item);
+          }
+        }));
+      } catch (error) {
+        console.error('An error occurred while attempting to retrieve:', error);
+      }
     }
   }
 
@@ -320,23 +330,29 @@ export class AddUserComponent implements OnInit, OnDestroy  {
           this.userId,
           this.updateUserRequest
         );
-        this.subscription.push(
-          updateResponse.subscribe((res: any) => {
-            if (res != null) {
-              this.toastr.success('Success!', 'Food item updated!');
-              this.toolbarService.enableButtons(true);
-              this.getUserId(res);
-              if (this.saveCloseValue) {
-                this.saveClose();
-              }
-            }
+
+
+        this.subscription.push(updateResponse.pipe(
+          catchError(error => {
+            this.toastr.error('Error!', error.error.Message);
+            this.toolbarService.enableButtons(true);
+            return error;
           })
-        );
+        ).subscribe((res: AddResultVM) => {
+          if (res != null) {
+            this.toolbarService.enableButtons(true);
+            this.toastr.success('Success!', 'User updated!');
+          this.getUserId(res.Id);
+          }
+          if (this.saveCloseValue) {
+            this.saveClose();
+          }
+        }));
 
       } catch (error) {
         this.toolbarService.enableButtons(true);
-        console.error('An error occurred while updating the food item:', error);
-        this.toastr.error('Error!', 'Failed to update food item.');
+        console.error('An error occurred while updating user:', error);
+        this.toastr.error('Error!', 'Failed to update user');
       }
     }
   }

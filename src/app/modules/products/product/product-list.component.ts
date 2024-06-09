@@ -23,6 +23,7 @@ import { MatCheckboxChange } from '@angular/material/checkbox';
 import { MasterDataService } from '../../../services/bakery/master-data.service';
 import { EnumType } from '../../../models/enum_collection/enumType';
 import { AllMasterData, MasterDataVM } from '../../../models/MasterData/MasterData';
+import { ResultView } from 'src/app/models/ResultView';
 @Component({
   selector: 'app-product-list',
   templateUrl: './product-list.component.html',
@@ -138,8 +139,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.subscription.push(
       this.recipeService
         .listSimpleRecipes()
-        .subscribe((recipe: RecipeListSimpleVM[]) => {
-          this.recipes = recipe;
+        .subscribe((res: ResultView<RecipeListSimpleVM[]>) => {
+          this.recipes = res.Item;
         })
     );
   }

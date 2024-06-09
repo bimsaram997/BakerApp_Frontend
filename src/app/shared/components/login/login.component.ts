@@ -1,10 +1,12 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, catchError } from 'rxjs';
 import { LoginServiceService } from '../../../services/bakery/login-service.service'
 import { LoginRequest } from '../../../models/Authorization/Authorization';
 import { AuthService } from '../../../services/bakery/auth.service';
+import { ToastrService } from 'ngx-toastr';
+import { MatSnackBar } from '@angular/material/snack-bar';
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
@@ -18,6 +20,8 @@ export class LoginComponent  implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private loginService: LoginServiceService,
     private authService: AuthService,
+    private toastr: ToastrService,
+    private snackBar: MatSnackBar
   ) {
 
   }
@@ -43,36 +47,41 @@ export class LoginComponent  implements OnInit, OnDestroy {
   loginRequest() {
     Object.values(this.loginForm.controls).forEach(control => {
       control.markAsTouched();
-
-
     });
 
-    if(this.loginForm.valid) {
+    if (this.loginForm.valid) {
+      const formData = this.loginForm.value;
+      const loginRequest: LoginRequest = {
+        Email: formData.email,
+        Password: formData.password
+      };
 
       try {
-
-
-        const formData = this.loginForm.value;
-        const loginRequest: LoginRequest = {
-          Email: formData.email,
-          Password:formData.password
-
-        };
-        const updateResponse = this.loginService.login( loginRequest);
-        this.subscription.push(updateResponse.subscribe((res: any) => {
+        const updateResponse = this.loginService.login(loginRequest);
+        this.subscription.push(updateResponse.pipe(
+          catchError(error => {
+            this.toastr.error('Error!', error.error.Message);
+            return error;
+          })
+        ).subscribe((res: any) => {
           if (res != null) {
             this.authService.setToken(res.Token);
             this.router.navigate(['base/']);
           }
         }));
-
-      }catch (error) {
-
-        console.error('An error occurred while updating the food item:', error);
-
+      } catch (error) {
+        console.error('An error occurred while attempting to log in:', error);
       }
     }
   }
+
+
+
+  showErrorMessage(message: string) {
+    // Implement your error message display logic here
+    alert(message); // Example using alert, you can use a more user-friendly way
+  }
+
 
 
   ngOnDestroy(): void {}

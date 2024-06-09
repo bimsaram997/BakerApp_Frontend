@@ -7,7 +7,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, catchError } from 'rxjs';
 import { ToolbarService } from '../../../services/layout/toolbar.service';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
@@ -30,13 +30,18 @@ import {
 import { MatSelectChange } from '@angular/material/select';
 import { MasterDataService } from '../../../services/bakery/master-data.service';
 import { EnumType } from '../../../models/enum_collection/enumType';
-import { AllMasterData, MasterDataVM } from '../../../models/MasterData/MasterData';
+import {
+  AllMasterData,
+  MasterDataVM,
+} from '../../../models/MasterData/MasterData';
+import { AddResultVM, ResultView } from 'src/app/models/ResultView';
 @Component({
   selector: 'app-add-recipe',
   templateUrl: './add-recipe.component.html',
   styleUrls: ['./add-recipe.component.css'],
 })
 export class AddRecipeComponent implements OnInit, OnDestroy, AfterViewInit {
+  toolBarButtons: ToolbarButtonType[];
   subscription: Subscription[] = [];
   header: string;
   mode: string;
@@ -52,7 +57,8 @@ export class AddRecipeComponent implements OnInit, OnDestroy, AfterViewInit {
   matHint: string;
   recipeId: number;
   updateRecipeValues: UpdateRecipe = new UpdateRecipe();
-measureUnits:MasterDataVM[];
+  measureUnits: MasterDataVM[];
+  isView: boolean;
   constructor(
     private route: ActivatedRoute,
     private toolbarService: ToolbarService,
@@ -62,7 +68,7 @@ measureUnits:MasterDataVM[];
     private changeDetectorRefs: ChangeDetectorRef,
     private recipeService: RecipeService,
     private rawMaterialService: RawMaterialService,
-    private masterDataService: MasterDataService,
+    private masterDataService: MasterDataService
   ) {}
 
   ngOnInit() {
@@ -75,25 +81,37 @@ measureUnits:MasterDataVM[];
         this.recipeId = id;
       }
     });
-
     this.createFormGroup();
 
-    this.toolbarService.updateCustomButtons([
-      ToolbarButtonType.Save,
-      ToolbarButtonType.SaveClose,
-      ToolbarButtonType.Cancel,
-    ]);
+    this.toolbarService.updateCustomButtons(this.toolBarButtons);
 
-    if (this.mode === 'edit') {
-      this.isEdit = true;
-      this.header = 'Update recipe';
+    if (this.mode === 'view') {
+      this.toolBarButtons = [ToolbarButtonType.Edit, ToolbarButtonType.Cancel];
+      this.toolbarService.updateCustomButtons(this.toolBarButtons);
+      this.isView = true;
+      this.header = 'View recipe';
+      this.toolbarService.updateToolbarContent(this.header);
       this.getRecipeById(this.recipeId);
-      //this.disableFields();
+    } else if (this.mode === 'edit') {
+      this.header = 'Edit recipe';
+      this.toolbarService.updateToolbarContent(this.header);
+      this.toolBarButtons = [
+        ToolbarButtonType.Save,
+        ToolbarButtonType.SaveClose,
+        ToolbarButtonType.Cancel,
+      ];
+      this.toolbarService.updateCustomButtons(this.toolBarButtons);
     } else {
       this.header = 'Add recipe';
+      this.toolbarService.updateToolbarContent(this.header);
+      this.toolBarButtons = [
+        ToolbarButtonType.Save,
+        ToolbarButtonType.SaveClose,
+        ToolbarButtonType.Cancel,
+      ];
+      this.toolbarService.updateCustomButtons(this.toolBarButtons);
     }
     this.toolbarService.updateToolbarContent(this.header);
-    // this.setValidators();
   }
 
   ngAfterViewInit() {
@@ -101,8 +119,6 @@ measureUnits:MasterDataVM[];
       this.dataSource.paginator = this.paginator;
     }
   }
-
-
 
   createFormGroup(): void {
     this.recipeGroup = this.fb.group({
@@ -150,8 +166,8 @@ measureUnits:MasterDataVM[];
 
         this.saveCloseValue = false;
         break;
-      case ToolbarButtonType.Update:
-        //this.handleUpdateButton();
+      case ToolbarButtonType.Edit:
+        this.handleEditButton();
         break;
       case ToolbarButtonType.SaveClose:
         this.saveCloseValue = true;
@@ -159,7 +175,6 @@ measureUnits:MasterDataVM[];
         break;
       case ToolbarButtonType.Cancel:
         this.saveClose();
-        //this.getRecipeById(4)
         break;
       default:
         console.warn(`Unknown button type: ${buttonType}`);
@@ -167,18 +182,36 @@ measureUnits:MasterDataVM[];
   }
 
   public getMeasureUnits(): void {
-    this.subscription.push(this.masterDataService.getMasterDataByEnumTypeId(EnumType.MeasuringUnit).subscribe((res: AllMasterData) => {
-      this.measureUnits = res.Items;
-    }))
+    this.subscription.push(
+      this.masterDataService
+        .getMasterDataByEnumTypeId(EnumType.MeasuringUnit)
+        .subscribe((res: AllMasterData) => {
+          this.measureUnits = res.Items;
+        })
+    );
   }
 
   getRecipeById(id: number): void {
     if (id > 0) {
-      this.subscription.push(
-        this.recipeService.getRecipeById(id).subscribe((recipe: RecipeVM) => {
-          this.setValuestoForm(recipe);
-        })
-      );
+      try {
+        const resultResponse = this.recipeService.getRecipeById(id);
+        this.subscription.push(
+          resultResponse
+            .pipe(
+              catchError((error) => {
+                this.toastr.error('Error!', error.error.Message);
+                return error;
+              })
+            )
+            .subscribe((recipe: ResultView<RecipeVM>) => {
+              if (recipe != null) {
+                this.setValuestoForm(recipe.Item);
+              }
+            })
+        );
+      } catch (error) {
+        console.error('An error occurred while attempting to log in:', error);
+      }
     }
   }
 
@@ -205,7 +238,9 @@ measureUnits:MasterDataVM[];
     });
     this.dataSource = new MatTableDataSource(this.rawMaterials.controls);
     this.changeDetectorRefs.detectChanges();
-    console.log(this.recipeGroup.value);
+    if (this.isView) {
+      this.disableFormGroup();
+    }
   }
 
   addRecipe(): void {
@@ -230,27 +265,79 @@ measureUnits:MasterDataVM[];
           Instructions: this.recipeGroup.get('content').value,
           rawMaterials: this.getRawMaterialArray(),
         };
-        console.log(recipeRequest);
+
         const updateResponse = this.recipeService.addRecipe(recipeRequest);
+
         this.subscription.push(
-          updateResponse.subscribe((res: any) => {
-            console.log(res);
-            if (res != null) {
-              this.toolbarService.enableButtons(true);
-              this.toastr.success('Success!', 'Raw material updated!');
-              this.getRecipeById(res);
-            }
-          })
+          updateResponse
+            .pipe(
+              catchError((error) => {
+                this.toastr.error('Error!', error.error.Message);
+                this.toolbarService.enableButtons(true);
+                return error;
+              })
+            )
+            .subscribe((res: AddResultVM) => {
+              if (res != null) {
+                this.toolbarService.enableButtons(true);
+                this.toastr.success('Success!', 'Recipe added!');
+                this.getRecipeById(res.Id);
+                this.recipeId = res.Id
+                if (this.saveCloseValue) {
+                  this.saveClose();
+                } else {
+                  this.router.navigate([
+                    'base/recipe/add',
+                    'view',
+                    this.recipeId,
+                  ]);
+                  this.header = 'View recipe';
+                  this.toolbarService.updateToolbarContent(this.header);
+                  this.disableFormGroup();
+                  this.removeSpecificButtons();
+                }
+              }
+            })
         );
-        if (this.saveCloseValue) {
-          this.saveClose();
-        }
       } catch (error) {
         this.toolbarService.enableButtons(true);
-        console.error('An error occurred while updating the food item:', error);
-        this.toastr.error('Error!', 'Failed to update food item.');
+        console.error('An error occurred while adding recipe:', error);
+        this.toastr.error('Error!', 'Failed to add recipe');
       }
     }
+  }
+
+  disableFormGroup(): void {
+    this.toolBarButtons = [ToolbarButtonType.Edit, ToolbarButtonType.Cancel];
+    this.toolbarService.updateCustomButtons(this.toolBarButtons);
+    this.recipeGroup.disable();
+    this.rawMaterials.controls.forEach((control) => {
+      control.disable();
+    });
+    this.changeDetectorRefs.detectChanges();
+  }
+
+  enableFormGroup(): void {
+    this.header = 'Edit recipe';
+    this.toolbarService.updateToolbarContent(this.header);
+    this.recipeGroup.enable();
+    this.rawMaterials.controls.forEach((control) => {
+      control.enable();
+    });
+    this.changeDetectorRefs.detectChanges();
+  }
+
+  handleEditButton(): void {
+    this.isView = false;
+    this.isEdit = true;
+    this.enableFormGroup();
+    this.router.navigate(['base/recipe/add', 'edit', this.recipeId]);
+    const deleteIndex = this.toolBarButtons.indexOf(ToolbarButtonType.Edit);
+    if (deleteIndex !== -1) {
+      this.toolBarButtons.splice(deleteIndex, 1);
+    }
+    this.toolBarButtons = [ToolbarButtonType.Save, ToolbarButtonType.SaveClose];
+    this.toolbarService.updateCustomButtons(this.toolBarButtons);
   }
 
   updateItem(): void {
@@ -281,17 +368,28 @@ measureUnits:MasterDataVM[];
           this.updateRecipeValues
         );
         this.subscription.push(
-          updateResponse.subscribe((res: any) => {
-            if (res != null) {
-              this.toastr.success('Success!', 'Recipe updated!');
-              this.toolbarService.enableButtons(true);
-              if (this.saveCloseValue) {
-                this.saveClose();
-              } else {
-                this.getRecipeById(res);
+          updateResponse
+            .pipe(
+              catchError((error) => {
+                this.toastr.error('Error!', error.error.Message);
+                this.toolbarService.enableButtons(true);
+                return error;
+              })
+            )
+            .subscribe((res: AddResultVM) => {
+              if (res != null) {
+                this.toolbarService.enableButtons(true);
+                this.toastr.success('Success!', 'Recipe updated!');
+                this.getRecipeById(res.Id);
+                if (this.saveCloseValue) {
+                  this.saveClose();
+                } else {
+                  this.removeSpecificButtons();
+                  this.disableFormGroup();
+
+                }
               }
-            }
-          })
+            })
         );
       } catch (error) {
         this.toolbarService.enableButtons(true);
@@ -299,6 +397,18 @@ measureUnits:MasterDataVM[];
         this.toastr.error('Error!', 'Failed to update recipe.');
       }
     }
+  }
+
+  removeSpecificButtons(): void {
+    const deleteIndex = this.toolBarButtons.indexOf(ToolbarButtonType.Save);
+    if (deleteIndex !== -1) {
+      this.toolBarButtons.splice(deleteIndex, 1);
+    }
+    const editIndex = this.toolBarButtons.indexOf(ToolbarButtonType.SaveClose);
+    if (editIndex !== -1) {
+      this.toolBarButtons.splice(editIndex, 1);
+    }
+    this.toolbarService.updateCustomButtons(this.toolBarButtons);
   }
 
   saveClose(): void {

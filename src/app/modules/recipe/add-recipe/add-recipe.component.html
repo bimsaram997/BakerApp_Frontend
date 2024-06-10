@@ -161,7 +161,7 @@
                       *matCellDef="let element; index as i"
                       [formGroup]="element"
                     >
-                      <button type="button" (click)="removeRow(i)">
+                      <button type="button" (click)="removeRow(i)"  [disabled]="isView">
                         <mat-icon matSuffix>delete</mat-icon>
                       </button>
                     </td>

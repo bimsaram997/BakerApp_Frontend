@@ -7,7 +7,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription, concatAll } from 'rxjs';
+import { Subscription, catchError, concatAll } from 'rxjs';
 import { ToolbarService } from '../../../services/layout/toolbar.service';
 import { ToolbarButtonType } from 'src/app/models/enum_collection/toolbar-button';
 import { FoodTypeService } from '../../../services/bakery/food-type.service';
@@ -36,6 +36,7 @@ import {
   MasterDataVM,
 } from '../../../models/MasterData/MasterData';
 import { EnumType } from '../../../models/enum_collection/enumType';
+import { AddResultVM, ResultView } from 'src/app/models/ResultView';
 
 @Component({
   selector: 'app-add-food-item',
@@ -43,6 +44,7 @@ import { EnumType } from '../../../models/enum_collection/enumType';
   styleUrls: ['./add-product.component.css'],
 })
 export class AddProductComponent implements OnInit, OnDestroy {
+  toolBarButtons: ToolbarButtonType[];
   subscription: Subscription[] = [];
   header: string;
   mode: string;
@@ -57,7 +59,7 @@ export class AddProductComponent implements OnInit, OnDestroy {
   imagePreview: string = 'assets/main images/placeholder.png';
   productCount: FormControl;
   saveCloseValue: boolean = false;
-
+  isView: boolean;
   costCodes: any[] = [
     {
       Id: 0,
@@ -101,20 +103,33 @@ export class AddProductComponent implements OnInit, OnDestroy {
       }
     });
     this.getUnits();
-    this.createFormGroup();
-
-    this.toolbarService.updateCustomButtons([
-      ToolbarButtonType.Save,
-      ToolbarButtonType.SaveClose,
-      ToolbarButtonType.Cancel,
-    ]);
     this.getListSimpleRecipes();
-    if (this.mode === 'edit') {
-      this.isEdit = true;
-      this.header = 'Update product';
+    this.createFormGroup();
+    if (this.mode === 'view') {
+      this.toolBarButtons = [ToolbarButtonType.Edit, ToolbarButtonType.Cancel];
+      this.toolbarService.updateCustomButtons(this.toolBarButtons);
+      this.isView = true;
+      this.header = 'View product';
+      this.toolbarService.updateToolbarContent(this.header);
       this.getProductById(this.productId);
+    } else if (this.mode === 'edit') {
+      this.header = 'Edit product';
+      this.toolbarService.updateToolbarContent(this.header);
+      this.toolBarButtons = [
+        ToolbarButtonType.Save,
+        ToolbarButtonType.SaveClose,
+        ToolbarButtonType.Cancel,
+      ];
+      this.toolbarService.updateCustomButtons(this.toolBarButtons);
     } else {
       this.header = 'Add product';
+      this.toolbarService.updateToolbarContent(this.header);
+      this.toolBarButtons = [
+        ToolbarButtonType.Save,
+        ToolbarButtonType.SaveClose,
+        ToolbarButtonType.Cancel,
+      ];
+      this.toolbarService.updateCustomButtons(this.toolBarButtons);
     }
     this.toolbarService.updateToolbarContent(this.header);
   }
@@ -135,8 +150,8 @@ export class AddProductComponent implements OnInit, OnDestroy {
         this.isEdit ? this.updateItem() : this.addProduct();
         this.saveCloseValue = false;
         break;
-      case ToolbarButtonType.Update:
-        //this.handleUpdateButton();
+      case ToolbarButtonType.Edit:
+        this.handleEditButton();
         break;
       case ToolbarButtonType.SaveClose:
         this.saveCloseValue = true;
@@ -176,21 +191,34 @@ export class AddProductComponent implements OnInit, OnDestroy {
     this.subscription.push(
       this.recipeService
         .listSimpleRecipes()
-        .subscribe((recipe: RecipeListSimpleVM[]) => {
-          this.recipes = recipe;
+        .subscribe((res: ResultView<RecipeListSimpleVM[]>) => {
+          this.recipes = res.Item;
         })
     );
   }
 
   public getProductById(productId: number): void {
     if (productId > 0) {
+      try {
+      const resultResponse = this.productService.getProductById(productId);
       this.subscription.push(
-        this.productService
-          .getProductById(productId)
-          .subscribe((foodItem: ProductVM) => {
-            this.setValuestoForm(foodItem);
+        resultResponse
+          .pipe(
+            catchError((error) => {
+              this.toastr.error('Error!', error.error.Message);
+              return error;
+            })
+          )
+          .subscribe((recipe: ResultView<ProductVM>) => {
+            if (recipe != null) {
+              this.setValuestoForm(recipe.Item);
+            }
           })
       );
+      } catch (error) {
+        console.error('An error occurred while attempting to log in:', error);
+      }
+
     }
   }
 
@@ -209,6 +237,9 @@ export class AddProductComponent implements OnInit, OnDestroy {
     this.imagePreview = foodItem.ImageURL;
     this.costPrice.setValue(foodItem.CostPrice);
     this.sellingPrice.setValue(foodItem.SellingPrice);
+    if (this.isView) {
+      this.disableFormGroup();
+    }
   }
 
   openDialog(): void {
@@ -255,23 +286,86 @@ export class AddProductComponent implements OnInit, OnDestroy {
         };
         const updateResponse = this.productService.addProduct(addProduct);
         this.subscription.push(
-          updateResponse.subscribe((res: any) => {
-            if (res != null) {
-              this.toolbarService.enableButtons(true);
-              this.toastr.success('Success!', 'Product added!');
-              this.getProductById(res);
-            }
-          })
+          updateResponse
+            .pipe(
+              catchError((error) => {
+                this.toastr.error('Error!', error.error.Message);
+                this.toolbarService.enableButtons(true);
+                return error;
+              })
+            )
+            .subscribe((res: AddResultVM) => {
+              if (res != null) {
+                this.toolbarService.enableButtons(true);
+                this.toastr.success('Success!', 'Recipe added!');
+                this.getProductById(res.Id);
+                this.productId = res.Id
+                if (this.saveCloseValue) {
+                  this.saveClose();
+                } else {
+                  this.router.navigate([
+                    'base/product/add',
+                    'view',
+                    this.productId,
+                  ]);
+                  this.header = 'View product';
+                  this.toolbarService.updateToolbarContent(this.header);
+                  this.disableFormGroup();
+                  this.removeSpecificButtons();
+                }
+              }
+            })
         );
-        if (this.saveCloseValue) {
-          this.saveClose();
-        }
+
       } catch (error) {
         this.toolbarService.enableButtons(true);
-        console.error('An error occurred while updating the food item:', error);
-        this.toastr.error('Error!', 'Failed to update food item.');
+        console.error('An error occurred while adding the product:', error);
+        this.toastr.error('Error!', 'Failed to add the product.');
       }
     }
+  }
+
+  disableFormGroup(): void {
+    this.toolBarButtons = [ToolbarButtonType.Edit, ToolbarButtonType.Cancel];
+    this.toolbarService.updateCustomButtons(this.toolBarButtons);
+    this.productGroup.disable();
+    this.costPrice.disable();
+    this.sellingPrice.disable();
+    this.cd.detectChanges();
+  }
+
+  enableFormGroup(): void {
+    this.header = 'Edit recipe';
+    this.toolbarService.updateToolbarContent(this.header);
+    this.productGroup.enable();
+    this.costPrice.enable();
+    this.sellingPrice.enable();
+    this.cd.detectChanges();
+  }
+
+  removeSpecificButtons(): void {
+    const deleteIndex = this.toolBarButtons.indexOf(ToolbarButtonType.Save);
+    if (deleteIndex !== -1) {
+      this.toolBarButtons.splice(deleteIndex, 1);
+    }
+    const editIndex = this.toolBarButtons.indexOf(ToolbarButtonType.SaveClose);
+    if (editIndex !== -1) {
+      this.toolBarButtons.splice(editIndex, 1);
+    }
+    this.toolbarService.updateCustomButtons(this.toolBarButtons);
+  }
+
+  handleEditButton(): void {
+    this.isView = false;
+    this.isEdit = true;
+    this.enableFormGroup();
+    this.router.navigate(['base/product/add', 'edit', this.productId]);
+    const deleteIndex = this.toolBarButtons.indexOf(ToolbarButtonType.Edit);
+    if (deleteIndex !== -1) {
+      this.toolBarButtons.splice(deleteIndex, 1);
+    }
+    this.toolBarButtons = [ToolbarButtonType.Save, ToolbarButtonType.SaveClose];
+    this.toolbarService.updateCustomButtons(this.toolBarButtons);
   }
 
   updateItem(): void {
@@ -304,22 +398,35 @@ export class AddProductComponent implements OnInit, OnDestroy {
           this.updateProduct
         );
         this.subscription.push(
-          updateResponse.subscribe((res: any) => {
-            console.log(res);
-            if (res != null) {
-              this.toolbarService.enableButtons(true);
-              this.toastr.success('Success!', 'Product updated!');
-              this.getProductById(res);
-            }
-          })
+          updateResponse
+            .pipe(
+              catchError((error) => {
+                this.toastr.error('Error!', error.error.Message);
+                this.toolbarService.enableButtons(true);
+                return error;
+              })
+            )
+            .subscribe((res: AddResultVM) => {
+              if (res != null) {
+                this.toolbarService.enableButtons(true);
+                this.toastr.success('Success!', 'Product updated!');
+                this.getProductById(res.Id);
+                if (this.saveCloseValue) {
+                  this.saveClose();
+                } else {
+                  this.isView = true;
+                  this.removeSpecificButtons();
+                  this.disableFormGroup();
+                  this.header = 'View product';
+                  this.toolbarService.updateToolbarContent(this.header)
+                }
+              }
+            })
         );
-        if (this.saveCloseValue) {
-          this.saveClose();
-        }
       } catch (error) {
         this.toolbarService.enableButtons(true);
-        console.error('An error occurred while updating the food item:', error);
-        this.toastr.error('Error!', 'Failed to update food item.');
+        console.error('An error occurred while updating the product:', error);
+        this.toastr.error('Error!', 'Failed to update product.');
       }
     }
   }

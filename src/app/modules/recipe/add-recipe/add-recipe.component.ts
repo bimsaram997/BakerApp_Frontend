@@ -386,7 +386,9 @@ export class AddRecipeComponent implements OnInit, OnDestroy, AfterViewInit {
                 } else {
                   this.removeSpecificButtons();
                   this.disableFormGroup();
-
+                  this.isView = true;
+                  this.header = 'View recipe';
+                  this.toolbarService.updateToolbarContent(this.header)
                 }
               }
             })

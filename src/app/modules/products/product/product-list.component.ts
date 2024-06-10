@@ -172,10 +172,10 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
     this.foodItemService
       .getProducts(filter)
-      .subscribe((res: PaginatedProducts) => {
-        this.dataSource.data = res.Items;
+      .subscribe((res: ResultView<PaginatedProducts>) => {
+        this.dataSource.data = res.Item.Items;
         this.dataSource.paginator = this.paginator;
-        this.paginator.length = res.TotalCount || 0;
+        this.paginator.length = res.Item.TotalCount || 0;
         this.dataSource.sort = this.sort;
       });
   }
@@ -200,7 +200,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   }
 
   navigateToEditproduct(id: number) {
-    this.router.navigate(['base/product/add', 'edit', id]);
+    this.router.navigate(['base/product/add', 'view', id]);
   }
 
   public handleNewButton(): void {

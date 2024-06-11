@@ -181,14 +181,28 @@ export class AddRecipeComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+
   public getMeasureUnits(): void {
-    this.subscription.push(
-      this.masterDataService
-        .getMasterDataByEnumTypeId(EnumType.MeasuringUnit)
-        .subscribe((res: AllMasterData) => {
-          this.measureUnits = res.Items;
-        })
-    );
+    try {
+      const resultResponse = this.masterDataService.getMasterDataByEnumTypeId(EnumType.MeasuringUnit);
+      this.subscription.push(
+        resultResponse
+          .pipe(
+            catchError((error) => {
+              this.toastr.error('Error!', error.error.Message);
+              return error;
+            })
+          )
+          .subscribe((res: ResultView<AllMasterData>) => {
+            if (res != null) {
+              this.measureUnits = res.Item.Items;
+            }
+          })
+      );
+    } catch (error) {
+      console.error('An error occurred while attempting to load master data:', error);
+    }
+
   }
 
   getRecipeById(id: number): void {
@@ -210,7 +224,7 @@ export class AddRecipeComponent implements OnInit, OnDestroy, AfterViewInit {
             })
         );
       } catch (error) {
-        console.error('An error occurred while attempting to log in:', error);
+        console.error('An error occurred while attempting to load recipes:', error);
       }
     }
   }
@@ -434,8 +448,8 @@ export class AddRecipeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.subscription.push(
       this.rawMaterialService
         .listSimpleRawmaterials()
-        .subscribe((rawMaterials: RawMaterialListSimpleVM[]) => {
-          this.rawMaterialList = rawMaterials;
+        .subscribe((res: ResultView<RawMaterialListSimpleVM[]>) => {
+          this.rawMaterialList = res.Item;
         })
     );
   }

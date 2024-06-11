@@ -8,7 +8,7 @@ import { RecipeService } from '../../../services/bakery/reipe.service';
 import {
   RecipeListAdvanceFilter,
   AllRecipeVM,
-  PaginatedRawMaterials,
+  PaginatedRecipes,
 } from '../../../models/Recipe/Recipe';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -65,8 +65,8 @@ export class RecipeListComponent implements OnInit, OnDestroy {
     this.subscription.push(
       this.rawMaterialService
         .listSimpleRawmaterials()
-        .subscribe((rawMaterials: RawMaterialListSimpleVM[]) => {
-          this.rawMaterialList = rawMaterials;
+        .subscribe((res: ResultView<RawMaterialListSimpleVM[]>) => {
+          this.rawMaterialList = res.Item;
         })
     );
   }
@@ -162,7 +162,7 @@ export class RecipeListComponent implements OnInit, OnDestroy {
 
     this.recipeService
       .getRecipes(filter)
-      .subscribe((res:  ResultView<PaginatedRawMaterials>) => {
+      .subscribe((res:  ResultView<PaginatedRecipes>) => {
         this.dataSource.data = res.Item.Items;
         this.dataSource.paginator = this.paginator;
         this.paginator.length = res.Item.TotalCount || 0;

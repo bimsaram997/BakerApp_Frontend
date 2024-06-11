@@ -5,7 +5,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, catchError } from 'rxjs';
 import {
   GenderType,
   LocationType,
@@ -26,6 +26,7 @@ import { AllMasterData, MasterDataVM } from '../../../models/MasterData/MasterDa
 import { RolesService } from '../../../services/bakery/roles.service';
 import { ReturnRoles, RolesVM } from 'src/app/models/Roles/roles';
 import { ResultView } from 'src/app/models/ResultView';
+import { ToastrService } from 'ngx-toastr';
 @Component({
   selector: 'app-user-list',
   templateUrl: './user-list.component.html',
@@ -79,7 +80,8 @@ export class UserListComponent {
     private fb: FormBuilder,
     private loginService: LoginServiceService,
     private masterDataService: MasterDataService,
-    private roleService: RolesService
+    private roleService: RolesService,
+    private toastr: ToastrService,
   ) {}
   ngOnInit() {
     this.searchFormGroup();
@@ -92,9 +94,26 @@ export class UserListComponent {
   }
 
   public getGenders(): void {
-    this.subscription.push(this.masterDataService.getMasterDataByEnumTypeId(EnumType.Gender).subscribe((res: AllMasterData) => {
-      this.genders = res.Items;
-    }))
+    try {
+      const resultResponse = this.masterDataService.getMasterDataByEnumTypeId(EnumType.Gender);
+      this.subscription.push(
+        resultResponse
+          .pipe(
+            catchError((error) => {
+              this.toastr.error('Error!', error.error.Message);
+              return error;
+            })
+          )
+          .subscribe((res: ResultView<AllMasterData>) => {
+            if (res != null) {
+              this.genders = res.Item.Items;
+            }
+          })
+      );
+    } catch (error) {
+      console.error('An error occurred while attempting to load master data:', error);
+    }
+
   }
 
   public getRoles(): void {

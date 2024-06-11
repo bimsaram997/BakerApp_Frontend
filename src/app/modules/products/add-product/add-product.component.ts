@@ -135,13 +135,26 @@ export class AddProductComponent implements OnInit, OnDestroy {
   }
 
   public getUnits(): void {
-    this.subscription.push(
-      this.masterDataService
-        .getMasterDataByEnumTypeId(EnumType.ItemUnit)
-        .subscribe((res: AllMasterData) => {
-          this.units = res.Items;
-        })
-    );
+    try {
+      const resultResponse = this.masterDataService.getMasterDataByEnumTypeId(EnumType.ItemUnit);
+      this.subscription.push(
+        resultResponse
+          .pipe(
+            catchError((error) => {
+              this.toastr.error('Error!', error.error.Message);
+              return error;
+            })
+          )
+          .subscribe((res: ResultView<AllMasterData>) => {
+            if (res != null) {
+              this.units = res.Item.Items;
+            }
+          })
+      );
+    } catch (error) {
+      console.error('An error occurred while attempting to load master data:', error);
+    }
+
   }
 
   handleButtonClick(buttonType: ToolbarButtonType): void {

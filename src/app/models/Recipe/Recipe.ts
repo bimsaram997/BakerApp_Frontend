@@ -45,7 +45,7 @@ export class AllRecipeVM {
   RawMaterialDetails: string[];
 }
 
-export class PaginatedRawMaterials {
+export class PaginatedRecipes {
   Items: AllRecipeVM[];
   TotalCount: number;
   PageIndex: number;

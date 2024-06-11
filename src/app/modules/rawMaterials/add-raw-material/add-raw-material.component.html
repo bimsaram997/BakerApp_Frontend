@@ -132,7 +132,7 @@
               style="display: none"
               (change)="onFileChange($event)"
             />
-            <button mat-raised-button (click)="triggerFileInput()">
+            <button mat-raised-button (click)="triggerFileInput()" [disabled]="isView">
               {{ this.isEdit ? "Update image" : "Add image" }}
             </button>
           </div>

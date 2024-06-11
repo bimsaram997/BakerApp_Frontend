@@ -16,7 +16,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSelectChange } from '@angular/material/select';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { Subscription } from 'rxjs';
+import { Subscription, catchError } from 'rxjs';
 import {
   AddRawMaterial,
   QuantityType,
@@ -33,6 +33,7 @@ import {
   AllMasterData,
   MasterDataVM,
 } from '../../../models/MasterData/MasterData';
+import { AddResultVM, ResultView } from 'src/app/models/ResultView';
 @Component({
   selector: 'app-add-raw-material',
   templateUrl: './add-raw-material.component.html',
@@ -57,6 +58,8 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy {
   quantityType: string;
   rawMaterialId: number;
   updateRawMaterial: UpdateRawMaterial = new UpdateRawMaterial();
+  toolBarButtons: ToolbarButtonType[];
+  isView: boolean;
   constructor(
     private route: ActivatedRoute,
     private toolbarService: ToolbarService,
@@ -79,19 +82,33 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy {
     });
     this.getMeasureUnits();
     this.createFormGroup();
+    this.toolbarService.updateCustomButtons(this.toolBarButtons);
 
-    this.toolbarService.updateCustomButtons([
-      ToolbarButtonType.Save,
-      ToolbarButtonType.SaveClose,
-      ToolbarButtonType.Cancel,
-    ]);
-
-    if (this.mode === 'edit') {
-      this.isEdit = true;
-      this.header = 'Update raw material';
+    if (this.mode === 'view') {
+      this.toolBarButtons = [ToolbarButtonType.Edit, ToolbarButtonType.Cancel];
+      this.toolbarService.updateCustomButtons(this.toolBarButtons);
+      this.isView = true;
+      this.header = 'View raw material';
+      this.toolbarService.updateToolbarContent(this.header);
       this.getRawMaterialById(this.rawMaterialId);
+    } else if (this.mode === 'edit') {
+      this.header = 'Edit raw material';
+      this.toolbarService.updateToolbarContent(this.header);
+      this.toolBarButtons = [
+        ToolbarButtonType.Save,
+        ToolbarButtonType.SaveClose,
+        ToolbarButtonType.Cancel,
+      ];
+      this.toolbarService.updateCustomButtons(this.toolBarButtons);
     } else {
       this.header = 'Add raw material';
+      this.toolbarService.updateToolbarContent(this.header);
+      this.toolBarButtons = [
+        ToolbarButtonType.Save,
+        ToolbarButtonType.SaveClose,
+        ToolbarButtonType.Cancel,
+      ];
+      this.toolbarService.updateCustomButtons(this.toolBarButtons);
     }
     this.toolbarService.updateToolbarContent(this.header);
     this.setValidators();
@@ -105,8 +122,8 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy {
         this.isEdit ? this.updateItem() : this.addRawMaterial();
         this.saveCloseValue = false;
         break;
-      case ToolbarButtonType.Update:
-        //this.handleUpdateButton();
+      case ToolbarButtonType.Edit:
+        this.handleEditButton();
         break;
       case ToolbarButtonType.SaveClose:
         this.saveCloseValue = true;
@@ -141,13 +158,69 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy {
   }
 
   public getMeasureUnits(): void {
-    this.subscription.push(
-      this.masterDataService
-        .getMasterDataByEnumTypeId(EnumType.MeasuringUnit)
-        .subscribe((res: AllMasterData) => {
-          this.quantityTypes = res.Items;
-        })
-    );
+    try {
+      const resultResponse = this.masterDataService.getMasterDataByEnumTypeId(
+        EnumType.MeasuringUnit
+      );
+      this.subscription.push(
+        resultResponse
+          .pipe(
+            catchError((error) => {
+              this.toastr.error('Error!', error.error.Message);
+              return error;
+            })
+          )
+          .subscribe((res: ResultView<AllMasterData>) => {
+            if (res != null) {
+              this.quantityTypes = res.Item.Items;
+            }
+          })
+      );
+    } catch (error) {
+      console.error(
+        'An error occurred while attempting to load master data:',
+        error
+      );
+    }
+  }
+
+  disableFormGroup(): void {
+    this.toolBarButtons = [ToolbarButtonType.Edit, ToolbarButtonType.Cancel];
+    this.toolbarService.updateCustomButtons(this.toolBarButtons);
+    this.rawMaterialGroup.disable();
+    this.cd.detectChanges();
+  }
+
+  enableFormGroup(): void {
+    this.header = 'Edit raw material';
+    this.toolbarService.updateToolbarContent(this.header);
+    this.rawMaterialGroup.enable();
+    this.cd.detectChanges();
+  }
+
+  handleEditButton(): void {
+    this.isView = false;
+    this.isEdit = true;
+    this.enableFormGroup();
+    this.router.navigate(['base/rawMaterial/add', 'edit', this.rawMaterialId]);
+    const deleteIndex = this.toolBarButtons.indexOf(ToolbarButtonType.Edit);
+    if (deleteIndex !== -1) {
+      this.toolBarButtons.splice(deleteIndex, 1);
+    }
+    this.toolBarButtons = [ToolbarButtonType.Save, ToolbarButtonType.SaveClose];
+    this.toolbarService.updateCustomButtons(this.toolBarButtons);
+  }
+
+  removeSpecificButtons(): void {
+    const deleteIndex = this.toolBarButtons.indexOf(ToolbarButtonType.Save);
+    if (deleteIndex !== -1) {
+      this.toolBarButtons.splice(deleteIndex, 1);
+    }
+    const editIndex = this.toolBarButtons.indexOf(ToolbarButtonType.SaveClose);
+    if (editIndex !== -1) {
+      this.toolBarButtons.splice(editIndex, 1);
+    }
+    this.toolbarService.updateCustomButtons(this.toolBarButtons);
   }
 
   addRawMaterial() {
@@ -173,23 +246,45 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy {
         console.log(addRawMaterial);
         const updateResponse =
           this.rawMaterialService.addRawMaterial(addRawMaterial);
+
         this.subscription.push(
-          updateResponse.subscribe((res: any) => {
-            console.log(res);
-            if (res != null) {
-              this.toolbarService.enableButtons(true);
-              this.toastr.success('Success!', 'Raw material added!');
-              this.getRawMaterialById(res);
-            }
-          })
+          updateResponse
+            .pipe(
+              catchError((error) => {
+                this.toastr.error('Error!', error.error.Message);
+                this.toolbarService.enableButtons(true);
+                return error;
+              })
+            )
+            .subscribe((res: AddResultVM) => {
+              if (res != null) {
+                this.toolbarService.enableButtons(true);
+                this.toastr.success('Success!', 'Recipe added!');
+                this.getRawMaterialById(res.Id);
+                this.rawMaterialId = res.Id;
+                if (this.saveCloseValue) {
+                  this.saveClose();
+                } else {
+                  this.router.navigate([
+                    'base/rawMaterial/add',
+                    'view',
+                    this.rawMaterialId,
+                  ]);
+                  this.header = 'View raw material';
+                  this.toolbarService.updateToolbarContent(this.header);
+                  this.disableFormGroup();
+                  this.removeSpecificButtons();
+                }
+              }
+            })
         );
-        if (this.saveCloseValue) {
-          this.saveClose();
-        }
       } catch (error) {
         this.toolbarService.enableButtons(true);
-        console.error('An error occurred while updating the food item:', error);
-        this.toastr.error('Error!', 'Failed to update food item.');
+        console.error(
+          'An error occurred while updating the raw material:',
+          error
+        );
+        this.toastr.error('Error!', 'Failed to add raw material');
       }
     }
   }
@@ -217,21 +312,35 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy {
           this.updateRawMaterial
         );
         this.subscription.push(
-          updateResponse.subscribe((res: any) => {
-            if (res != null) {
-              this.toastr.success('Success!', 'Raw material updated!');
-              this.toolbarService.enableButtons(true);
-              this.getRawMaterialById(res);
-            }
-          })
+          updateResponse
+            .pipe(
+              catchError((error) => {
+                this.toastr.error('Error!', error.error.Message);
+                this.toolbarService.enableButtons(true);
+                return error;
+              })
+            )
+            .subscribe((res: AddResultVM) => {
+              if (res != null) {
+                this.toolbarService.enableButtons(true);
+                this.toastr.success('Success!', 'Raw material updated!');
+                this.getRawMaterialById(res.Id);
+                if (this.saveCloseValue) {
+                  this.saveClose();
+                } else {
+                  this.removeSpecificButtons();
+                  this.disableFormGroup();
+                  this.isView = true;
+                  this.header = 'View Raw material';
+                  this.toolbarService.updateToolbarContent(this.header);
+                }
+              }
+            })
         );
-        if (this.saveCloseValue) {
-          this.saveClose();
-        }
       } catch (error) {
         this.toolbarService.enableButtons(true);
-        console.error('An error occurred while updating the food item:', error);
-        this.toastr.error('Error!', 'Failed to update food item.');
+        console.error('An error occurred while updating raw material', error);
+        this.toastr.error('Error!', 'Failed to update raw material.');
       }
     }
   }
@@ -250,13 +359,25 @@ export class AddRawMaterialComponent implements OnInit, OnDestroy {
 
   getRawMaterialById(id: number): void {
     if (id > 0) {
-      this.subscription.push(
-        this.rawMaterialService
-          .getRawMaterialById(id)
-          .subscribe((rawMaterial: RawMaterialVM) => {
-            this.setValuestoForm(rawMaterial);
-          })
-      );
+      try {
+        const resultResponse = this.rawMaterialService.getRawMaterialById(id);
+        this.subscription.push(
+          resultResponse
+            .pipe(
+              catchError((error) => {
+                this.toastr.error('Error!', error.error.Message);
+                return error;
+              })
+            )
+            .subscribe((rawMaterial: ResultView<RawMaterialVM>) => {
+              if (rawMaterial != null) {
+                this.setValuestoForm(rawMaterial.Item);
+              }
+            })
+        );
+      } catch (error) {
+        console.error('An error occurred while attempting to log in:', error);
+      }
     }
   }
 

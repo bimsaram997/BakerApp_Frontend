@@ -22,6 +22,7 @@ import {
 import { MatDialog } from '@angular/material/dialog';
 import { AddMasterDataComponent } from '../add-master-data/add-master-data.component';
 import { ToastrService } from 'ngx-toastr';
+import { ResultView } from 'src/app/models/ResultView';
 @Component({
   selector: 'app-master-data-list',
   templateUrl: './master-data-list.component.html',
@@ -56,8 +57,7 @@ export class MasterDataListComponent {
     private masterDataService: MasterDataService,
     private enumTranslationService: EnumTranslationService,
     public dialog: MatDialog,
-    private toastr: ToastrService,
-
+    private toastr: ToastrService
   ) {}
   ngOnInit() {
     this.searchFormGroup();
@@ -105,10 +105,10 @@ export class MasterDataListComponent {
 
     this.masterDataService
       .getMasterData(filter)
-      .subscribe((res: PaginateMasterData) => {
-        this.dataSource.data = res.Items;
+      .subscribe((res: ResultView<PaginateMasterData>) => {
+        this.dataSource.data = res.Item.Items;
         this.dataSource.paginator = this.paginator;
-        this.paginator.length = res.TotalCount || 0; // Update paginator length
+        this.paginator.length = res.Item.TotalCount || 0; // Update paginator length
         this.dataSource.sort = this.sort;
       });
   }
@@ -224,6 +224,19 @@ export class MasterDataListComponent {
       this.toolBarButtons.splice(editIndex, 1); // Remove Edit button
     }
     this.toolbarService.updateCustomButtons(this.toolBarButtons);
+  }
+
+  ngAfterViewInit(): void {
+    this.sort.sortChange.subscribe(() => {
+      if (this.paginator) {
+        this.paginator.pageIndex = 0;
+        this.getMasterData();
+      }
+    });
+
+    this.subscription.push(
+      this.paginator.page.subscribe(() => this.getMasterData())
+    );
   }
 
   ngOnDestroy(): void {

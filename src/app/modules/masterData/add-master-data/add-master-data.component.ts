@@ -1,7 +1,7 @@
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Subscription } from 'rxjs';
+import { Subscription, catchError } from 'rxjs';
 import { EnumTranslationService } from '../../../services/bakery/enum-translation.service';
 import {
   AllEnumTypeVM,
@@ -14,6 +14,7 @@ import {
 } from '../../../models/MasterData/MasterData';
 import { MasterDataService } from '../../../services/bakery/master-data.service';
 import { ToastrService } from 'ngx-toastr';
+import { AddResultVM, ResultView } from 'src/app/models/ResultView';
 @Component({
   selector: 'app-add-master-data',
   templateUrl: './add-master-data.component.html',
@@ -54,13 +55,27 @@ export class AddMasterDataComponent implements OnInit, OnDestroy {
   }
 
   getMasterDataById(id: number): void {
-    this.subscription.push(
-      this.masterDataService
-        .getMasterDataById(id)
-        .subscribe((res: MasterDataVM) => {
-          this.setValuestoForm(res);
-        })
-    );
+    if (id > 0) {
+      try {
+        const resultResponse = this.masterDataService.getMasterDataById(id);
+        this.subscription.push(
+          resultResponse
+            .pipe(
+              catchError((error) => {
+                this.toastr.error('Error!', error.error.Message);
+                return error;
+              })
+            )
+            .subscribe((masterData: ResultView<MasterDataVM>) => {
+              if (masterData != null) {
+                this.setValuestoForm(masterData.Item);
+              }
+            })
+        );
+      } catch (error) {
+        console.error('An error occurred while attempting to log in:', error);
+      }
+    }
   }
 
   setValuestoForm(masterData: MasterDataVM): void {
@@ -116,13 +131,22 @@ export class AddMasterDataComponent implements OnInit, OnDestroy {
 
         const addReponse = this.masterDataService.addMasterData(addMasterData);
         this.subscription.push(
-          addReponse.subscribe((res: any) => {
-            if (res != null) {
-              this.isSave = false;
-              this.toastr.success('Success!', 'Master data addeed!');
-              this.dialogRef.close(true);
-            }
-          })
+          addReponse
+            .pipe(
+              catchError((error) => {
+                this.toastr.error('Error!', error.error.Message);
+
+                return error;
+              })
+            )
+            .subscribe((res: AddResultVM) => {
+              if (res != null) {
+                this.isSave = false;
+                this.toastr.success('Success!', 'Master data addeed!');
+                this.dialogRef.close(true);
+
+              }
+            })
         );
       } catch (error) {
         this.isSave = false;
@@ -148,17 +172,26 @@ export class AddMasterDataComponent implements OnInit, OnDestroy {
           this.masterDataGroup.controls['masterDataSymbol'].value;
         this.updateMasterData.MasterColorCode =
           this.masterDataGroup.controls['masterColorCode'].value;
-        this.subscription.push(
-          this.masterDataService
-            .updateMasterData(this.data.id, this.updateMasterData)
-            .subscribe((res: any) => {
-              if (res != null) {
-                this.toastr.success('Success!', 'Master data updated!');
-                this.isSave = false;
-                this.dialogRef.close(true);
-              }
-            })
-        );
+          const updateResponse = this.masterDataService.updateMasterData(
+            this.data.id, this.updateMasterData
+          );
+
+          this.subscription.push(
+            updateResponse
+              .pipe(
+                catchError((error) => {
+                  this.toastr.error('Error!', error.error.Message);
+                  return error;
+                })
+              )
+              .subscribe((res: AddResultVM) => {
+                if (res != null) {
+                  this.toastr.success('Success!', 'Master data updated!');
+                  this.isSave = false;
+                  this.dialogRef.close(true);
+                }
+              })
+          );
       }
     } catch (e) {
       this.toastr.error('Error!', 'Failed to update master data');

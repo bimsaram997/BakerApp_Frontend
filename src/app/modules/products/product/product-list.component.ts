@@ -4,7 +4,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, catchError } from 'rxjs';
 import { FoodType } from '../../../models/Products/foodType';
 import {
   AllProductVM,
@@ -22,8 +22,12 @@ import { ToolbarService } from '../../../services/layout/toolbar.service';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { MasterDataService } from '../../../services/bakery/master-data.service';
 import { EnumType } from '../../../models/enum_collection/enumType';
-import { AllMasterData, MasterDataVM } from '../../../models/MasterData/MasterData';
+import {
+  AllMasterData,
+  MasterDataVM,
+} from '../../../models/MasterData/MasterData';
 import { ResultView } from 'src/app/models/ResultView';
+import { ToastrService } from 'ngx-toastr';
 @Component({
   selector: 'app-product-list',
   templateUrl: './product-list.component.html',
@@ -79,7 +83,6 @@ export class ProductListComponent implements OnInit, OnDestroy {
     return CostCode[value];
   }
 
-
   constructor(
     private foodItemService: ProductService,
     private toolbarService: ToolbarService,
@@ -88,6 +91,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
     private router: Router,
     private recipeService: RecipeService,
     private masterDataService: MasterDataService,
+    private toastr: ToastrService
   ) {}
 
   ngOnInit() {
@@ -146,9 +150,30 @@ export class ProductListComponent implements OnInit, OnDestroy {
   }
 
   public getUnits(): void {
-    this.subscription.push(this.masterDataService.getMasterDataByEnumTypeId(EnumType.ItemUnit).subscribe((res: AllMasterData) => {
-      this.units = res.Items;
-    }))
+    try {
+      const resultResponse = this.masterDataService.getMasterDataByEnumTypeId(
+        EnumType.ItemUnit
+      );
+      this.subscription.push(
+        resultResponse
+          .pipe(
+            catchError((error) => {
+              this.toastr.error('Error!', error.error.Message);
+              return error;
+            })
+          )
+          .subscribe((res: ResultView<AllMasterData>) => {
+            if (res != null) {
+              this.units = res.Item.Items;
+            }
+          })
+      );
+    } catch (error) {
+      console.error(
+        'An error occurred while attempting to load master data:',
+        error
+      );
+    }
   }
 
   public getFoodItemsList(): void {

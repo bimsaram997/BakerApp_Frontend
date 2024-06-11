@@ -1,9 +1,11 @@
 import { Component, Input, OnDestroy, OnInit, forwardRef } from '@angular/core';
 import { ControlValueAccessor, FormBuilder, FormGroup, NG_VALUE_ACCESSOR, Validators } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Subscription, catchError } from 'rxjs';
 import { MasterDataService } from '../../../services/bakery/master-data.service';
 import { EnumType } from '../../../models/enum_collection/enumType';
 import { AllMasterData, MasterDataVM } from '../../../models/MasterData/MasterData';
+import { ResultView } from 'src/app/models/ResultView';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-address-lookup',
@@ -24,6 +26,7 @@ export class AddressLookupComponent implements ControlValueAccessor, OnInit, OnD
 
   constructor(private fb: FormBuilder,
     private masterDataService: MasterDataService,
+    private toastr: ToastrService,
   ) {
     this.addressForm = this.fb.group({
       street1: ['', Validators.required],
@@ -51,9 +54,26 @@ export class AddressLookupComponent implements ControlValueAccessor, OnInit, OnD
   }
 
   public getCountries(): void {
-    this.subscription.push(this.masterDataService.getMasterDataByEnumTypeId(EnumType.Countries).subscribe((res: AllMasterData) => {
-      this.countries = res.Items;
-    }))
+    try {
+      const resultResponse = this.masterDataService.getMasterDataByEnumTypeId(EnumType.Countries);
+      this.subscription.push(
+        resultResponse
+          .pipe(
+            catchError((error) => {
+              this.toastr.error('Error!', error.error.Message);
+              return error;
+            })
+          )
+          .subscribe((res: ResultView<AllMasterData>) => {
+            if (res != null) {
+              this.countries = res.Item.Items;
+            }
+          })
+      );
+    } catch (error) {
+      console.error('An error occurred while attempting to load master data:', error);
+    }
+
   }
 
   onChange: any = () => {};

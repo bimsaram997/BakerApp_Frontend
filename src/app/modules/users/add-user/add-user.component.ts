@@ -170,11 +170,27 @@ export class AddUserComponent implements OnInit, OnDestroy  {
   }
 
   public getGenders(): void {
-    this.subscription.push(this.masterDataService.getMasterDataByEnumTypeId(EnumType.Gender).subscribe((res: AllMasterData) => {
-      this.genders = res.Items;
-    }))
-  }
+    try {
+      const resultResponse = this.masterDataService.getMasterDataByEnumTypeId(EnumType.Gender);
+      this.subscription.push(
+        resultResponse
+          .pipe(
+            catchError((error) => {
+              this.toastr.error('Error!', error.error.Message);
+              return error;
+            })
+          )
+          .subscribe((res: ResultView<AllMasterData>) => {
+            if (res != null) {
+              this.genders = res.Item.Items;
+            }
+          })
+      );
+    } catch (error) {
+      console.error('An error occurred while attempting to load master data:', error);
+    }
 
+  }
   public getRoles(): void {
     this.subscription.push(this.roleService.getRoles().subscribe((res: ReturnRoles) => {
       this.roles = res.Items;

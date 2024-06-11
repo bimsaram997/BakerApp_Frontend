@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ToolbarService } from '../../../services/layout/toolbar.service';
 import { ToolbarButtonType } from '../../../models/enum_collection/toolbar-button';
-import { Subscription } from 'rxjs';
+import { Subscription, catchError } from 'rxjs';
 import { Router } from '@angular/router';
 import { MatSelectChange } from '@angular/material/select';
 import {
@@ -23,6 +23,8 @@ import {
   AllMasterData,
   MasterDataVM,
 } from '../../../models/MasterData/MasterData';
+import { ResultView } from 'src/app/models/ResultView';
+import { ToastrService } from 'ngx-toastr';
 @Component({
   selector: 'app-raw-material-list',
   templateUrl: './raw-material-list.component.html',
@@ -65,7 +67,8 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
     private router: Router,
     private fb: FormBuilder,
     private rawMaterialService: RawMaterialService,
-    private masterDataService: MasterDataService
+    private masterDataService: MasterDataService,
+    private toastr: ToastrService
   ) {}
   ngOnInit() {
     this.getMeasureUnits();
@@ -82,13 +85,30 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
   }
 
   public getMeasureUnits(): void {
-    this.subscription.push(
-      this.masterDataService
-        .getMasterDataByEnumTypeId(EnumType.MeasuringUnit)
-        .subscribe((res: AllMasterData) => {
-          this.quantityTypes = res.Items;
-        })
-    );
+    try {
+      const resultResponse = this.masterDataService.getMasterDataByEnumTypeId(
+        EnumType.MeasuringUnit
+      );
+      this.subscription.push(
+        resultResponse
+          .pipe(
+            catchError((error) => {
+              this.toastr.error('Error!', error.error.Message);
+              return error;
+            })
+          )
+          .subscribe((res: ResultView<AllMasterData>) => {
+            if (res != null) {
+              this.quantityTypes = res.Item.Items;
+            }
+          })
+      );
+    } catch (error) {
+      console.error(
+        'An error occurred while attempting to load master data:',
+        error
+      );
+    }
   }
 
   searchFormGroup(): void {
@@ -137,10 +157,10 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
 
     this.rawMaterialService
       .getRawMaterials(filter)
-      .subscribe((res: PaginatedRawMaterials) => {
-        this.dataSource.data = res.Items;
+      .subscribe((res: ResultView<PaginatedRawMaterials>) => {
+        this.dataSource.data = res.Item.Items;
         this.dataSource.paginator = this.paginator;
-        this.paginator.length = res.TotalCount || 0;
+        this.paginator.length = res.Item.TotalCount || 0;
         this.dataSource.sort = this.sort;
       });
   }
@@ -181,7 +201,7 @@ export class RawMaterialListComponent implements OnInit, OnDestroy {
   }
 
   navigateToEditRawMaterial(id: number) {
-    this.router.navigate(['base/rawMaterial/add', 'edit', id]);
+    this.router.navigate(['base/rawMaterial/add', 'view', id]);
   }
 
   private handleNewButton(): void {

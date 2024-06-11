@@ -59,7 +59,7 @@ export class AllRawMaterialVM {
   MeasureUnitName: string | null;
 }
 
-export interface PaginatedRawMaterials {
+export class PaginatedRawMaterials {
   Items: AllRawMaterialVM[];
   TotalCount: number;
   PageIndex: number;

@@ -5,6 +5,6 @@ export enum MenuType {
   User,
   Settings,
   MasterData,
-  SubSetting2
+  Supplier
 }
 

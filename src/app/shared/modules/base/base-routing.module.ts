@@ -28,6 +28,10 @@ const routes: Routes = [
       {
         path:'masterData',
         loadChildren: () => import('../../../modules/masterData/masterData.module').then(m => m.MasterDataModule)
+      },
+      {
+        path:'supplier',
+        loadChildren: () => import('../../../modules/supplier/supplier.module').then(m => m.SupplierModule)
       }
     ]
 }];

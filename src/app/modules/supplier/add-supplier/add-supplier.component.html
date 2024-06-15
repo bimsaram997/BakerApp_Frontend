@@ -1,0 +1,146 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-12">
+      <app-tool-bar (buttonClick)="handleButtonClick($event)"></app-tool-bar>
+    </div>
+  </div>
+  <div class="row form-body">
+    <form action="" [formGroup]="supplierGroup">
+      <div class="row">
+        <div class="col-md-4">
+          <mat-form-field appearance="outline">
+            <mat-label>First name</mat-label>
+            <input
+              matInput
+              placeholder="Placeholder"
+              formControlName="supplierFirstName"
+            />
+            <mat-error
+              *ngIf="supplierGroup.get('supplierFirstName').hasError('required')"
+            >
+              First name is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-md-4">
+          <mat-form-field appearance="outline">
+            <mat-label>Last name name</mat-label>
+            <input
+              matInput
+              placeholder="Placeholder"
+              formControlName="supplierLastName"
+            />
+            <mat-error
+              *ngIf="supplierGroup.get('supplierLastName').hasError('required')"
+            >
+              First name is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-md-4">
+          <mat-form-field appearance="outline">
+            <mat-label>Added date</mat-label>
+            <input
+              matInput
+              [matDatepicker]="picker"
+              formControlName="addedDate"
+            />
+            <mat-hint>MM/DD/YYYY</mat-hint>
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="picker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-error
+              *ngIf="supplierGroup.get('addedDate').hasError('required')"
+            >
+              Date is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4">
+          <mat-form-field appearance="outline">
+            <mat-label>Phone number</mat-label>
+            <input
+              matInput
+              placeholder="+(358) 000-0000-000"
+              formControlName="phoneNumber"
+            />
+            <mat-error
+              *ngIf="supplierGroup.get('phoneNumber').hasError('pattern')"
+            >
+              Please enter valid phone number
+            </mat-error>
+            <mat-error
+              *ngIf="supplierGroup.get('phoneNumber').hasError('required')"
+            >
+              Phone number required
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-md-4">
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input
+              type="email"
+              matInput
+              formControlName="email"
+              placeholder="Ex. pat@example.com"
+            />
+            <mat-error *ngIf="supplierGroup.get('email').hasError('required')">
+              Email is required
+            </mat-error>
+            <mat-error *ngIf="supplierGroup.get('email').hasError('pattern')">
+              Please enter valid email
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-md-4">
+          <mat-radio-group  aria-label="Select an option" formControlName="supplierItemType">
+            <mat-radio-button (change)="selectValue($event)"[value]="false">Raw material</mat-radio-button>
+            <mat-radio-button (change)="selectValue($event)"  [value]="true" >Products</mat-radio-button>
+          </mat-radio-group>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-4">
+          <app-address-lookup
+          [addressForm]="supplierGroup.get('address')"
+        ></app-address-lookup>
+        </div>
+        <div class="col-md-4" *ngIf="!isProduct">
+          <mat-form-field  appearance="outline">
+            <mat-label>Raw materials</mat-label>
+            <mat-select   formControlName="rawMaterialIds" multiple>
+              <mat-form-field appearance="outline">
+                <input matInput   placeholder="Type for search"    (input)="onInputValueChanged(SearchItemType.RawMaterial)" [formControl]="rawMaterialSearchCtrl" #rawMaterialInput/>
+              </mat-form-field>
+              <mat-option *ngFor="let material of allRawMaterials" [value]="material.Id">{{material.Name}}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="supplierGroup.get('rawMaterialIds').hasError('required')">
+              Raw material is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-md-4" *ngIf="isProduct">
+          <mat-form-field  appearance="outline">
+            <mat-label>Products</mat-label>
+            <mat-select formControlName="productIds" multiple>
+              <mat-form-field appearance="outline">
+                <input matInput   placeholder="Type for search..."    (input)="onInputValueChanged(SearchItemType.Product)" [formControl]="productSearchCtrl" #productInput/>
+              </mat-form-field>
+
+              <mat-option *ngFor="let product of allProdcuts" [value]="product.Id">{{product.Name}}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="supplierGroup.get('productIds').hasError('required')">
+              Product is required
+            </mat-error>
+          </mat-form-field>
+
+        </div>
+      </div>
+    </form>
+  </div>

@@ -78,6 +78,11 @@ export class UpdateProduct {
 }
 
 
+export class ProductListSimpleVM {
+  Id: number;
+  Name: string;
+}
+
 export enum CostCode {
   "CC001 Bakery products" = 0,
   "CC002 Vegetables" = 1,

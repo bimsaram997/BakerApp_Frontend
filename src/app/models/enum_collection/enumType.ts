@@ -20,3 +20,14 @@ export enum EnumType {
   Roles = 11,
   Countries = 12
 }
+
+export enum AutoCompleteType {
+  RawMaterial = 1,
+  Product = 2,
+}
+
+export enum SearchItemType {
+  RawMaterial = 1,
+  Product = 2,
+}
+

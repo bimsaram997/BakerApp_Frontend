@@ -35,4 +35,8 @@ public getProducts(filter: ProductListAdvanceFilter): Observable<any> {
   public addProduct( addProduct:AddProductRequest ): Observable<any> {
     return this.http.post(`${this.myUrl}/Product/addProduct`, addProduct );
 }
+
+public listSimpleProducts(): Observable<any> {
+  return this.http.get(`${this.myUrl}/Product/listSimpleProducts`);
+}
 }

@@ -1,0 +1,25 @@
+<mat-form-field appearance="outline" class="example-chip-list">
+  <mat-label>{{label}}</mat-label>
+  <mat-chip-grid #chipGrid>
+    <mat-chip-row *ngFor="let rawMaterial of rawMaterials" (removed)="remove(rawMaterial)">
+      {{rawMaterial.Name}}
+      <button matChipRemove [attr.aria-label]="'remove ' + rawMaterial.Id">
+        <mat-icon>cancel</mat-icon>
+      </button>
+    </mat-chip-row>
+  </mat-chip-grid>
+  <input placeholder="{{label + ' selection'}}" #rawMaterialInput [formControl]="rawMaterialControl"
+    [matChipInputFor]="chipGrid" [matAutocomplete]="auto"
+    [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+    (matChipInputTokenEnd)="add($event)"
+    (input)="onInputValueChanged()"
+    />
+  <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
+    <mat-option *ngFor="let rawMaterial of filteredRawMaterials | async" [value]="rawMaterial.Id">
+      {{rawMaterial.Name}}
+    </mat-option>
+  </mat-autocomplete>
+  <mat-error *ngIf="rawMaterialControl.hasError('required')">
+    {{getErrorMessage()}}
+  </mat-error>
+</mat-form-field>

@@ -61,18 +61,6 @@ export class UserListComponent {
 
   genders: MasterDataVM[];
   roles: RolesVM[];
-  countries: any[] = [
-    { Id: 0, name: 'Sri Lanka' },
-    { Id: 1, name: 'Finland' },
-  ];
-
-  getGenderType(value: number): string {
-    return GenderType[value];
-  }
-
-  getRoleType(value: number): string {
-    return RoleType[value];
-  }
 
   constructor(
     private toolbarService: ToolbarService,

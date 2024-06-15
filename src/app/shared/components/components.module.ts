@@ -8,6 +8,7 @@ import { ToolBarComponent } from './tool-bar/tool-bar.component';
 import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
 import { AddressLookupComponent } from './address-lookup/address-lookup.component';
 import { InfoBoxComponent } from './info-box/info-box.component';
+import { CustomAutocompleteComponent } from './custom-autocomplete/custom-autocomplete.component';
 
 
 
@@ -20,7 +21,8 @@ import { InfoBoxComponent } from './info-box/info-box.component';
     ToolBarComponent,
     ConfirmDialogComponent,
     AddressLookupComponent,
-    InfoBoxComponent
+    InfoBoxComponent,
+    CustomAutocompleteComponent
   ],
   entryComponents: [ConfirmDialogComponent, InfoBoxComponent],
   imports: [
@@ -29,6 +31,6 @@ import { InfoBoxComponent } from './info-box/info-box.component';
 
   ],
   exports: [MainheaderComponent,
-    SidenavbarComponent, ToolBarComponent, AddressLookupComponent],
+    SidenavbarComponent, ToolBarComponent, AddressLookupComponent, CustomAutocompleteComponent],
 })
 export class ComponentsModule { }

@@ -1,0 +1,220 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-12">
+      <app-tool-bar (buttonClick)="handleButtonClick($event)"></app-tool-bar>
+    </div>
+  </div>
+  <!-- <div class="row">
+    <div class="col-md-12">
+      <mat-card class="mt-3">
+        <mat-card-content>
+          <form [formGroup]="searchUserForm">
+            <div class="row">
+              <div class="col-md-3">
+                <mat-form-field appearance="outline">
+                  <mat-label>Search by</mat-label>
+                  <input
+                    matInput
+                    placeholder="Placeholder"
+                    formControlName="searchString"
+                  />
+                  <mat-hint><b>Search by</b>Name</mat-hint>
+                </mat-form-field>
+              </div>
+              <div class="col-md-3">
+                <mat-form-field appearance="outline">
+                  <mat-label>Phone number</mat-label>
+                  <input
+                    matInput
+                    placeholder="+(358) 000-0000-000"
+                    formControlName="phoneNumber"
+                  />
+                </mat-form-field>
+              </div>
+              <div class="col-md-3">
+                <mat-form-field appearance="outline">
+                  <mat-label>Gender</mat-label>
+                  <mat-select formControlName="gender">
+                    <mat-option
+                      *ngFor="let gender of genders"
+                      [value]="gender.Id"
+                    >
+                      {{ gender.MasterDataName }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div class="col-md-3">
+                <mat-form-field appearance="outline">
+                  <mat-label>Role</mat-label>
+                  <mat-select formControlName="role">
+                    <mat-option *ngFor="let role of roles" [value]="role.Id">
+                      {{ role.RoleName }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-3">
+                <mat-form-field appearance="outline">
+                  <mat-label>Added date</mat-label>
+                  <input
+                    matInput
+                    [matDatepicker]="picker"
+                    formControlName="addedDate"
+                  />
+                  <mat-hint>MM/DD/YYYY</mat-hint>
+                  <mat-datepicker-toggle
+                    matIconSuffix
+                    [for]="picker"
+                  ></mat-datepicker-toggle>
+                  <mat-datepicker #picker></mat-datepicker>
+                </mat-form-field>
+              </div>
+              <div class="col-md-3">
+                <mat-form-field appearance="outline">
+                  <mat-label>Email</mat-label>
+                  <input
+                    type="email"
+                    matInput
+                    formControlName="email"
+                    placeholder="Ex. pat@example.com"
+                  />
+                </mat-form-field>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-3 mt-2">
+                <button
+                  mat-raised-button
+                  color="primary"
+                  class="custom-button"
+                  (click)="search()"
+                >
+                  Search
+                </button>
+                <button
+                  mat-raised-button
+                  class="custom-button"
+                  (click)="clear()"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <mat-card class="mt-3">
+        <mat-card-content>
+          <div class="mat-elevation-z8">
+            <table
+              mat-table
+              [dataSource]="dataSource"
+              matSort
+              class="mat-elevation-z8"
+            >
+              <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let element">
+                  <mat-checkbox
+                    color="primary"
+                    (change)="checkboxChanged($event, element.Id)"
+                    [checked]="isSelected(element.Id)"
+                  ></mat-checkbox>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="FirstName">
+                <th mat-header-cell *matHeaderCellDef>First name</th>
+                <td mat-cell *matCellDef="let element" class="link">
+                  <a (click)="navigateToEditUser(element.Id)">{{
+                    element.FirstName
+                  }}</a>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="LastName">
+                <th mat-header-cell *matHeaderCellDef>Last name</th>
+                <td mat-cell *matCellDef="let element" class="link">
+                  <a (click)="navigateToEditUser(element.Id)">{{
+                    element.LastName
+                  }}</a>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="PhoneNumber">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                  Phone number
+                </th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.PhoneNumber }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="Role">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Role</th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.RoleName }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="Email">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
+                <td mat-cell *matCellDef="let element">{{ element.Email }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="Gender">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                  Gender
+                </th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.GenderName }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="Address">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                  Address
+                </th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.Addresses.FullAddress }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="AddedDate">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                  Added date
+                </th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.AddedDate | date }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="ModifiedDate">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                  ModifiedDate
+                </th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.ModifiedDate | date }}
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+            </table>
+
+            <mat-paginator
+              [pageSizeOptions]="[5, 10, 10]"
+              showFirstLastButtons
+            ></mat-paginator>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div> -->
+</div>

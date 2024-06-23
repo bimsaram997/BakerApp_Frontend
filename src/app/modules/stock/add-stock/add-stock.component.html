@@ -1,0 +1,269 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-12">
+      <app-tool-bar (buttonClick)="handleButtonClick($event)"></app-tool-bar>
+    </div>
+  </div>
+  <div class="row form-body">
+    <form action="" [formGroup]="stockGroup">
+      <p>Product details</p>
+      <div class="row">
+        <div class="col-md-3">
+          <mat-form-field  appearance="outline">
+            <mat-label>Products</mat-label>
+            <mat-select formControlName="product" (selectionChange)="selectProduct($event)">
+              <mat-form-field appearance="outline">
+                <input matInput   placeholder="Type for search..."    (input)="onInputValueChanged(SearchItemType.Product)" [formControl]="productSearchCtrl" #productInput/>
+              </mat-form-field>
+              <mat-option *ngFor="let product of allProdcuts" [value]="product.Id">{{product.Name}}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="stockGroup.get('product').hasError('required')">
+              Product is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-md-3">
+          <mat-form-field appearance="outline">
+            <mat-label>Unit</mat-label>
+            <mat-select formControlName="unit">
+              <mat-option *ngFor="let unit of units" [value]="unit.Id">
+                {{ unit.MasterDataName }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="stockGroup.get('unit').hasError('required')">
+              Unit is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-md-3">
+          <mat-form-field appearance="outline">
+            <mat-label>Cost code</mat-label>
+            <mat-select formControlName="costCode">
+              <mat-option *ngFor="let costCode of costCodes" [value]="costCode.Id">
+                {{ costCode.MasterDataName }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="stockGroup.get('costCode').hasError('required')">
+              Cost code is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-md-3">
+          <mat-form-field appearance="outline">
+            <mat-label>Cost price</mat-label>
+            <input
+              matInput
+              type="number"
+              placeholder="0"
+              [formControl]="costPrice"
+            />
+            <span matTextSuffix>$</span>
+            <mat-error
+              *ngIf="
+                costPrice.invalid && (costPrice.dirty || costPrice.touched)
+              "
+            >
+              <span *ngIf="sellingPrice.hasError('required')">
+                Cost price is required
+              </span>
+
+              <span *ngIf="sellingPrice.hasError('nonNegative')">
+                Cost price cannot be negative
+              </span>
+            </mat-error>
+          </mat-form-field>
+
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-3">
+          <mat-form-field appearance="outline">
+            <mat-label>Selling Price</mat-label>
+            <input
+              matInput
+              type="number"
+              placeholder="0"
+              [formControl]="sellingPrice"
+            />
+            <span matTextSuffix>$</span>
+            <mat-error
+              *ngIf="
+                sellingPrice.invalid &&
+                (sellingPrice.dirty || sellingPrice.touched)
+              "
+            >
+              <span *ngIf="sellingPrice.hasError('required')">
+                Selling price is required
+              </span>
+
+              <span *ngIf="sellingPrice.hasError('nonNegative')">
+                Selling price cannot be negative
+              </span>
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+      <p>Recipe details</p>
+      <div class="row">
+        <div class="col-md-3">
+          <mat-form-field appearance="outline">
+            <mat-label>Recipe name</mat-label>
+            <input
+            matInput
+            placeholder="Placeholder"
+            formControlName="recipeName"
+          />
+            <mat-error *ngIf="stockGroup.get('recipeName').hasError('recipeName')">
+              Recipe is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline">
+            <mat-label>Description</mat-label>
+            <input
+              matInput
+              formControlName="rawMaterials"
+            />
+            <mat-error
+              *ngIf="
+                stockGroup.get('rawMaterials').hasError('required')
+              "
+            >
+              Raw materials is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+      <p>Supplier details</p>
+      <div class="row">
+        <div class="col-md-3">
+          <mat-form-field appearance="outline">
+            <mat-label>Supplying type</mat-label>
+            <mat-select formControlName="supplyingType" (selectionChange)="selectSupplierType($event)">
+              <mat-option *ngFor="let supplyingType of supplyingTypes" [value]="supplyingType.Id">
+                {{ supplyingType.MasterDataName }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="stockGroup.get('supplyingType').hasError('supplyingType')">
+              Unit is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-3">
+          <mat-form-field appearance="outline">
+            <mat-label>Suppliers</mat-label>
+            <mat-select formControlName="supplierId">
+              <mat-option *ngFor="let supplier of supplierList" [value]="supplier.Id">
+                {{ supplier.SupplierFirstName + " " + supplier.SupplierLastName }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="stockGroup.get('supplierId').hasError('supplierId')">
+              Supplier is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+      <p>Stock details</p>
+      <div class="row">
+        <div class="col-md-3">
+          <mat-form-field appearance="outline">
+            <mat-label>Manufacture date</mat-label>
+            <input
+              matInput
+              [matDatepicker]="picker"
+              formControlName="manufactureDate"
+            />
+            <mat-hint>MM/DD/YYYY</mat-hint>
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="picker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-error
+              *ngIf="stockGroup.get('manufactureDate').hasError('required')"
+            >
+              Date is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-md-3">
+          <mat-form-field appearance="outline">
+            <mat-label>Expiry date date</mat-label>
+            <input
+              matInput
+              [matDatepicker]="picker1"
+              formControlName="expiryDate"
+            />
+            <mat-hint>MM/DD/YYYY</mat-hint>
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="picker1"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #picker1></mat-datepicker>
+            <mat-error
+              *ngIf="stockGroup.get('expiryDate').hasError('required')"
+            >
+              Date is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-md-3">
+          <mat-form-field appearance="outline">
+            <mat-label>Re-order level</mat-label>
+            <input
+            type="number"
+            placeholder="0"
+            matInput
+            placeholder="Placeholder"
+            [formControl]="reorderLevel"
+
+          />
+          <mat-error
+          *ngIf="
+            reorderLevel.invalid &&
+            (reorderLevel.dirty || reorderLevel.touched)
+          "
+        >
+          <span *ngIf="reorderLevel.hasError('required')">
+            Re-order level is required
+          </span>
+
+          <span *ngIf="reorderLevel.hasError('nonNegative')">
+            Re-order level  cannot be negative
+          </span>
+        </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-md-3">
+          <mat-form-field appearance="outline">
+            <mat-label>Item count</mat-label>
+            <input
+            type="number"
+            placeholder="0"
+            matInput
+            placeholder="Placeholder"
+          [formControl]="itemCount"
+          />
+          <mat-error
+          *ngIf="
+            itemCount.invalid &&
+            (itemCount.dirty || itemCount.touched)
+          "
+        >
+          <span *ngIf="itemCount.hasError('required')">
+            Item count is required
+          </span>
+
+          <span *ngIf="itemCount.hasError('nonNegative')">
+            Item count cannot be negative
+          </span>
+        </mat-error>
+          </mat-form-field>
+        </div>
+
+      </div>
+    </form>
+  </div>
+  </div>

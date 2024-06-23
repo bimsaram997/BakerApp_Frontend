@@ -83,3 +83,24 @@ export class UpdateSupplier {
   ProductIds: number[] | null;
   RawMaterialIds: number[] | null;
 }
+
+
+export class SupplerListSimpleFilter {
+  IsRawMaterial: boolean | null;
+  IsProduct: boolean | null;
+  ProductIds: number[];
+}
+
+export class SupplierListSimpleVM {
+  Id: number;
+  SupplierCode: string;
+  SupplierFirstName: string;
+  SupplierLastName: string;
+  AddedDate: string;
+  ModifiedDate: string | null;
+  PhoneNumber: string;
+  Email: string;
+  IsRawMaterial: boolean | null;
+  IsProduct: boolean | null;
+  IsDeleted: boolean;
+}

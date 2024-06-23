@@ -20,6 +20,7 @@ export class AllMasterDataVM {
   ModifiedDate: string | null;
   IsDeleted: boolean;
   EnumType: string;
+  MasterValueCode: string;
 }
 
 export class PaginateMasterData {
@@ -35,6 +36,7 @@ export class AddMasterDataRequest {
   MasterDataSymbol: string | null;
   MasterColorCode: string | null;
   AddedDate: string;
+  MasterValueCode: string
 }
 
 export class MasterDataVM {
@@ -47,6 +49,7 @@ export class MasterDataVM {
   AddedDate: string;
   ModifiedDate: string | null;
   IsDeleted: boolean;
+  MasterValueCode: string
 }
 
 export class UpdateMasterData {
@@ -54,6 +57,7 @@ export class UpdateMasterData {
   EnumTypeId: number;
   MasterDataSymbol: string | null;
   MasterColorCode: string | null;
+  MasterValueCode: string
 }
 
 

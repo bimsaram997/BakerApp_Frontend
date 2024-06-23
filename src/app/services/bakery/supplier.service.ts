@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { AddSupplierRquest, SupplierListAdvanceFilter, UpdateSupplier } from 'src/app/models/Supplier/Supplier';
+import { AddSupplierRquest, SupplerListSimpleFilter, SupplierListAdvanceFilter, UpdateSupplier } from 'src/app/models/Supplier/Supplier';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -26,5 +26,10 @@ export class SupplierService {
 
   public updateSupplierById(supplierId: number, updateItem: UpdateSupplier): Observable<any> {
     return this.http.put(`${this.myUrl}/Supplier/updateSupplier/${supplierId}`, updateItem)
+  }
+
+  public getSupplierListSimple(filter: SupplerListSimpleFilter): Observable<any> {
+
+    return this.http.post(`${this.myUrl}/Supplier/listSimpleSuppliers`, filter);
   }
 }

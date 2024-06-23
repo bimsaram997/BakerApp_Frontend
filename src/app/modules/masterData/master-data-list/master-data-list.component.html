@@ -130,7 +130,14 @@
                   {{ element.EnumType }}
                 </td>
               </ng-container>
-
+              <ng-container matColumnDef="MasterValueCode">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                  Master value code
+                </th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.MasterValueCode }}
+                </td>
+              </ng-container>
               <ng-container matColumnDef="MasterColorCode">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header>
                   Master color code

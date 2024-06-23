@@ -51,6 +51,7 @@ export class AddMasterDataComponent implements OnInit, OnDestroy {
       masterDataSymbol: [null],
       masterColorCode: [null],
       addedDate: [null, Validators.required],
+      masterValueCode: [null]
     });
   }
 
@@ -93,6 +94,9 @@ export class AddMasterDataComponent implements OnInit, OnDestroy {
         masterData.MasterColorCode
       );
       this.masterDataGroup.controls['addedDate'].setValue(masterData.AddedDate);
+      this.masterDataGroup.controls['masterValueCode'].setValue(
+        masterData.MasterValueCode
+      )
     }
   }
 
@@ -127,6 +131,7 @@ export class AddMasterDataComponent implements OnInit, OnDestroy {
           MasterDataSymbol: formData.masterDataSymbol,
           EnumTypeId: formData.enumTypeId,
           AddedDate: formData.addedDate,
+          MasterValueCode: formData.masterValueCode,
         };
 
         const addReponse = this.masterDataService.addMasterData(addMasterData);
@@ -172,6 +177,8 @@ export class AddMasterDataComponent implements OnInit, OnDestroy {
           this.masterDataGroup.controls['masterDataSymbol'].value;
         this.updateMasterData.MasterColorCode =
           this.masterDataGroup.controls['masterColorCode'].value;
+        this.updateMasterData.MasterValueCode =
+          this.masterDataGroup.controls['masterValueCode'].value;
           const updateResponse = this.masterDataService.updateMasterData(
             this.data.id, this.updateMasterData
           );

@@ -40,6 +40,7 @@ export class MasterDataListComponent {
     'MasterDataCode',
     'MasterDataName',
     'MasterDataSymbol',
+    'MasterValueCode',
     'MasterColorCode',
     'EnumType',
     'AddedDate',

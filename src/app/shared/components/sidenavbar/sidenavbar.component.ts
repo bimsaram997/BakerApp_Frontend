@@ -24,6 +24,7 @@ export class SidenavbarComponent {
       subItems: [
         { name: 'Master data', icon: 'assets/main images/fast-food.svg', menuType: MenuType.MasterData, visible: true },
         { name: 'Suppliers', icon: 'assets/main images/fast-food.svg', menuType: MenuType.Supplier, visible: true },
+        { name: 'Stock', icon: 'assets/main images/fast-food.svg', menuType: MenuType.Stock, visible: true },
         // { name: 'Sub Setting 2', icon: 'assets/main images/fast-food.svg', menuType: MenuType.SubSetting2, visible: true }
       ]
     }
@@ -63,6 +64,9 @@ export class SidenavbarComponent {
           break;
       case MenuType.Supplier:
         this.router.navigate(['base/supplier/supplier']);
+        break;
+      case MenuType.Stock:
+        this.router.navigate(['base/stock/stock']);
     }
 
   }

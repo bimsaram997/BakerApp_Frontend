@@ -232,7 +232,11 @@ export class AddRecipeComponent implements OnInit, OnDestroy, AfterViewInit {
   setValuestoForm(recipe: RecipeVM): void {
     this.recipeGroup.reset();
     this.rawMaterials.clear();
-    this.recipeGroup.controls['name'].setValue(recipe.RecipeName);
+    this.recipeGroup.controls['name'].setValue(recipe.
+
+
+
+      RecipeName);
     this.recipeGroup.controls['addedDate'].setValue(recipe.AddedDate);
     this.recipeGroup.controls['description'].setValue(recipe.Description);
     this.recipeGroup.controls['content'].setValue(recipe.Instructions);

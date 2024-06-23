@@ -81,6 +81,11 @@ export class UpdateProduct {
 export class ProductListSimpleVM {
   Id: number;
   Name: string;
+  CostCode: number;
+  RecipeId: number;
+  Unit: number;
+  CostPrice: number;
+  SellingPrice: number;
 }
 
 export enum CostCode {

@@ -10,7 +10,7 @@ import { ToastrService } from 'ngx-toastr';
 import { ToolbarService } from '../../../services/layout/toolbar.service';
 import { SupplierService } from 'src/app/services/bakery/supplier.service';
 import { RawMaterialService } from 'src/app/services/bakery/raw-material.service';
-import { ProductService } from 'src/app/services/bakery/product.service';
+import { ProductService } from '../../../services/bakery/product.service';
 import { RawMaterialListSimpleVM } from 'src/app/models/RawMaterials/RawMaterial';
 import { ProductListSimpleVM } from 'src/app/models/Products/product';
 import { SearchItemType } from 'src/app/models/enum_collection/enumType';

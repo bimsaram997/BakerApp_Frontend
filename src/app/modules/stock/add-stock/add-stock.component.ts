@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, Subscription } from 'rxjs';
 import { AllMasterData, MasterDataVM } from 'src/app/models/MasterData/MasterData';
-import { ResultView } from 'src/app/models/ResultView';
+import { AddResultVM, ResultView } from 'src/app/models/ResultView';
 import { MasterDataService } from 'src/app/services/bakery/master-data.service';
 import { ProductListSimpleVM, ProductVM } from '../../../models/Products/product';
 import { EnumType, SearchItemType } from '../../../models/enum_collection/enumType';
@@ -23,6 +23,9 @@ import { MasterDataCode } from 'src/app/models/enum_collection/masterDataCode';
 import { SupplierService } from 'src/app/services/bakery/supplier.service';
 import { SupplerListSimpleFilter, SupplierListSimpleVM } from 'src/app/models/Supplier/Supplier';
 import { CustomValidators } from 'src/app/shared/utils/custom-validators';
+import { AddStock } from 'src/app/models/Stock/Stock';
+import { StockServiceService } from '../../../services/bakery/stock-service.service';
+import { S } from '@angular/cdk/keycodes';
 @Component({
   selector: 'app-add-stock',
   templateUrl: './add-stock.component.html',
@@ -60,7 +63,8 @@ export class AddStockComponent {
   reorderLevel: FormControl
   costPrice: FormControl;
   sellingPrice: FormControl;
-
+  recipeId: number;
+  minExpiryDate = null;
   constructor(
     private route: ActivatedRoute,
     private toolbarService: ToolbarService,
@@ -70,7 +74,8 @@ export class AddStockComponent {
     private toastr: ToastrService,
     private productService: ProductService,
     private recipeService: RecipeService,
-    private supplierService: SupplierService
+    private supplierService: SupplierService,
+    private stockServiceService: StockServiceService
   ) {}
 
   ngOnInit() {
@@ -81,11 +86,14 @@ export class AddStockComponent {
         this.supplierId = id;
       }
     });
+
     this.getCostCodes();
     this.getUnits();
     this.getListProducts();
     this.getSupplyingType();
     this.createFormGroup();
+    this. disableSpecificFields();
+    this.setMinExpiryDate();
     if (this.mode === 'view') {
       this.toolBarButtons = [ToolbarButtonType.Edit, ToolbarButtonType.Cancel];
       this.toolbarService.updateCustomButtons(this.toolBarButtons);
@@ -102,7 +110,7 @@ export class AddStockComponent {
         ToolbarButtonType.SaveClose,
         ToolbarButtonType.Cancel,
       ];
-      // if(this.supplierGroup.controls['supplierFirstName'].value == null) {
+      // if(this.stockGroup.controls['supplierFirstName'].value == null) {
       //   this.getSupplierById(this.supplierId)
       // }
       this.toolbarService.updateCustomButtons(this.toolBarButtons);
@@ -136,17 +144,15 @@ export class AddStockComponent {
   createFormGroup(): void {
     this.stockGroup = this.fb.group({
       product: [null, Validators.required],
-      unit: [null, Validators.required],
+      unit: [null,  Validators.required],
       costCode: [null, Validators.required],
-      sellingPrice: [null, Validators.required],
-      costPrice: [null, [Validators.required, Validators.minLength(10)]],
       recipeName:[null, [Validators.required]],
       rawMaterials: [null, [Validators.required]],
       supplyingType: [null, [Validators.required]],
-      supplierId: [null, [Validators.required]],
+      supplierId: [null],
       manufactureDate: [null, [Validators.required]],
       expiryDate: [null, [Validators.required]],
-
+      addedDate: [null, [Validators.required]],
     });
     this.itemCount = new FormControl(null);
     this.itemCount.setValidators([
@@ -173,14 +179,116 @@ export class AddStockComponent {
     ]);
   }
 
+  disableSpecificFields(): void {
+    this.stockGroup.controls['unit'].disable();
+    this.stockGroup.controls['costCode'].disable();
+    this.stockGroup.controls['recipeName'].disable();
+    this.stockGroup.controls['rawMaterials'].disable();
+    this.stockGroup.controls['unit'].disable();
+    this.stockGroup.controls['supplyingType'].disable();
+    this.stockGroup.controls['supplierId'].disable();
+    this.stockGroup.controls['manufactureDate'].disable();
+    this.stockGroup.controls['addedDate'].disable();
+    this.stockGroup.controls['expiryDate'].disable();
+    this.costPrice.disable();
+    this.sellingPrice.disable();
+    this.itemCount.disable();
+    this.reorderLevel.disable();
+  }
+
+  addStock(): void {
+    Object.values(this.stockGroup.controls).forEach((control) => {
+      control.markAsTouched();
+    });
+
+    if (
+      this.stockGroup.valid
+    ) {
+      try {
+        this.toolbarService.enableButtons(false);
+        const formData = this.stockGroup.value;
+
+
+        const addStock: AddStock = {
+          ProductId:  formData.product,
+          Unit: formData.unit,
+          CostCode: formData.costCode,
+          SellingPrice: this.sellingPrice.value,
+          CostPrice: this.costPrice.value,
+          RecipeId: this.recipeId,
+          SupplyTypeId: formData.supplyingType,
+          SupplierId: formData.supplierId,
+          ManufacturedDate: formData.manufactureDate,
+          ExpiredDate: formData.expiryDate,
+          ItemQuantity: this.itemCount.value,
+          ReorderLevel: this.reorderLevel.value,
+          AddedDate: formData.addedDate,
+
+        };
+        const updateResponse = this.stockServiceService.addStock(addStock);
+        this.subscription.push(
+          updateResponse
+            .pipe(
+              catchError((error) => {
+                this.toastr.error('Error!', error.error.Message);
+                this.toolbarService.enableButtons(true);
+                return error;
+              })
+            )
+            .subscribe((res: AddResultVM) => {
+              if (res != null) {
+                this.toolbarService.enableButtons(true);
+                this.toastr.success('Success!', 'Supplier added!');
+           //    this.getSupplierById(res.Id);
+                this.supplierId = res.Id
+                if (this.saveCloseValue) {
+                // this.saveClose();
+                } else {
+                  this.router.navigate([
+                    'base/supplier/add',
+                    'view',
+                    this.supplierId,
+                  ]);
+                  this.header = 'View supplier';
+                  this.toolbarService.updateToolbarContent(this.header);
+                //  this.disableFormGroup();
+                //  this.removeSpecificButtons();
+                }
+              }
+            })
+        );
+
+      } catch (error) {
+        this.toolbarService.enableButtons(true);
+        console.error('An error occurred while adding the product:', error);
+        this.toastr.error('Error!', 'Failed to add the product.');
+      }
+    }
+  }
+
   selectProduct(value: MatSelectChange): void {
     this.productId = value.value;
     this.resetForm();
     this.getProductById(this.productId);
+    this.recipeId = null;
+    if (this.productId != null) {
+      this.enableSpecificFields();
+    }
+  }
+
+  enableSpecificFields(): void {
+    this.stockGroup.controls['supplyingType'].enable();
+    this.stockGroup.controls['supplierId'].enable();
+    this.stockGroup.controls['manufactureDate'].enable();
+    this.stockGroup.controls['addedDate'].enable();
+    this.stockGroup.controls['expiryDate'].enable();
+    this.itemCount.enable();
+    this.reorderLevel.enable();
   }
 
   selectSupplierType(value: MatSelectChange): void {
      const Id = value.value;
+     this.stockGroup.controls['supplierId'].setValue(null);
      const supplierCode  = this.supplyingTypes.find((suppliertype: MasterDataVM) => suppliertype.Id === Id).MasterValueCode;
      switch (supplierCode) {
       case MasterDataCode.InHouse:
@@ -200,22 +308,26 @@ export class AddStockComponent {
     }
 
     try {
-      const updateResponse = this.supplierService.getSupplierListSimple(supplierFilter);
-      this.subscription.push(
-        updateResponse
-          .pipe(
-            catchError((error) => {
-              this.toastr.error('Error!', error.error.Message);
+      if(supplierFilter.ProductIds.length > 0) {
+        const updateResponse = this.supplierService.getSupplierListSimple(supplierFilter);
+        this.subscription.push(
+          updateResponse
+            .pipe(
+              catchError((error) => {
+                this.toastr.error('Error!', error.error.Message);
 
-              return error;
+                return error;
+              })
+            )
+            .subscribe((res: ResultView<SupplierListSimpleVM[]>) => {
+              if (res != null) {
+                this.supplierList =  res.Item;
+              }
             })
-          )
-          .subscribe((res: ResultView<SupplierListSimpleVM[]>) => {
-            if (res != null) {
-              this.supplierList =  res.Item;
-            }
-          })
-      );
+        );
+      }
+
+
     }catch (error) {
 
       console.error('An error occurred while retrieving the suppliers:', error);
@@ -240,10 +352,11 @@ export class AddStockComponent {
             if (product != null) {
              this.stockGroup.controls['unit'].setValue(product.Item.Unit);
              this.stockGroup.controls['costCode'].setValue(product.Item.CostCode);
-             this.stockGroup.controls['sellingPrice'].setValue(product.Item.SellingPrice);
-             this.stockGroup.controls['costPrice'].setValue(product.Item.CostPrice);
+             this.sellingPrice.setValue(product.Item.SellingPrice);
+             this.costPrice.setValue(product.Item.CostPrice);
 
              //get recipe details and bind
+             this.recipeId = product.Item.RecipeId;
              this.getRecipeById(product.Item.RecipeId);
             }
           })
@@ -288,7 +401,7 @@ export class AddStockComponent {
         resultResponse
           .pipe(
             catchError((error) => {
-              this.toastr.error('Error!', error.error.Message);
+              this.toastr.error('Error!', error.message);
               return error;
             })
           )
@@ -311,7 +424,7 @@ export class AddStockComponent {
         resultResponse
           .pipe(
             catchError((error) => {
-              this.toastr.error('Error!', error.error.Message);
+              this.toastr.error('Error!', error.message);
               return error;
             })
           )
@@ -334,7 +447,7 @@ export class AddStockComponent {
         resultResponse
           .pipe(
             catchError((error) => {
-              this.toastr.error('Error!', error.error.Message);
+              this.toastr.error('Error!', error.message);
               return error;
             })
           )
@@ -349,6 +462,8 @@ export class AddStockComponent {
     }
 
   }
+
+
 
   resetForm(): void {
     this.supplierList = [];
@@ -402,7 +517,7 @@ export class AddStockComponent {
   handleButtonClick(buttonType: ToolbarButtonType): void {
     switch (buttonType) {
       case ToolbarButtonType.Save:
-      //  this.isEdit ? this.updateItem() : this.addSupplier();
+       this.isEdit ? this.updateItem() : this.addStock();
         this.saveCloseValue = false;
         break;
       case ToolbarButtonType.Edit:
@@ -410,7 +525,7 @@ export class AddStockComponent {
         break;
       case ToolbarButtonType.SaveClose:
         this.saveCloseValue = true;
-     //   this.isEdit ? this.updateItem() : this.addSupplier();
+        this.isEdit ? this.updateItem() : this.addStock();
         break;
       case ToolbarButtonType.Cancel:
       //  this.saveClose();
@@ -418,5 +533,30 @@ export class AddStockComponent {
       default:
         console.warn(`Unknown button type: ${buttonType}`);
     }
+  }
+
+  setMinExpiryDate() {
+
+    this.subscription.push( this.stockGroup.controls['manufactureDate'].valueChanges.subscribe(value => {
+      const manufactureDate = value;
+      if (manufactureDate) {
+        this.minExpiryDate = new Date(manufactureDate);
+        this.minExpiryDate.setDate(this.minExpiryDate.getDate() + 1);
+      } else {
+        this.minExpiryDate = null;
+      }
+    }));
+
+  }
+
+  minExpiryDateFilter = (d: Date | null): boolean => {
+    if (!this.minExpiryDate) {
+      return true;
+    }
+    return d > this.minExpiryDate;
+  }
+
+  updateItem() {
+    throw new Error('Method not implemented.');
   }
 }

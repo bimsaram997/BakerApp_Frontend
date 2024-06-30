@@ -1,16 +1,18 @@
-mat-sidenav-container {
+.main-container {
+  display: flex;
+  flex-direction: column;
   height: 100%;
+}
+
+.sidenav-container {
+  flex: 1;
+  display: flex;
 }
 
 mat-sidenav {
-  width: 240px;
-  min-width: 0;
-  color: var(--back-color);
+  width: 250px; /* Adjust width as necessary */
 }
 
 mat-sidenav-content {
-  overflow: auto; /* Enable scrolling content within the content area if needed */
-  height: 100%;
+  flex: 1;
 }
-
-

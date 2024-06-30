@@ -1,16 +1,13 @@
+<div class="main-container">
+  <app-mainheader (sidenavToggle)="toggleSidenav()"></app-mainheader>
 
-
-<mat-sidenav-container>
-  <mat-sidenav #sidenav >
+  <mat-sidenav-container class="sidenav-container">
+    <mat-sidenav #sidenav mode="side" position="start" [opened]="isSidenavOpen">
       <app-sidenavbar (sidenavClose)="sidenav.close()"></app-sidenavbar>
-
     </mat-sidenav>
 
-  <mat-sidenav-content>
-      <app-mainheader (sidenavToggle)="sidenav.toggle()"></app-mainheader>
-
-    <router-outlet></router-outlet>
-  </mat-sidenav-content>
-
-</mat-sidenav-container>
-
+    <mat-sidenav-content>
+      <router-outlet></router-outlet>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

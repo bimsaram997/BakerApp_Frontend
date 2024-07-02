@@ -266,14 +266,45 @@ export class AddStockComponent {
     }
   }
 
-  selectProduct(value: MatSelectChange): void {
-    this.productId = value.value;
-    this.resetForm();
-    this.getProductById(this.productId);
+  checkProductAssociatedWithStock(prodId: number): void {
+
+    try {
+      const resultResponse = this.stockServiceService.getProductId(prodId)
+      this.subscription.push(
+        resultResponse
+          .pipe(
+            catchError((error) => {
+              this.resetForm();
+              this.recipeId = null;
+              this.toastr.error('Error!', error.error.Message);
+
+              return error;
+            })
+          )
+          .subscribe((res: AddResultVM) => {
+            if (res.Id == 0) {
+              this.getProductById(prodId);
+            }else {
+              this.toastr.error('Error!', 'Product is associated with stock. Please selct new product.');
+            }
+          })
+      );
+    } catch (error) {
+     this.resetForm();
     this.recipeId = null;
-    if (this.productId != null) {
-      this.enableSpecificFields();
+      console.error('An error occurred while attempting to load recipes:', error);
     }
+
+
+  }
+
+
+
+  selectProduct(value: MatSelectChange): void {
+    this.recipeId = null;
+    this.productId = value.value;
+    this. disableSpecificFields();
+    this.checkProductAssociatedWithStock(this.productId);
   }
 
   enableSpecificFields(): void {
@@ -339,6 +370,9 @@ export class AddStockComponent {
   public getProductById(productId: number): void {
     if (productId > 0) {
       try {
+
+          this.enableSpecificFields();
+
       const resultResponse = this.productService.getProductById(productId);
       this.subscription.push(
         resultResponse
@@ -466,9 +500,12 @@ export class AddStockComponent {
 
 
   resetForm(): void {
+    this.stockGroup.reset();
     this.supplierList = [];
     this.stockGroup.controls['supplyingType'].setValue(null);
     this.stockGroup.controls['supplierId'].setValue(null);
+    this.sellingPrice.setValue(null);
+    this.costPrice.setValue(null);
   }
 
 
@@ -528,7 +565,7 @@ export class AddStockComponent {
         this.isEdit ? this.updateItem() : this.addStock();
         break;
       case ToolbarButtonType.Cancel:
-      //  this.saveClose();
+        this.saveClose();
         break;
       default:
         console.warn(`Unknown button type: ${buttonType}`);
@@ -558,5 +595,9 @@ export class AddStockComponent {
 
   updateItem() {
     throw new Error('Method not implemented.');
+  }
+
+  saveClose(): void {
+    this.router.navigate(['base/stock/stock']);
   }
 }

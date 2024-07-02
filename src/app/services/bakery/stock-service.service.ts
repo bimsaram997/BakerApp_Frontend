@@ -33,4 +33,8 @@ export class StockServiceService {
   public addStock( addStock: AddStock): Observable<any> {
     return this.http.post(`${this.myUrl}/Stock/addStock`, addStock );
 }
+public getProductId(prodId: number): Observable<any> {
+
+    return this.http.get(`${this.myUrl}/Stock/getProductId/${prodId}`);
+  }
 }

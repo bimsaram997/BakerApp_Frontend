@@ -5,9 +5,10 @@ import { ProductListComponent } from './product/product-list.component';
 import { ProductRoutingModule } from './products-routing.module';
 import { MaterialModule } from '../../material.module';
 import { ComponentsModule } from '../../shared/components/components.module';
-
+import { InputNumberModule } from 'primeng/inputnumber';
 
 import { MatRippleModule } from '@angular/material/core';
+import { NGPrimeMaterialModule } from '../../ngPrime-material.module';
 
 
 //test
@@ -22,7 +23,9 @@ import { MatRippleModule } from '@angular/material/core';
     ProductRoutingModule,
     MaterialModule,
     ComponentsModule,
-    MatRippleModule
+    MatRippleModule,
+    NGPrimeMaterialModule,
+    InputNumberModule
   ]
 })
 export class ProductsModule { }

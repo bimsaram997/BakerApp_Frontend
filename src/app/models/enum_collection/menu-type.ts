@@ -6,6 +6,8 @@ export enum MenuType {
   Settings,
   MasterData,
   Supplier,
-  Stock
+  Stock,
+  Location,
+  Role
 }
 

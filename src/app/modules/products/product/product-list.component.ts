@@ -45,7 +45,6 @@ export class ProductListComponent implements OnInit, OnDestroy {
     'SellingPrice',
     'CostPrice',
     'AddedDate',
-    'ModifiedDate',
     'ProductDescription',
   ];
   dataSource = new MatTableDataSource<AllProductVM>();
@@ -58,7 +57,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   selectedId: string | null = null;
   id: number;
   units: MasterDataVM[];
-
+  showAdvancedFilters = false;
   costCodes: any[] = [
     {
       Id: 0,
@@ -82,7 +81,13 @@ export class ProductListComponent implements OnInit, OnDestroy {
   getCostCodeType(value: number): string {
     return CostCode[value];
   }
+  value1: number = 1500;
 
+  value2: number = 2500;
+
+  value3: number = 4250;
+
+  value4: number = 5002;
   constructor(
     private foodItemService: ProductService,
     private toolbarService: ToolbarService,
@@ -123,6 +128,9 @@ export class ProductListComponent implements OnInit, OnDestroy {
       unit: [null],
       costCode: [null],
       recipeId: [null],
+      reOrderLevel:[null],
+      weight: [null],
+      daysToExpires: [null]
     });
   }
 
@@ -178,6 +186,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   public getFoodItemsList(): void {
     this.dataSource.data = null;
+    const test  = this.searchProduct.get('recipeId').value?.Id
     const filter: ProductListAdvanceFilter = {
       SortBy: this.sort?.active || 'Id',
       IsAscending: false,
@@ -188,7 +197,9 @@ export class ProductListComponent implements OnInit, OnDestroy {
       CostCode: this.searchProduct.get('costCode').value,
       RecipeId: this.searchProduct.get('recipeId').value,
       CostPrice: this.searchProduct.get('costPrice').value,
-
+      Weight: this.searchProduct.get('weight').value ? (this.searchProduct.get('weight').value)/1000 : null,
+      ReOrderLevel:  this.searchProduct.get('reOrderLevel').value,
+      DaysToExpires:  this.searchProduct.get('daysToExpires').value,
       Pagination: {
         PageIndex: this.paginator?.pageIndex + 1 || 1,
         PageSize: this.paginator?.pageSize || 5,
@@ -281,6 +292,10 @@ export class ProductListComponent implements OnInit, OnDestroy {
     }
     this.toolbarService.updateCustomButtons(this.toolBarButtons);
   }
+  toggleAdvancedFilters() {
+    this.showAdvancedFilters = !this.showAdvancedFilters;
+  }
+
 
   ngOnDestroy(): void {
     this.toolbarService.updateCustomButtons([]);

@@ -64,3 +64,5 @@ export class UpdateMasterData {
 export class AllMasterData {
   Items: MasterDataVM[];
 }
+
+

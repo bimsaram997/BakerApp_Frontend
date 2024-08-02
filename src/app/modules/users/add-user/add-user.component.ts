@@ -19,10 +19,10 @@ import { MasterDataService } from '../../../services/bakery/master-data.service'
 import { EnumType } from '../../../models/enum_collection/enumType';
 import { AllMasterData, MasterDataVM } from '../../../models/MasterData/MasterData';
 import { RolesService } from '../../../services/bakery/roles.service';
-import { ReturnRoles, RolesVM } from 'src/app/models/Roles/roles';
 import { MatDialog } from '@angular/material/dialog';
 import { InfoBoxComponent } from 'src/app/shared/components/info-box/info-box.component';
 import { AddResultVM, ResultView } from 'src/app/models/ResultView';
+import { ReturnRoles, RolesVM } from 'src/app/models/role/role';
 @Component({
   selector: 'app-add-user',
   templateUrl: './add-user.component.html',

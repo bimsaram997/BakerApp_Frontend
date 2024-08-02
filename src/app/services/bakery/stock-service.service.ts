@@ -1,16 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { AddStock } from 'src/app/models/Stock/Stock';
+import { AddStock, StockListAdvanceFilter } from 'src/app/models/Stock/Stock';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class StockServiceService {
-
   myUrl = environment.baseUrl;
-
 
   constructor(private http: HttpClient) {
     //this.currntUserSubject = new BehaviorSubject<any>(JSON.parse(localStorage.getItem('currentUser')));
@@ -30,11 +28,20 @@ export class StockServiceService {
   //   return this.http.put(`${this.myUrl}/Recipe/updateRecipe/${recipeId}`, updateItem)
   // }
 
-  public addStock( addStock: AddStock): Observable<any> {
-    return this.http.post(`${this.myUrl}/Stock/addStock`, addStock );
-}
-public getProductId(prodId: number): Observable<any> {
-
+  public addStock(addStock: AddStock): Observable<any> {
+    return this.http.post(`${this.myUrl}/Stock/addStock`, addStock);
+  }
+  public getProductId(prodId: number): Observable<any> {
     return this.http.get(`${this.myUrl}/Stock/getProductId/${prodId}`);
+  }
+  public getStock(
+    filter: StockListAdvanceFilter
+  ): Observable<any> {
+    return this.http.post(`${this.myUrl}/Stock/listAdvance`, filter);
+  }
+
+
+  public getStockById(stockId: number): Observable<any> {
+    return this.http.get(`${this.myUrl}/Stock/getStockById/${stockId}`);
   }
 }

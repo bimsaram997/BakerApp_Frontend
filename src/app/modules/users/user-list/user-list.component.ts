@@ -24,9 +24,9 @@ import { MasterDataService } from '../../../services/bakery/master-data.service'
 import { EnumType } from '../../../models/enum_collection/enumType';
 import { AllMasterData, MasterDataVM } from '../../../models/MasterData/MasterData';
 import { RolesService } from '../../../services/bakery/roles.service';
-import { ReturnRoles, RolesVM } from 'src/app/models/Roles/roles';
 import { ResultView } from 'src/app/models/ResultView';
 import { ToastrService } from 'ngx-toastr';
+import { ReturnRoles, RolesVM } from 'src/app/models/role/role';
 @Component({
   selector: 'app-user-list',
   templateUrl: './user-list.component.html',

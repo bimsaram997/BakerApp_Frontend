@@ -11,4 +11,7 @@ export interface ProductListAdvanceFilter {
   Unit: number | null;
   CostCode: number | null;
   RecipeId: number | null;
+  ReOrderLevel: number | null;
+  Weight: number | null;
+  DaysToExpires: number | null;
 }

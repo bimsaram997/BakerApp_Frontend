@@ -1,15 +1,17 @@
 import { Component, ViewChild } from '@angular/core';
 import { ToolbarService } from '../../../services/layout/toolbar.service';
 import { ToolbarButtonType } from '../../../models/enum_collection/toolbar-button';
-import { Subscription } from 'rxjs';
+import { catchError, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatSort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import {
+  AllMasterData,
   AllMasterDataVM,
   MasterDataListAdvanceFilter,
+  MasterDataVM,
   PaginateMasterData,
 } from '../../../models/MasterData/MasterData';
 import { MasterDataService } from '../../../services/bakery/master-data.service';
@@ -17,119 +19,174 @@ import { MatCheckboxChange } from '@angular/material/checkbox';
 import { EnumTranslationService } from '../../../services/bakery/enum-translation.service';
 import {
   AllEnumTypeVM,
+  EnumType,
   PaginateEnumTypeData,
 } from '../../../models/enum_collection/enumType';
 import { MatDialog } from '@angular/material/dialog';
-import { AddMasterDataComponent } from '../add-master-data/add-master-data.component';
+import { AddResultVM, ResultView } from 'src/app/models/ResultView';
 import { ToastrService } from 'ngx-toastr';
-import { ResultView } from 'src/app/models/ResultView';
+import { RoleService } from 'src/app/services/bakery/role.service';
+import {
+  AllRolesVM,
+  PaginatedRoles,
+  RoleAdvanceFilter,
+} from 'src/app/models/role/role';
+import { LocationService } from 'src/app/services/bakery/location.service';
+import {
+  AllLocationListSimple,
+  LocationlListSimpleVM,
+} from 'src/app/models/Location/location';
+import { AddRoleComponent } from '../add-role/add-role.component';
 @Component({
-  selector: 'app-master-data-list',
-  templateUrl: './master-data-list.component.html',
-  styleUrls: ['./master-data-list.component.css'],
+  selector: 'app-role-list',
+  templateUrl: './role-list.component.html',
+  styleUrls: ['./role-list.component.css'],
 })
-export class MasterDataListComponent {
+export class RoleListComponent {
+  searchForm: FormGroup;
   subscription: Subscription[] = [];
-  header: string = 'Master data';
+  header: string = 'Roles';
   toolBarButtons: ToolbarButtonType[];
   searchUserForm: FormGroup;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   displayedColumns: string[] = [
     'select',
-    'MasterDataCode',
-    'MasterDataName',
-    'MasterDataSymbol',
-    'MasterValueCode',
-    'MasterColorCode',
-    'EnumType',
+    'Id',
+    'RoleName',
+    'StatusName',
+    'LocationName',
+    'RoleDescription',
     'AddedDate',
     'ModifiedDate',
   ];
-  dataSource = new MatTableDataSource<AllMasterDataVM>();
   selectedId: string | null = null;
   id: number;
   enumDataList: AllEnumTypeVM[];
   isEdit: boolean = false;
+  statuses: MasterDataVM[];
+  locations: LocationlListSimpleVM[];
+  dataSource = new MatTableDataSource<AllRolesVM>();
   constructor(
     private toolbarService: ToolbarService,
     private router: Router,
     private fb: FormBuilder,
     private masterDataService: MasterDataService,
-    private enumTranslationService: EnumTranslationService,
     public dialog: MatDialog,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private rolesService: RoleService,
+    private locationService: LocationService
   ) {}
   ngOnInit() {
     this.searchFormGroup();
-    this.loadEnumTypeData();
+    this.getStatuses();
+    this.listSimpleLocations();
+    this.loadRoleData();
     this.toolbarService.updateToolbarContent(this.header);
-    this.toolBarButtons = [ToolbarButtonType.New];
+    this.toolBarButtons = [];
     this.toolbarService.updateCustomButtons(this.toolBarButtons);
-    this.getMasterData();
   }
 
-  openDialog(): void {
-    const dialogRef = this.dialog.open(AddMasterDataComponent, {
-      data: { edit: this.isEdit, id: this.selectedId },
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.getMasterData();
-      }
+  searchFormGroup(): void {
+    this.searchForm = this.fb.group({
+      searchString: [null],
+      status: [null],
+      locationId: [null],
+      addedDate: [null],
+      roleDescription: [null],
     });
   }
 
-  search(): void {
-    this.getMasterData();
+  listSimpleLocations(): void {
+    try {
+      const resultResponse = this.locationService.locationListSimple();
+      this.subscription.push(
+        resultResponse
+          .pipe(
+            catchError((error) => {
+              this.toastr.error(
+                'Error!',
+                error.error?.Message ?? error.message
+              );
+              return error;
+            })
+          )
+          .subscribe((res: ResultView<LocationlListSimpleVM[]>) => {
+            if (res != null) {
+              this.locations = res.Item;
+            }
+          })
+      );
+    } catch (error) {
+      console.error(
+        'An error occurred while attempting to load location data:',
+        error
+      );
+    }
   }
 
-  clear(): void {
-    this.searchUserForm.reset();
-    this.getMasterData();
+  getStatuses(): void {
+    try {
+      const resultResponse = this.masterDataService.getMasterDataByEnumTypeId(
+        EnumType.Status
+      );
+      this.subscription.push(
+        resultResponse
+          .pipe(
+            catchError((error) => {
+              this.toastr.error(
+                'Error!',
+                error.error?.Message ?? error.message
+              );
+              return error;
+            })
+          )
+          .subscribe((res: ResultView<AllMasterData>) => {
+            if (res != null) {
+              this.statuses = res.Item.Items;
+            }
+          })
+      );
+    } catch (error) {
+      console.error(
+        'An error occurred while attempting to load location data:',
+        error
+      );
+    }
   }
-  public getMasterData(): void {
+
+  loadRoleData(): void {
     this.dataSource.data = null;
-    const filter: MasterDataListAdvanceFilter = {
+    const filter: RoleAdvanceFilter = {
       SortBy: this.sort?.active || 'Id',
       IsAscending: false,
-      EnumTypeId: this.searchUserForm.get('enumTypeId').value,
-      SearchString: this.searchUserForm.get('searchString').value,
-      AddedDate: this.searchUserForm.get('addedDate').value ?? null,
-
+      Status: this.searchForm.get('status').value,
+      SearchString: this.searchForm.get('searchString').value,
+      AddedDate: this.searchForm.get('addedDate').value,
+      LocationId: this.searchForm.get('locationId').value,
+      RoleDescription: this.searchForm.get('roleDescription').value,
       Pagination: {
         PageIndex: this.paginator?.pageIndex + 1 || 1,
         PageSize: this.paginator?.pageSize || 5,
       },
     };
 
-    this.masterDataService
-      .getMasterData(filter)
-      .subscribe((res: ResultView<PaginateMasterData>) => {
+    this.rolesService
+      .getRoles(filter)
+      .subscribe((res: ResultView<PaginatedRoles>) => {
         this.dataSource.data = res.Item.Items;
         this.dataSource.paginator = this.paginator;
         this.paginator.length = res.Item.TotalCount || 0; // Update paginator length
         this.dataSource.sort = this.sort;
       });
   }
-
-  loadEnumTypeData(): void {
-    this.subscription.push(
-      this.enumTranslationService
-        .getEnumData()
-        .subscribe((res: PaginateEnumTypeData) => {
-          this.enumDataList = res.Items;
-        })
-    );
+  search(): void {
+    this.loadRoleData();
   }
 
-  searchFormGroup(): void {
-    this.searchUserForm = this.fb.group({
-      searchString: [null],
-      status: [null],
-      addedDate: [null],
-    });
+  clear(): void {
+    this.searchForm.reset();
+    this.loadRoleData();
   }
 
   public handleButtonClick(buttonType: ToolbarButtonType): void {
@@ -146,29 +203,31 @@ export class MasterDataListComponent {
         this.openDialog();
         break;
       case ToolbarButtonType.Delete:
-        this.handleDelete();
+        // this.handleDelete();
         break;
       default:
         console.warn(`Unknown button type: ${buttonType}`);
     }
   }
-  navigateToEdiMasterData(id: number) {
+
+  openDialog(): void {
+    const dialogRef = this.dialog.open(AddRoleComponent, {
+      data: { edit: this.isEdit, id: this.selectedId },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.loadRoleData();
+      }
+      this.selectedId = null;
+      this.id = null;
+      this.removeSpecificButtons();
+    });
+  }
+  navigateToEditLocationData(id: number) {
     this.isEdit = true;
     this.selectedId = id.toString();
     this.openDialog();
-  }
-
-  handleDelete(): void {
-    this.subscription.push(
-      this.masterDataService
-        .deleteMasterDataById(+this.selectedId)
-        .subscribe((res: any) => {
-          if (res != null) {
-            this.toastr.success('Success!', 'Master data deleted!');
-            this.getMasterData();
-          }
-        })
-    );
   }
 
   isSelected(id: string): boolean {
@@ -182,16 +241,10 @@ export class MasterDataListComponent {
       const hasEditButton = this.toolBarButtons.includes(
         ToolbarButtonType.Edit
       );
-      const hasDeleteButton = this.toolBarButtons.includes(
-        ToolbarButtonType.Delete
-      );
 
       // Add Edit and Delete buttons if they are not already present
       if (!hasEditButton) {
         this.toolBarButtons.push(ToolbarButtonType.Edit);
-      }
-      if (!hasDeleteButton) {
-        this.toolBarButtons.push(ToolbarButtonType.Delete);
       }
 
       // Update custom buttons
@@ -231,12 +284,12 @@ export class MasterDataListComponent {
     this.sort.sortChange.subscribe(() => {
       if (this.paginator) {
         this.paginator.pageIndex = 0;
-        this.getMasterData();
+        this.loadRoleData();
       }
     });
 
     this.subscription.push(
-      this.paginator.page.subscribe(() => this.getMasterData())
+      this.paginator.page.subscribe(() => this.loadRoleData())
     );
   }
 

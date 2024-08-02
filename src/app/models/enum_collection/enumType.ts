@@ -20,7 +20,8 @@ export enum EnumType {
   Roles = 11,
   Countries = 12,
   CostCodes =13,
-  SupplyingType = 14
+  SupplyingType = 14,
+  Status = 15,
 }
 
 export enum AutoCompleteType {

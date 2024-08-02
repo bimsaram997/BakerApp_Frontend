@@ -5,10 +5,10 @@
     </div>
   </div>
   <div class="row form-body">
-    <div class="col-md-6">
+    <div class="col-md-9">
       <form action="" [formGroup]="productGroup">
         <div class="row">
-          <div class="col-md-12">
+          <div class="col-md-4">
             <mat-form-field appearance="outline">
               <mat-label>Product name</mat-label>
               <input
@@ -18,9 +18,7 @@
               />
             </mat-form-field>
           </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
+          <div class="col-md-4">
             <mat-form-field appearance="outline">
               <mat-label>Recipe</mat-label>
               <mat-select formControlName="recipeId">
@@ -35,9 +33,7 @@
               </mat-error>
             </mat-form-field>
           </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
+          <div class="col-md-4">
             <mat-form-field appearance="outline">
               <mat-label>Unit</mat-label>
               <mat-select formControlName="unit">
@@ -51,8 +47,9 @@
             </mat-form-field>
           </div>
         </div>
+        <div class="row"></div>
         <div class="row">
-          <div class="col-md-12">
+          <div class="col-md-4">
             <mat-form-field appearance="outline">
               <mat-label>Cost code</mat-label>
               <mat-select formControlName="costCode">
@@ -70,9 +67,7 @@
               </mat-error>
             </mat-form-field>
           </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
+          <div class="col-md-4">
             <mat-form-field appearance="outline">
               <mat-label>Cost price</mat-label>
               <input
@@ -97,9 +92,7 @@
               </mat-error>
             </mat-form-field>
           </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
+          <div class="col-md-4">
             <mat-form-field appearance="outline">
               <mat-label>Selling Price</mat-label>
               <input
@@ -127,7 +120,101 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-md-12">
+          <div class="col-md-4">
+            <mat-form-field appearance="outline">
+              <mat-label>Re order level</mat-label>
+              <input
+                matInput
+                type="number"
+                [formControl]="reOrderLevel"
+              />
+
+              <mat-error
+                *ngIf="
+                  reOrderLevel.invalid &&
+                  (reOrderLevel.dirty || reOrderLevel.touched)
+                "
+              >
+                <span *ngIf="reOrderLevel.hasError('required')">
+                  Re-order level price is required
+                </span>
+
+                <span *ngIf="reOrderLevel.hasError('nonNegative')">
+                  Re-order level cannot be negative
+                </span>
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="col-md-4">
+            <mat-form-field appearance="outline">
+              <mat-label>Weight</mat-label>
+              <input
+                matInput
+                type="number"
+
+                [formControl]="weight"
+              />
+              <span matTextSuffix>g</span>
+              <mat-error
+                *ngIf="weight.invalid && (weight.dirty || weight.touched)"
+              >
+                <span *ngIf="weight.hasError('required')">
+                  Re-order level price is required
+                </span>
+
+                <span *ngIf="weight.hasError('nonNegative')">
+                  Re-order level cannot be negative
+                </span>
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="col-md-4">
+            <mat-radio-group
+              aria-labelledby="example-radio-group-label"
+              class="example-radio-group"
+              formControlName="status"
+            >
+              <mat-radio-button
+                class="example-radio-button"
+                *ngFor="let status of statuses"
+                [value]="status.Id"
+              >
+                {{ status.Status }}
+              </mat-radio-button>
+            </mat-radio-group>
+            <mat-error
+            *ngIf="productGroup.get('status').hasError('required')"
+          >
+            Status is required
+          </mat-error>
+
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-4">
+            <mat-form-field appearance="outline">
+              <mat-label>Days to expire</mat-label>
+              <input
+                matInput
+                type="number"
+
+                [formControl]="daysToExpires"
+              />
+              <span matTextSuffix>day</span>
+              <mat-error
+                *ngIf="daysToExpires.invalid && (daysToExpires.dirty || daysToExpires.touched)"
+              >
+                <span *ngIf="daysToExpires.hasError('required')">
+                  Days to expir is required
+                </span>
+
+                <span *ngIf="weight.hasError('nonNegative')">
+                  Days to expir cannot be negative
+                </span>
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="col-md-4">
             <mat-form-field appearance="outline">
               <mat-label>Added date</mat-label>
               <input
@@ -148,9 +235,7 @@
               </mat-error>
             </mat-form-field>
           </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
+          <div class="col-md-4">
             <mat-form-field appearance="outline">
               <mat-label>Description</mat-label>
               <textarea
@@ -176,18 +261,27 @@
               style="display: none"
               (change)="onFileChange($event)"
             />
-            <button mat-raised-button (click)="triggerFileInput()"  [disabled]="isView">
+            <button
+              mat-raised-button
+              (click)="triggerFileInput()"
+              [disabled]="isView"
+            >
               {{ this.isEdit ? "Update image" : "Add image" }}
             </button>
           </div>
         </div>
       </form>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-3">
       <div class="row">
         <div class="col-md-1"></div>
         <div class="col-md-11">
-          <img class="image" [src]="imagePreview" alt="" srcset="" />
+          <p-image
+            [src]="imagePreview"
+            alt="Image"
+            width="250"
+            [preview]="true"
+          ></p-image>
         </div>
       </div>
     </div>

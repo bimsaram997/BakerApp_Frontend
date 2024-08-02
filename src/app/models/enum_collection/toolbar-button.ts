@@ -6,6 +6,7 @@ export enum ToolbarButtonType {
   SaveClose = 'Save & Close',
   Delete = 'Delete',
   Edit = 'Edit',
+  ReStock = 'Re-stock'
 }
 
 export enum ToolbarComptype {

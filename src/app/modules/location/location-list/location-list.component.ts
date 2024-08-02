@@ -1,102 +1,101 @@
 import { Component, ViewChild } from '@angular/core';
-import { ToolbarService } from '../../../services/layout/toolbar.service';
-import { ToolbarButtonType } from '../../../models/enum_collection/toolbar-button';
-import { Subscription } from 'rxjs';
-import { Router } from '@angular/router';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { MatSort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import {
-  AllMasterDataVM,
-  MasterDataListAdvanceFilter,
-  PaginateMasterData,
-} from '../../../models/MasterData/MasterData';
-import { MasterDataService } from '../../../services/bakery/master-data.service';
-import { MatCheckboxChange } from '@angular/material/checkbox';
-import { EnumTranslationService } from '../../../services/bakery/enum-translation.service';
+import { catchError, Subscription } from 'rxjs';
+import { ToolbarButtonType } from '../../../models/enum_collection/toolbar-button';
+import { AllLocationVM, LocationAdvanceFilter, PaginatedLocationData } from '../../../models/Location/location';
 import {
   AllEnumTypeVM,
+  EnumType,
   PaginateEnumTypeData,
 } from '../../../models/enum_collection/enumType';
+import { ToolbarService } from '../../../services/layout/toolbar.service';
+import { Router } from '@angular/router';
+import { EnumTranslationService } from '../../../services/bakery/enum-translation.service';
 import { MatDialog } from '@angular/material/dialog';
-import { AddMasterDataComponent } from '../add-master-data/add-master-data.component';
 import { ToastrService } from 'ngx-toastr';
+import { AddLocationComponent } from '../add-location/add-location.component';
+import { MatCheckboxChange } from '@angular/material/checkbox';
+import { MasterDataService } from 'src/app/services/bakery/master-data.service';
+import { AllMasterData, MasterDataVM } from 'src/app/models/MasterData/MasterData';
 import { ResultView } from 'src/app/models/ResultView';
+import { LocationService } from 'src/app/services/bakery/location.service';
 @Component({
-  selector: 'app-master-data-list',
-  templateUrl: './master-data-list.component.html',
-  styleUrls: ['./master-data-list.component.css'],
+  selector: 'app-location-list',
+  templateUrl: './location-list.component.html',
+  styleUrls: ['./location-list.component.css']
 })
-export class MasterDataListComponent {
+export class LocationListComponent {
   subscription: Subscription[] = [];
-  header: string = 'Master data';
+  header: string = 'Location';
   toolBarButtons: ToolbarButtonType[];
-  searchUserForm: FormGroup;
+  searchLocation: FormGroup;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   displayedColumns: string[] = [
     'select',
-    'MasterDataCode',
-    'MasterDataName',
-    'MasterDataSymbol',
-    'MasterValueCode',
-    'MasterColorCode',
-    'EnumType',
+    'LocationCode',
+    'LocationName',
+    'StatusName',
     'AddedDate',
-    'ModifiedDate',
+    'Addresses',
   ];
-  dataSource = new MatTableDataSource<AllMasterDataVM>();
+  dataSource = new MatTableDataSource<AllLocationVM>();
   selectedId: string | null = null;
   id: number;
   enumDataList: AllEnumTypeVM[];
   isEdit: boolean = false;
+  statuses:MasterDataVM[];
   constructor(
     private toolbarService: ToolbarService,
     private router: Router,
     private fb: FormBuilder,
-    private masterDataService: MasterDataService,
     private enumTranslationService: EnumTranslationService,
     public dialog: MatDialog,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private locationService: LocationService,
+    private masterDataService: MasterDataService
   ) {}
   ngOnInit() {
+    this.getStatuses();
     this.searchFormGroup();
-    this.loadEnumTypeData();
     this.toolbarService.updateToolbarContent(this.header);
     this.toolBarButtons = [ToolbarButtonType.New];
     this.toolbarService.updateCustomButtons(this.toolBarButtons);
-    this.getMasterData();
+    this.loadLocationData();
+  }
+
+  searchFormGroup(): void {
+    this.searchLocation = this.fb.group({
+      searchString: [null],
+      addedDate: [null],
+      status: [null],
+    });
   }
 
   openDialog(): void {
-    const dialogRef = this.dialog.open(AddMasterDataComponent, {
+    const dialogRef = this.dialog.open(AddLocationComponent, {
       data: { edit: this.isEdit, id: this.selectedId },
     });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.getMasterData();
+        this.loadLocationData();
       }
     });
   }
 
-  search(): void {
-    this.getMasterData();
-  }
 
-  clear(): void {
-    this.searchUserForm.reset();
-    this.getMasterData();
-  }
-  public getMasterData(): void {
+  loadLocationData(): void {
     this.dataSource.data = null;
-    const filter: MasterDataListAdvanceFilter = {
+    const filter: LocationAdvanceFilter = {
       SortBy: this.sort?.active || 'Id',
       IsAscending: false,
-      EnumTypeId: this.searchUserForm.get('enumTypeId').value,
-      SearchString: this.searchUserForm.get('searchString').value,
-      AddedDate: this.searchUserForm.get('addedDate').value ?? null,
+      Status: this.searchLocation.get('status').value,
+      SearchString: this.searchLocation.get('searchString').value,
+      AddedDate: this.searchLocation.get('addedDate').value,
 
       Pagination: {
         PageIndex: this.paginator?.pageIndex + 1 || 1,
@@ -104,9 +103,8 @@ export class MasterDataListComponent {
       },
     };
 
-    this.masterDataService
-      .getMasterData(filter)
-      .subscribe((res: ResultView<PaginateMasterData>) => {
+    this.locationService.getLocationData(filter)
+      .subscribe((res: ResultView<PaginatedLocationData>) => {
         this.dataSource.data = res.Item.Items;
         this.dataSource.paginator = this.paginator;
         this.paginator.length = res.Item.TotalCount || 0; // Update paginator length
@@ -114,22 +112,38 @@ export class MasterDataListComponent {
       });
   }
 
-  loadEnumTypeData(): void {
-    this.subscription.push(
-      this.enumTranslationService
-        .getEnumData()
-        .subscribe((res: PaginateEnumTypeData) => {
-          this.enumDataList = res.Items;
-        })
-    );
+
+  getStatuses(): void {
+    try {
+      const resultResponse = this.masterDataService.getMasterDataByEnumTypeId(EnumType.Status);
+      this.subscription.push(
+        resultResponse
+          .pipe(
+            catchError((error) => {
+              this.toastr.error('Error!', error.error.Message);
+              return error;
+            })
+          )
+          .subscribe((res: ResultView<AllMasterData>) => {
+            if (res != null) {
+              this.statuses = res.Item.Items;
+            }
+          })
+      );
+    } catch (error) {
+      console.error('An error occurred while attempting to load master data:', error);
+    }
+
   }
 
-  searchFormGroup(): void {
-    this.searchUserForm = this.fb.group({
-      searchString: [null],
-      status: [null],
-      addedDate: [null],
-    });
+
+  search(): void {
+    this.loadLocationData();
+  }
+
+  clear(): void {
+    this.searchLocation.reset();
+    this.loadLocationData();
   }
 
   public handleButtonClick(buttonType: ToolbarButtonType): void {
@@ -146,30 +160,19 @@ export class MasterDataListComponent {
         this.openDialog();
         break;
       case ToolbarButtonType.Delete:
-        this.handleDelete();
+       // this.handleDelete();
         break;
       default:
         console.warn(`Unknown button type: ${buttonType}`);
     }
   }
-  navigateToEdiMasterData(id: number) {
+  navigateToEditLocationData(id: number) {
     this.isEdit = true;
     this.selectedId = id.toString();
     this.openDialog();
   }
 
-  handleDelete(): void {
-    this.subscription.push(
-      this.masterDataService
-        .deleteMasterDataById(+this.selectedId)
-        .subscribe((res: any) => {
-          if (res != null) {
-            this.toastr.success('Success!', 'Master data deleted!');
-            this.getMasterData();
-          }
-        })
-    );
-  }
+
 
   isSelected(id: string): boolean {
     this.id = +id;
@@ -182,17 +185,12 @@ export class MasterDataListComponent {
       const hasEditButton = this.toolBarButtons.includes(
         ToolbarButtonType.Edit
       );
-      const hasDeleteButton = this.toolBarButtons.includes(
-        ToolbarButtonType.Delete
-      );
 
       // Add Edit and Delete buttons if they are not already present
       if (!hasEditButton) {
         this.toolBarButtons.push(ToolbarButtonType.Edit);
       }
-      if (!hasDeleteButton) {
-        this.toolBarButtons.push(ToolbarButtonType.Delete);
-      }
+
 
       // Update custom buttons
       this.toolbarService.updateCustomButtons(this.toolBarButtons);
@@ -231,12 +229,12 @@ export class MasterDataListComponent {
     this.sort.sortChange.subscribe(() => {
       if (this.paginator) {
         this.paginator.pageIndex = 0;
-        this.getMasterData();
+        this.loadLocationData();
       }
     });
 
     this.subscription.push(
-      this.paginator.page.subscribe(() => this.getMasterData())
+      this.paginator.page.subscribe(() => this.loadLocationData())
     );
   }
 

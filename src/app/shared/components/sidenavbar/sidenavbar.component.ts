@@ -25,6 +25,8 @@ export class SidenavbarComponent {
         { name: 'Master data', icon: 'assets/main images/fast-food.svg', menuType: MenuType.MasterData, visible: true },
         { name: 'Suppliers', icon: 'assets/main images/fast-food.svg', menuType: MenuType.Supplier, visible: true },
         { name: 'Stock', icon: 'assets/main images/fast-food.svg', menuType: MenuType.Stock, visible: true },
+        { name: 'Location', icon: 'assets/main images/fast-food.svg', menuType: MenuType.Location, visible: true },
+        { name: 'Roles', icon: 'assets/main images/fast-food.svg', menuType: MenuType.Role, visible: true },
         // { name: 'Sub Setting 2', icon: 'assets/main images/fast-food.svg', menuType: MenuType.SubSetting2, visible: true }
       ]
     }
@@ -67,6 +69,12 @@ export class SidenavbarComponent {
         break;
       case MenuType.Stock:
         this.router.navigate(['base/stock/stock']);
+        break;
+      case MenuType.Location:
+          this.router.navigate(['base/location/location']);
+          break;
+      case MenuType.Role:
+          this.router.navigate(['base/role/role']);
     }
 
   }

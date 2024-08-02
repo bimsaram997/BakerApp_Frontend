@@ -60,6 +60,10 @@ export class AddProductComponent implements OnInit, OnDestroy {
   productCount: FormControl;
   saveCloseValue: boolean = false;
   isView: boolean;
+  statuses: any[] = [
+    {Id: 0, Status: 'Discontinued'},
+    {Id: 1, Status: 'Active'}
+  ]
   costCodes: any[] = [
     {
       Id: 0,
@@ -79,6 +83,9 @@ export class AddProductComponent implements OnInit, OnDestroy {
   ];
   costPrice: FormControl;
   sellingPrice: FormControl;
+  reOrderLevel: FormControl;
+  weight: FormControl;
+  daysToExpires: FormControl;
   units: MasterDataVM[];
 
   constructor(
@@ -187,6 +194,7 @@ export class AddProductComponent implements OnInit, OnDestroy {
       productDescription: [null, Validators.required],
       imageURL: [null],
       addedDate: [null, Validators.required],
+      status: [null, Validators.required]
     });
     this.sellingPrice = new FormControl(null);
     this.sellingPrice.setValidators([
@@ -195,6 +203,23 @@ export class AddProductComponent implements OnInit, OnDestroy {
     ]);
     this.costPrice = new FormControl(null);
     this.costPrice.setValidators([
+      Validators.required,
+      CustomValidators.nonNegative(),
+    ]);
+    this.reOrderLevel =  new FormControl(null);
+    this.reOrderLevel.setValidators([
+      Validators.required,
+      CustomValidators.nonNegative(),
+    ]);
+
+    this.weight =  new FormControl(null);
+    this.weight.setValidators([
+      Validators.required,
+      CustomValidators.nonNegative(),
+    ]);
+
+    this.daysToExpires =  new FormControl(null);
+    this.daysToExpires.setValidators([
       Validators.required,
       CustomValidators.nonNegative(),
     ]);
@@ -245,11 +270,16 @@ export class AddProductComponent implements OnInit, OnDestroy {
         productDescription: foodItem.ProductDescription,
         costCode: foodItem.CostCode,
         imageURL: foodItem.ImageURL,
+        status: foodItem.Status ?? 1
       });
     }
     this.imagePreview = foodItem.ImageURL;
     this.costPrice.setValue(foodItem.CostPrice);
     this.sellingPrice.setValue(foodItem.SellingPrice);
+    this.reOrderLevel.setValue(foodItem.ReOrderLevel ?? null);
+    this.weight.setValue((foodItem.Weight * 1000) ?? null);
+    this.daysToExpires.setValue(foodItem.DaysToExpires ?? null);
+
     if (this.isView) {
       this.disableFormGroup();
     }
@@ -296,6 +326,10 @@ export class AddProductComponent implements OnInit, OnDestroy {
           CostPrice: this.costPrice.value,
           SellingPrice: this.sellingPrice.value,
           RecipeId: formData.recipeId,
+          ReOrderLevel: this.reOrderLevel.value,
+          Weight: (this.weight.value)/1000,
+          Status: formData.status,
+          DaysToExpires: this.daysToExpires.value
         };
         const updateResponse = this.productService.addProduct(addProduct);
         this.subscription.push(
@@ -310,7 +344,7 @@ export class AddProductComponent implements OnInit, OnDestroy {
             .subscribe((res: AddResultVM) => {
               if (res != null) {
                 this.toolbarService.enableButtons(true);
-                this.toastr.success('Success!', 'Recipe added!');
+                this.toastr.success('Success!', 'Product added!');
                 this.getProductById(res.Id);
                 this.productId = res.Id
                 if (this.saveCloseValue) {
@@ -344,7 +378,12 @@ export class AddProductComponent implements OnInit, OnDestroy {
     this.productGroup.disable();
     this.costPrice.disable();
     this.sellingPrice.disable();
+    this.weight.disable();
+    this.reOrderLevel.disable();
+    this.daysToExpires.disable();
     this.cd.detectChanges();
+
+
   }
 
   enableFormGroup(): void {
@@ -405,7 +444,10 @@ export class AddProductComponent implements OnInit, OnDestroy {
           this.productGroup.controls['recipeId'].value;
         this.updateProduct.SellingPrice = this.sellingPrice.value;
         this.updateProduct.CostPrice = this.costPrice.value;
-
+        this.updateProduct.ReOrderLevel = this.reOrderLevel.value;
+        this.updateProduct.Weight = (this.weight.value)/1000;
+        this.updateProduct.Status = this.productGroup.controls['status'].value;
+        this.updateProduct.DaysToExpires = this.daysToExpires.value;
         const updateResponse = this.productService.updateProductById(
           this.productId,
           this.updateProduct

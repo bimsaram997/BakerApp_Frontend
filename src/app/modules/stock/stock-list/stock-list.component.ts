@@ -19,6 +19,10 @@ import { MatSelectChange } from '@angular/material/select';
 import { MasterDataCode } from 'src/app/models/enum_collection/masterDataCode';
 import { SupplerListSimpleFilter, SupplierListSimpleVM } from 'src/app/models/Supplier/Supplier';
 import { SupplierService } from 'src/app/services/bakery/supplier.service';
+import { AllStockVM, PaginatedStocks, StockListAdvanceFilter } from 'src/app/models/Stock/Stock';
+import { MatTableDataSource } from '@angular/material/table';
+import { StockServiceService } from 'src/app/services/bakery/stock-service.service';
+import { MatCheckboxChange } from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-stock-list',
@@ -34,16 +38,20 @@ export class StockListComponent {
   @ViewChild(MatSort) sort!: MatSort;
   displayedColumns: string[] = [
     'select',
-    'SupplierFirstName',
-    'SupplierLastName',
-    'AddedDate',
-    'PhoneNumber',
-    'Email',
-    'Address',
-    'ModifiedDate',
-    'SupplierType',
-    'ProductIds',
-    'RawMaterialIds',
+    'StockCode',
+    'ProductName',
+    'BatchId',
+    'MeasureUnitName',
+    'CostCode',
+    'CostPrice',
+    'SellingPrice',
+    'RecipeName',
+    'SupplyTypeId',
+    'SupplierName',
+    'ManufacturedDate',
+    'ExpiredDate',
+    'ItemQuantity',
+    'ReorderLevel',
   ];
   toolBarButtons: ToolbarButtonType[];
   selectedId: string | null = null;
@@ -56,7 +64,7 @@ export class StockListComponent {
   staticRawterials: RawMaterialListSimpleVM[];
   isRawMaterial: boolean = null;
   header: string = 'Stock';
-  itemCount: FormControl<any>;
+  itemCount: FormControl<number>;
   sellingPrice: FormControl<any>;
   costPrice: FormControl<any>;
   reorderLevel: FormControl<any>;
@@ -67,6 +75,7 @@ export class StockListComponent {
   supplierList: SupplierListSimpleVM[] = [];
   showAdvancedFilters = false;
   costCodes: MasterDataVM[];
+  dataSource = new MatTableDataSource<AllStockVM>();
   constructor(
     private toolbarService: ToolbarService,
     private fb: FormBuilder,
@@ -76,6 +85,7 @@ export class StockListComponent {
     private productService: ProductService,
     private recipeService: RecipeService,
     private supplierService: SupplierService,
+    private stockServiceService: StockServiceService
   ) {}
 
   ngOnInit() {
@@ -90,6 +100,7 @@ export class StockListComponent {
     this.toolbarService.updateToolbarContent(this.header);
     this.toolBarButtons = [ToolbarButtonType.New];
     this.toolbarService.updateCustomButtons([ToolbarButtonType.New]);
+    this.getStocks();
     this.subscription.push(
       this.productSearchCtrl.valueChanges.subscribe((value: any) => {
         if (value != '') {
@@ -119,6 +130,42 @@ export class StockListComponent {
     this.sellingPrice = new FormControl(null);
     this.costPrice =  new FormControl(null);
   }
+
+  public getStocks(): void {
+    this.dataSource.data = null;
+    const filter: StockListAdvanceFilter = {
+      SortBy: this.sort?.active || 'Id',
+      IsAscending: false,
+      ProductId: this.searchStockForm.get('product').value,
+      Unit: this.searchStockForm.get('unit').value,
+      SearchString: this.searchStockForm.get('searchString').value,
+      AddedDate: this.searchStockForm.get('addedDate').value ?? null,
+      CostCode: this.searchStockForm.get('costCode').value,
+      RecipeId: this.searchStockForm.get('recipeId').value,
+      SupplyTypeId: this.searchStockForm.get('supplyingType').value,
+      SupplierId: this.searchStockForm.get('supplierId').value,
+      ManufacturedDate: this.searchStockForm.get('manufactureDate').value,
+      ExpiredDate: this.searchStockForm.get('expiryDate').value,
+      ItemQuantity: this.itemCount.value,
+      ReorderLevel: this.reorderLevel.value,
+      SellingPrice: this.sellingPrice.value,
+      CostPrice: this.costPrice.value,
+      Pagination: {
+        PageIndex: this.paginator?.pageIndex + 1 || 1,
+        PageSize: this.paginator?.pageSize || 5,
+      },
+    };
+
+    this.stockServiceService
+      .getStock(filter)
+      .subscribe((res:  ResultView<PaginatedStocks>) => {
+        this.dataSource.data = res.Item.Items;
+        this.dataSource.paginator = this.paginator;
+        this.paginator.length = res.Item.TotalCount || 0;
+        this.dataSource.sort = this.sort;
+      });
+  }
+
 
   selectSupplierType(value: MatSelectChange): void {
     const Id = value.value;
@@ -265,12 +312,17 @@ export class StockListComponent {
   }
 
   search(): void {
-    //this.getFoodItemsList();
+
+    this.getStocks();
   }
 
   clear(): void {
     this.searchStockForm.reset();
-   // this.getFoodItemsList();
+    this.searchStockForm.controls['supplyingType'].setValue(null);
+    this.searchStockForm.controls['supplierId'].setValue(null);
+    this.sellingPrice.setValue(null);
+    this.costPrice.setValue(null);
+    this.getStocks();
   }
 
   private _filterItems(value: string, searchItemType: SearchItemType): void {
@@ -321,6 +373,53 @@ export class StockListComponent {
     }
   }
 
+  isSelected(id: string): boolean {
+    this.id = +id;
+    return this.selectedId === id;
+  }
+
+  checkboxChanged(event: MatCheckboxChange, id: string): void {
+    if (event.checked) {
+      const hasEditButton = this.toolBarButtons.includes(
+        ToolbarButtonType.Edit
+      );
+      const hasDeleteButton = this.toolBarButtons.includes(
+        ToolbarButtonType.Delete
+      );
+
+      if (!hasEditButton) {
+        this.toolBarButtons.push(ToolbarButtonType.Edit);
+      }
+      if (!hasDeleteButton) {
+        this.toolBarButtons.push(ToolbarButtonType.Delete);
+      }
+      this.toolbarService.updateCustomButtons(this.toolBarButtons);
+    } else {
+      this.removeSpecificButtons();
+    }
+    if (this.selectedId === id) {
+      this.selectedId = null;
+      this.id = null;
+    } else {
+      this.selectedId = id;
+      this.id = +id;
+      console.log(this.selectedId);
+    }
+  }
+
+  removeSpecificButtons(): void {
+    const deleteIndex = this.toolBarButtons.indexOf(ToolbarButtonType.Delete);
+    if (deleteIndex !== -1) {
+      this.toolBarButtons.splice(deleteIndex, 1);
+    }
+    const editIndex = this.toolBarButtons.indexOf(ToolbarButtonType.Edit);
+    if (editIndex !== -1) {
+      this.toolBarButtons.splice(editIndex, 1);
+    }
+    this.toolbarService.updateCustomButtons(this.toolBarButtons);
+  }
+
+
 
   navigateToEditStock(id: number) {
     this.router.navigate(['base/stock/add', 'view', id]);
@@ -328,5 +427,14 @@ export class StockListComponent {
 
   public handleNewButton(): void {
     this.router.navigate(['base/stock/add', 'add']);
+  }
+
+  ngOnDestroy(): void {
+    this.toolbarService.updateCustomButtons([]);
+    this.toolbarService.updateToolbarContent('');
+    this.toolbarService.unsubscribeAll();
+    this.subscription.forEach((subscription: Subscription) => {
+      subscription.unsubscribe();
+    });
   }
 }

@@ -35,6 +35,10 @@ export class ProductVM {
   AddedDate: string | null;
   ModifiedDate: string | null;
   IsDeleted: boolean;
+  ReOrderLevel: number;
+  Weight: number;
+  Status: number;
+  DaysToExpires: number;
 }
 
 
@@ -64,6 +68,10 @@ export class AddProductRequest {
   ProductDescription: string;
   ImageURL: string;
   AddedDate: string;
+  ReOrderLevel: number;
+  Weight: number;
+  Status: number;
+  DaysToExpires: number;
 }
 
 export class UpdateProduct {
@@ -75,6 +83,10 @@ export class UpdateProduct {
   RecipeId: number;
   ProductDescription: string;
   ImageURL: string;
+  ReOrderLevel: number;
+  Weight: number;
+  Status: number;
+  DaysToExpires: number;
 }
 
 

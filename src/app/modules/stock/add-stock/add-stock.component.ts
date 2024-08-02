@@ -23,7 +23,7 @@ import { MasterDataCode } from 'src/app/models/enum_collection/masterDataCode';
 import { SupplierService } from 'src/app/services/bakery/supplier.service';
 import { SupplerListSimpleFilter, SupplierListSimpleVM } from 'src/app/models/Supplier/Supplier';
 import { CustomValidators } from 'src/app/shared/utils/custom-validators';
-import { AddStock } from 'src/app/models/Stock/Stock';
+import { AddStock, StockVM } from 'src/app/models/Stock/Stock';
 import { StockServiceService } from '../../../services/bakery/stock-service.service';
 import { S } from '@angular/cdk/keycodes';
 @Component({
@@ -38,7 +38,7 @@ export class AddStockComponent {
   subscription: Subscription[] = [];
   header: string;
   mode: string;
-  supplierId: number;
+  stockId: number;
   stockGroup: FormGroup;
   isEdit: boolean = false;
   @ViewChild('fileInput') fileInput: ElementRef;
@@ -65,6 +65,8 @@ export class AddStockComponent {
   sellingPrice: FormControl;
   recipeId: number;
   minExpiryDate = null;
+  supplierId: number;
+  stock: StockVM;
   constructor(
     private route: ActivatedRoute,
     private toolbarService: ToolbarService,
@@ -83,7 +85,9 @@ export class AddStockComponent {
       this.mode = params['mode'];
       const id: number = +params['id'];
       if (id !== null) {
+        this.stockId = id;
         this.supplierId = id;
+
       }
     });
 
@@ -95,25 +99,12 @@ export class AddStockComponent {
     this. disableSpecificFields();
     this.setMinExpiryDate();
     if (this.mode === 'view') {
-      this.toolBarButtons = [ToolbarButtonType.Edit, ToolbarButtonType.Cancel];
+      this.toolBarButtons = [ToolbarButtonType.ReStock, ToolbarButtonType.Cancel];
       this.toolbarService.updateCustomButtons(this.toolBarButtons);
       this.isView = true;
       this.header = 'View stock';
       this.toolbarService.updateToolbarContent(this.header);
-     // this.getSupplierById(this.supplierId);
-    } else if (this.mode === 'edit') {
-      this.header = 'Edit stock';
-      this.isEdit = true;
-      this.toolbarService.updateToolbarContent(this.header);
-      this.toolBarButtons = [
-        ToolbarButtonType.Save,
-        ToolbarButtonType.SaveClose,
-        ToolbarButtonType.Cancel,
-      ];
-      // if(this.stockGroup.controls['supplierFirstName'].value == null) {
-      //   this.getSupplierById(this.supplierId)
-      // }
-      this.toolbarService.updateCustomButtons(this.toolBarButtons);
+      this.getStockById(this.stockId);
     } else {
       this.header = 'Add stock';
       this.toolbarService.updateToolbarContent(this.header);
@@ -179,6 +170,60 @@ export class AddStockComponent {
     ]);
   }
 
+  getStockById(stockId: number): void {
+    if (stockId > 0) {
+      try {
+      const resultResponse = this.stockServiceService.getStockById(stockId);
+      this.subscription.push(
+        resultResponse
+          .pipe(
+            catchError((error) => {
+              this.toastr.error('Error!', error.error.Message);
+              return error;
+            })
+          )
+          .subscribe((stock: ResultView<StockVM>) => {
+            if (stock != null) {
+              this.setValuestoForm(stock.Item);
+            }
+          })
+      );
+      } catch (error) {
+        console.error('An error occurred while attempting to log in:', error);
+      }
+
+    }
+  }
+
+
+  setValuestoForm(stock: StockVM): void {
+    if (stock != null) {
+      this.stock = stock;
+      this.productId =  stock.ProductId;
+      this.getRecipeById(stock.RecipeId);
+      this.stockGroup.controls['product'].setValue(stock.ProductId);
+      this.stockGroup.controls['unit'].setValue(stock.Unit);
+      this.stockGroup.controls['costCode'].setValue(stock.CostCode);
+      this.stockGroup.controls['addedDate'].setValue(stock.AddedDate);
+      this.stockGroup.controls['supplyingType'].setValue(stock.SupplyTypeId);
+      this.stockGroup.controls['manufactureDate'].setValue(stock.ManufacturedDate);
+      this.stockGroup.controls['expiryDate'].setValue(stock.ExpiredDate);
+      this.stockGroup.controls['addedDate'].setValue(stock.AddedDate);
+      this.stockGroup.controls['supplyingType'].setValue(stock.SupplyTypeId);
+      if (stock.SupplyTypeId  == 20) {
+        this.getSuppliers();
+        this.isExternalSupplier = true;
+
+      }
+
+
+      this.itemCount.setValue(stock.ItemQuantity);
+      this.reorderLevel.setValue(stock.ReorderLevel);
+      this.sellingPrice.setValue(stock.SellingPrice);
+      this.costPrice.setValue(stock.CostPrice);
+    }
+  }
+
   disableSpecificFields(): void {
     this.stockGroup.controls['unit'].disable();
     this.stockGroup.controls['costCode'].disable();
@@ -206,7 +251,7 @@ export class AddStockComponent {
     ) {
       try {
         this.toolbarService.enableButtons(false);
-        const formData = this.stockGroup.value;
+        const formData = this.stockGroup.getRawValue();
 
 
         const addStock: AddStock = {
@@ -217,7 +262,7 @@ export class AddStockComponent {
           CostPrice: this.costPrice.value,
           RecipeId: this.recipeId,
           SupplyTypeId: formData.supplyingType,
-          SupplierId: formData.supplierId,
+          SupplierId: formData.stockId,
           ManufacturedDate: formData.manufactureDate,
           ExpiredDate: formData.expiryDate,
           ItemQuantity: this.itemCount.value,
@@ -238,21 +283,20 @@ export class AddStockComponent {
             .subscribe((res: AddResultVM) => {
               if (res != null) {
                 this.toolbarService.enableButtons(true);
-                this.toastr.success('Success!', 'Supplier added!');
-           //    this.getSupplierById(res.Id);
-                this.supplierId = res.Id
+                this.toastr.success('Success!', 'Stock added!');
+                this.stockId = res.Id
                 if (this.saveCloseValue) {
-                // this.saveClose();
+                 this.saveClose();
                 } else {
                   this.router.navigate([
-                    'base/supplier/add',
+                    'base/stock/add',
                     'view',
-                    this.supplierId,
+                    this.stockId,
                   ]);
-                  this.header = 'View supplier';
+                  this.header = 'View stock';
                   this.toolbarService.updateToolbarContent(this.header);
                 //  this.disableFormGroup();
-                //  this.removeSpecificButtons();
+                this.removeSpecificButtons();
                 }
               }
             })
@@ -353,6 +397,9 @@ export class AddStockComponent {
             .subscribe((res: ResultView<SupplierListSimpleVM[]>) => {
               if (res != null) {
                 this.supplierList =  res.Item;
+                if (this.stock != null ) {
+                  this.stockGroup.controls['supplierId'].setValue(this.stock.SupplierId);
+                }
               }
             })
         );
@@ -503,7 +550,7 @@ export class AddStockComponent {
     this.stockGroup.reset();
     this.supplierList = [];
     this.stockGroup.controls['supplyingType'].setValue(null);
-    this.stockGroup.controls['supplierId'].setValue(null);
+    this.stockGroup.controls['stockId'].setValue(null);
     this.sellingPrice.setValue(null);
     this.costPrice.setValue(null);
   }
@@ -585,6 +632,19 @@ export class AddStockComponent {
     }));
 
   }
+
+  removeSpecificButtons(): void {
+    const deleteIndex = this.toolBarButtons.indexOf(ToolbarButtonType.Save);
+    if (deleteIndex !== -1) {
+      this.toolBarButtons.splice(deleteIndex, 1);
+    }
+    const editIndex = this.toolBarButtons.indexOf(ToolbarButtonType.SaveClose);
+    if (editIndex !== -1) {
+      this.toolBarButtons.splice(editIndex, 1);
+    }
+    this.toolbarService.updateCustomButtons(this.toolBarButtons);
+  }
+
 
   minExpiryDateFilter = (d: Date | null): boolean => {
     if (!this.minExpiryDate) {

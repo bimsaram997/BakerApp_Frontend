@@ -22,7 +22,8 @@ import { RolesService } from '../../../services/bakery/roles.service';
 import { MatDialog } from '@angular/material/dialog';
 import { InfoBoxComponent } from 'src/app/shared/components/info-box/info-box.component';
 import { AddResultVM, ResultView } from 'src/app/models/ResultView';
-import { ReturnRoles, RolesVM } from 'src/app/models/role/role';
+import { ReturnRoles, RoleListSimpleVM, RolesVM } from 'src/app/models/role/role';
+import { RoleService } from 'src/app/services/bakery/role.service';
 @Component({
   selector: 'app-add-user',
   templateUrl: './add-user.component.html',
@@ -38,7 +39,6 @@ export class AddUserComponent implements OnInit, OnDestroy  {
   userGroup: FormGroup;
   imagePreview: string = 'assets/main images/placeholder.png';
   genders: MasterDataVM[];
-  roles: RolesVM[]
   countries: any[] = [
     { Id: 0, name: 'Sri Lanka' },
     { Id: 1, name: 'Finland' },
@@ -48,6 +48,7 @@ export class AddUserComponent implements OnInit, OnDestroy  {
   updateUserRequest: UpdateUser = new UpdateUser();
   addrressId: number;
   hide = true;
+  roles: RoleListSimpleVM[];
   constructor(
     private route: ActivatedRoute,
     private toolbarService: ToolbarService,
@@ -57,8 +58,8 @@ export class AddUserComponent implements OnInit, OnDestroy  {
     private router: Router,
     private loginService: LoginServiceService,
     private masterDataService: MasterDataService,
-    private roleService: RolesService,
     public dialog: MatDialog,
+    private roleService: RoleService,
   ) {}
 
   ngOnInit() {
@@ -191,10 +192,14 @@ export class AddUserComponent implements OnInit, OnDestroy  {
     }
 
   }
+
   public getRoles(): void {
-    this.subscription.push(this.roleService.getRoles().subscribe((res: ReturnRoles) => {
-      this.roles = res.Items;
-    }))
+    this.subscription.push(
+      this.roleService.listSimpleRoles()
+        .subscribe((res: ResultView<RoleListSimpleVM[]>) => {
+          this.roles = res.Item;
+        })
+    );
   }
 
   addUser() {

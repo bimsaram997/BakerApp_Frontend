@@ -28,4 +28,8 @@ export class RoleService {
   public updateRoleById(roleId: number, updateItem: UpdateRole): Observable<any> {
     return this.http.post(`${this.myUrl}/Roles/updateRoleById/${roleId}`, updateItem)
   }
+
+  public listSimpleRoles(): Observable<any> {
+    return this.http.get(`${this.myUrl}/Roles/listSimpleRole`);
+  }
 }

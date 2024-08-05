@@ -277,7 +277,11 @@ export class AddProductComponent implements OnInit, OnDestroy {
     this.costPrice.setValue(foodItem.CostPrice);
     this.sellingPrice.setValue(foodItem.SellingPrice);
     this.reOrderLevel.setValue(foodItem.ReOrderLevel ?? null);
-    this.weight.setValue((foodItem.Weight * 1000) ?? null);
+    if(foodItem.Weight !== null) {
+      this.weight.setValue(foodItem.Weight * 1000)
+    } else {
+      this.weight.setValue(null);
+    }
     this.daysToExpires.setValue(foodItem.DaysToExpires ?? null);
 
     if (this.isView) {

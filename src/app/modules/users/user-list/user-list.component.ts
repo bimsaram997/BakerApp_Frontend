@@ -23,10 +23,11 @@ import { ToolbarService } from '../../../services/layout/toolbar.service';
 import { MasterDataService } from '../../../services/bakery/master-data.service';
 import { EnumType } from '../../../models/enum_collection/enumType';
 import { AllMasterData, MasterDataVM } from '../../../models/MasterData/MasterData';
-import { RolesService } from '../../../services/bakery/roles.service';
 import { ResultView } from 'src/app/models/ResultView';
 import { ToastrService } from 'ngx-toastr';
-import { ReturnRoles, RolesVM } from 'src/app/models/role/role';
+import { ReturnRoles, RoleListSimpleVM, RolesVM } from 'src/app/models/role/role';
+import { RolesService } from 'src/app/services/bakery/roles.service';
+import { RoleService } from 'src/app/services/bakery/role.service';
 @Component({
   selector: 'app-user-list',
   templateUrl: './user-list.component.html',
@@ -60,7 +61,7 @@ export class UserListComponent {
   id: number;
 
   genders: MasterDataVM[];
-  roles: RolesVM[];
+  roles: RoleListSimpleVM[];
 
   constructor(
     private toolbarService: ToolbarService,
@@ -68,7 +69,7 @@ export class UserListComponent {
     private fb: FormBuilder,
     private loginService: LoginServiceService,
     private masterDataService: MasterDataService,
-    private roleService: RolesService,
+    private roleService: RoleService,
     private toastr: ToastrService,
   ) {}
   ngOnInit() {
@@ -103,12 +104,15 @@ export class UserListComponent {
     }
 
   }
-
   public getRoles(): void {
-    this.subscription.push(this.roleService.getRoles().subscribe((res: ReturnRoles) => {
-      this.roles = res.Items;
-    }))
+    this.subscription.push(
+      this.roleService.listSimpleRoles()
+        .subscribe((res: ResultView<RoleListSimpleVM[]>) => {
+          this.roles = res.Item;
+        })
+    );
   }
+
 
   search(): void {
     this.getUserList();

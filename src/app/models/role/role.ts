@@ -56,3 +56,7 @@ export class ReturnRoles {
   Items: RolesVM[];
 }
 
+export class RoleListSimpleVM {
+  Id: number;
+  RoleName: string;
+}

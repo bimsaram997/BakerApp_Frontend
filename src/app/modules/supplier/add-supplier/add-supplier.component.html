@@ -7,7 +7,7 @@
   <div class="row form-body">
     <form action="" [formGroup]="supplierGroup">
       <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-3">
           <mat-form-field appearance="outline">
             <mat-label>First name</mat-label>
             <input
@@ -22,7 +22,7 @@
             </mat-error>
           </mat-form-field>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
           <mat-form-field appearance="outline">
             <mat-label>Last name name</mat-label>
             <input
@@ -37,7 +37,7 @@
             </mat-error>
           </mat-form-field>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
           <mat-form-field appearance="outline">
             <mat-label>Added date</mat-label>
             <input
@@ -58,10 +58,7 @@
             </mat-error>
           </mat-form-field>
         </div>
-      </div>
-
-      <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-3">
           <mat-form-field appearance="outline">
             <mat-label>Phone number</mat-label>
             <input
@@ -81,7 +78,11 @@
             </mat-error>
           </mat-form-field>
         </div>
-        <div class="col-md-4">
+      </div>
+
+      <div class="row">
+
+        <div class="col-md-3">
           <mat-form-field appearance="outline">
             <mat-label>Email</mat-label>
             <input
@@ -98,20 +99,13 @@
             </mat-error>
           </mat-form-field>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
           <mat-radio-group  aria-label="Select an option" formControlName="supplierItemType">
             <mat-radio-button (change)="selectValue($event)"[value]="false">Raw material</mat-radio-button>
             <mat-radio-button (change)="selectValue($event)"  [value]="true" >Products</mat-radio-button>
           </mat-radio-group>
         </div>
-      </div>
-      <div class="row">
-        <div class="col-md-4">
-          <app-address-lookup
-          [addressForm]="supplierGroup.get('address')"
-        ></app-address-lookup>
-        </div>
-        <div class="col-md-4" *ngIf="!isProduct">
+        <div class="col-md-3" *ngIf="!isProduct">
           <mat-form-field  appearance="outline">
             <mat-label>Raw materials</mat-label>
             <mat-select   formControlName="rawMaterialIds" multiple>
@@ -125,7 +119,7 @@
             </mat-error>
           </mat-form-field>
         </div>
-        <div class="col-md-4" *ngIf="isProduct">
+        <div class="col-md-3" *ngIf="isProduct">
           <mat-form-field  appearance="outline">
             <mat-label>Products</mat-label>
             <mat-select formControlName="productIds" multiple>
@@ -141,6 +135,14 @@
           </mat-form-field>
 
         </div>
+      </div>
+      <div class="row">
+        <div class="col-md-8">
+          <app-address-lookup
+          [addressForm]="supplierGroup.get('address')"
+        ></app-address-lookup>
+        </div>
+
       </div>
     </form>
   </div>

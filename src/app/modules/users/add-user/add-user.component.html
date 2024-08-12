@@ -5,10 +5,10 @@
     </div>
   </div>
   <div class="row form-body">
-    <div class="col-md-6">
+    <div class="col-md-9">
       <form action="" [formGroup]="userGroup">
         <div class="row">
-          <div class="col-md-6">
+          <div class="col-md-4">
             <mat-form-field appearance="outline">
               <mat-label>First name</mat-label>
               <input
@@ -23,7 +23,7 @@
               </mat-error>
             </mat-form-field>
           </div>
-          <div class="col-md-6">
+          <div class="col-md-4">
             <mat-form-field appearance="outline">
               <mat-label>Last name</mat-label>
               <input
@@ -36,10 +36,7 @@
               </mat-error>
             </mat-form-field>
           </div>
-        </div>
-
-        <div class="row">
-          <div class="col-md-6">
+          <div class="col-md-4">
             <mat-form-field appearance="outline">
               <mat-label>Phone number</mat-label>
               <input
@@ -59,7 +56,10 @@
               </mat-error>
             </mat-form-field>
           </div>
-          <div class="col-md-6">
+        </div>
+
+        <div class="row">
+          <div class="col-md-4">
             <mat-form-field appearance="outline">
               <mat-label>Gender</mat-label>
               <mat-select formControlName="gender">
@@ -72,9 +72,7 @@
               </mat-error>
             </mat-form-field>
           </div>
-        </div>
-        <div class="row">
-          <div class="col-md-6">
+          <div class="col-md-4">
             <mat-form-field appearance="outline">
               <mat-label>Role</mat-label>
               <mat-select formControlName="role">
@@ -87,7 +85,7 @@
               </mat-error>
             </mat-form-field>
           </div>
-          <div class="col-md-6">
+          <div class="col-md-4">
             <mat-form-field appearance="outline">
               <mat-label>Added date</mat-label>
               <input
@@ -109,7 +107,6 @@
             </mat-form-field>
           </div>
         </div>
-
         <div class="row">
           <div class="col-md-12">
             <app-address-lookup
@@ -118,7 +115,7 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-md-12">
+          <div class="col-md-4">
             <mat-form-field appearance="outline">
               <mat-label>Email</mat-label>
               <input
@@ -135,10 +132,7 @@
               </mat-error>
             </mat-form-field>
           </div>
-        </div>
-
-        <div class="row" *ngIf="!this.isEdit">
-          <div class="col-md-6">
+          <div class="col-md-4" *ngIf="!this.isEdit">
             <mat-form-field appearance="outline">
               <mat-label>Password</mat-label>
               <input matInput placeholder="" formControlName="password" [type]="hide ? 'password' : 'text'"  />
@@ -160,14 +154,13 @@
             </mat-form-field>
 
           </div>
-          <div class="col-md-6">
+          <div class="col-md-4"  *ngIf="!this.isEdit">
             <mat-form-field appearance="outline">
               <mat-label>Re enter Password</mat-label>
               <input matInput placeholder="" formControlName="rePassword" />
             </mat-form-field>
           </div>
         </div>
-
         <div class="row">
           <div class="col-md-6">
             <input
@@ -183,7 +176,7 @@
         </div>
       </form>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-3">
       <div class="row">
         <div class="col-md-1"></div>
         <div class="col-md-11">

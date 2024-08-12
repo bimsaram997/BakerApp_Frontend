@@ -10,7 +10,7 @@
         <mat-card-content>
           <form [formGroup]="searchRecipeForm">
             <div class="row">
-              <div class="col-md-3">
+              <div class="col-md-2">
                 <mat-form-field appearance="outline">
                   <mat-label>Search by</mat-label>
                   <input
@@ -22,7 +22,7 @@
                 </mat-form-field>
               </div>
 
-              <div class="col-md-3">
+              <div class="col-md-2">
                 <mat-form-field appearance="outline">
                   <mat-label>Description</mat-label>
                   <input
@@ -33,7 +33,7 @@
                   <mat-icon matSuffix></mat-icon>
                 </mat-form-field>
               </div>
-              <div class="col-md-3">
+              <div class="col-md-2">
                 <mat-form-field appearance="outline">
                   <mat-label>Added date</mat-label>
                   <input
@@ -49,7 +49,7 @@
                   <mat-datepicker #picker></mat-datepicker>
                 </mat-form-field>
               </div>
-              <div class="col-md-3">
+              <div class="col-md-2">
                 <mat-form-field appearance="outline">
                   <mat-label>Raw material name</mat-label>
                   <mat-select formControlName="rawMaterialIds" multiple>
@@ -62,9 +62,7 @@
                   </mat-select>
                 </mat-form-field>
               </div>
-            </div>
-            <div class="row">
-              <div class="col-md-3 mt-2">
+              <div class="col-md-4 mt-2">
                 <button
                   mat-raised-button
                   color="primary"
@@ -82,6 +80,7 @@
                 </button>
               </div>
             </div>
+
           </form>
         </mat-card-content>
       </mat-card>

@@ -5,10 +5,10 @@
     </div>
   </div>
   <div class="row form-body">
-    <div class="col-md-6">
+    <div class="col-md-9">
       <form action="" [formGroup]="rawMaterialGroup">
         <div class="row">
-          <div class="col-md-12">
+          <div class="col-md-4">
             <mat-form-field appearance="outline">
               <mat-label>Raw material name</mat-label>
               <input
@@ -18,9 +18,7 @@
               />
             </mat-form-field>
           </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
+          <div class="col-md-4">
             <mat-form-field appearance="outline">
               <mat-label>Measuring unit</mat-label>
               <mat-select
@@ -41,9 +39,7 @@
               </mat-error>
             </mat-form-field>
           </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
+          <div class="col-md-4">
             <mat-form-field appearance="outline">
               <mat-label>Quantity</mat-label>
               <input
@@ -73,15 +69,13 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-md-12">
+          <div class="col-md-4">
             <mat-form-field appearance="outline">
               <mat-label>Unit price</mat-label>
               <input matInput placeholder="" [formControl]="unitPrice" />
             </mat-form-field>
           </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
+          <div class="col-md-4">
             <mat-form-field appearance="outline">
               <mat-label>Location</mat-label>
               <mat-select formControlName="locationId">
@@ -99,9 +93,7 @@
               </mat-error>
             </mat-form-field>
           </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
+          <div class="col-md-4">
             <mat-form-field appearance="outline">
               <mat-label>Added date</mat-label>
               <input
@@ -123,9 +115,8 @@
             </mat-form-field>
           </div>
         </div>
-
         <div class="row">
-          <div class="col-md-6">
+          <div class="col-md-4">
             <input
               type="file"
               #fileInput
@@ -139,7 +130,7 @@
         </div>
       </form>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-3">
       <div class="row">
         <div class="col-md-1"></div>
         <div class="col-md-11">

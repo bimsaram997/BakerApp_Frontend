@@ -63,3 +63,10 @@ export class RecipeListAdvanceFilter {
   Description: string | null;
   RawMaterialIds: number[] | null;
 }
+
+
+export class RecipeRawMaterialRequest {
+  rawMaterialId: number;
+  rawMaterialQuantity: number;
+  measureUnit: number;
+}

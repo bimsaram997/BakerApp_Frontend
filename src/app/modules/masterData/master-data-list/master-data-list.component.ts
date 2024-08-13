@@ -94,7 +94,7 @@ export class MasterDataListComponent {
     const filter: MasterDataListAdvanceFilter = {
       SortBy: this.sort?.active || 'Id',
       IsAscending: false,
-      EnumTypeId: this.searchUserForm.get('enumTypeId').value,
+      EnumTypeId: this.searchUserForm.get('enumTypeId').value ?? null,
       SearchString: this.searchUserForm.get('searchString').value,
       AddedDate: this.searchUserForm.get('addedDate').value ?? null,
 
@@ -129,6 +129,7 @@ export class MasterDataListComponent {
       searchString: [null],
       status: [null],
       addedDate: [null],
+      enumTypeId: [null],
     });
   }
 

@@ -14,14 +14,14 @@ export class PaginateEnumTypeData {
 
 export enum EnumType {
   Currency = 1,
-  MeasuringUnit = 2,
-  ItemUnit = 8,
-  Gender = 9,
-  Roles = 11,
-  Countries = 12,
+  MeasuringUnit = 6,
+  ItemUnit = 7,
+  Gender = 5,
+  Roles = 1,
+  Countries = 3,
   CostCodes =13,
   SupplyingType = 14,
-  Status = 15,
+  Status = 2,
 }
 
 export enum AutoCompleteType {

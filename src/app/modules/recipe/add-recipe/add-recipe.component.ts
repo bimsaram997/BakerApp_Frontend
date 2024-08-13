@@ -18,6 +18,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import {
   AddRecipeRequest,
   RecipeRawMaterial,
+  RecipeRawMaterialRequest,
   RecipeVM,
   UpdateRecipe,
 } from '../../../models/Recipe/Recipe';
@@ -435,10 +436,10 @@ export class AddRecipeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.router.navigate(['base/recipe/recipe']);
   }
 
-  getRawMaterialArray(): RecipeRawMaterial[] {
-    const rawMaterialsArray: RecipeRawMaterial[] = [];
+  getRawMaterialArray(): RecipeRawMaterialRequest[] {
+    const rawMaterialsArray: RecipeRawMaterialRequest[] = [];
     this.rawMaterials.controls.forEach((control) => {
-      const rawMaterial: RecipeRawMaterial = {
+      const rawMaterial: RecipeRawMaterialRequest = {
         rawMaterialId: control.get('rawMaterialId').value,
         rawMaterialQuantity: control.get('rawMaterialQuantity').value / 1000,
         measureUnit: control.get('measureunit').value,

@@ -15,21 +15,15 @@
               formControlName="product"
               (selectionChange)="selectProduct($event)"
             >
-              <mat-form-field appearance="outline">
-                <input
 
-                  matInput
-                  placeholder="Type for search..."
-                  (input)="onInputValueChanged(SearchItemType.Product)"
-                  [formControl]="productSearchCtrl"
-                  #productInput
-                />
-              </mat-form-field>
               <mat-option
                 *ngFor="let product of allProdcuts"
                 [value]="product.Id"
                 >{{ product.Name }}</mat-option
               >
+              <button mat-icon-button (click)="openDialog()"  matSuffix >
+                <mat-icon >help</mat-icon>
+               </button>
             </mat-select>
             <mat-error *ngIf="stockGroup.get('product').hasError('required')">
               Product is required

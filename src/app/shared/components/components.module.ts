@@ -9,6 +9,7 @@ import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.componen
 import { AddressLookupComponent } from './address-lookup/address-lookup.component';
 import { InfoBoxComponent } from './info-box/info-box.component';
 import { CustomAutocompleteComponent } from './custom-autocomplete/custom-autocomplete.component';
+import { ProductSearchComponent } from './product-search/product-search.component';
 
 
 
@@ -22,9 +23,11 @@ import { CustomAutocompleteComponent } from './custom-autocomplete/custom-autoco
     ConfirmDialogComponent,
     AddressLookupComponent,
     InfoBoxComponent,
-    CustomAutocompleteComponent
+    CustomAutocompleteComponent,
+    ProductSearchComponent,
+
   ],
-  entryComponents: [ConfirmDialogComponent, InfoBoxComponent],
+  entryComponents: [ConfirmDialogComponent, InfoBoxComponent, ProductSearchComponent],
   imports: [
     CommonModule,
     MaterialModule

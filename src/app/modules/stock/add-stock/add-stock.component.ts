@@ -26,6 +26,8 @@ import { CustomValidators } from 'src/app/shared/utils/custom-validators';
 import { AddStock, StockVM } from 'src/app/models/Stock/Stock';
 import { StockServiceService } from '../../../services/bakery/stock-service.service';
 import { S } from '@angular/cdk/keycodes';
+import { MatDialog } from '@angular/material/dialog';
+import { ProductSearchComponent } from 'src/app/shared/components/product-search/product-search.component';
 @Component({
   selector: 'app-add-stock',
   templateUrl: './add-stock.component.html',
@@ -77,7 +79,8 @@ export class AddStockComponent {
     private productService: ProductService,
     private recipeService: RecipeService,
     private supplierService: SupplierService,
-    private stockServiceService: StockServiceService
+    private stockServiceService: StockServiceService,
+    public dialog: MatDialog,
   ) {}
 
   ngOnInit() {
@@ -131,6 +134,16 @@ export class AddStockComponent {
       })
     );
   }
+
+  openDialog(): void {
+    const dialogRef = this.dialog.open(ProductSearchComponent, {
+      data: { title: "Product search", text: "" },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+    });
+  }
+
 
   createFormGroup(): void {
     this.stockGroup = this.fb.group({

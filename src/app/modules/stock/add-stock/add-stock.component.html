@@ -11,20 +11,15 @@
         <div class="col-md-3">
           <mat-form-field appearance="outline">
             <mat-label>Products</mat-label>
-            <mat-select
-              formControlName="product"
-              (selectionChange)="selectProduct($event)"
-            >
+            <input
+              matInput
+              formControlName="productName"
 
-              <mat-option
-                *ngFor="let product of allProdcuts"
-                [value]="product.Id"
-                >{{ product.Name }}</mat-option
-              >
+            />
               <button mat-icon-button (click)="openDialog()"  matSuffix >
                 <mat-icon >help</mat-icon>
                </button>
-            </mat-select>
+
             <mat-error *ngIf="stockGroup.get('product').hasError('required')">
               Product is required
             </mat-error>

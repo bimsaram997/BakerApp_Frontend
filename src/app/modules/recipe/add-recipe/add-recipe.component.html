@@ -65,7 +65,7 @@
                       <td mat-cell *matCellDef="let element; index as i" [formGroup]="element">
                         <mat-form-field appearance="outline" class="mt-2">
                           <mat-label>Name</mat-label>
-                          <mat-select formControlName="rawMaterialId" (selectionChange)="selectRawMaterial($event, i)">
+                          <mat-select formControlName="rawMaterialId" >
                             <mat-option *ngFor="let rawMaterial of rawMaterialList" [value]="rawMaterial.Id">
                               {{ rawMaterial.Name }}
                             </mat-option>

@@ -62,6 +62,7 @@ export class AllStockVM {
   Id: number;
   Unit: number;
   ProductId: number;
+  ProductName: string;
   CostCode: number;
   SellingPrice: number;
   CostPrice: number;

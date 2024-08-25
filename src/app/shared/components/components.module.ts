@@ -10,6 +10,7 @@ import { AddressLookupComponent } from './address-lookup/address-lookup.componen
 import { InfoBoxComponent } from './info-box/info-box.component';
 import { CustomAutocompleteComponent } from './custom-autocomplete/custom-autocomplete.component';
 import { ProductSearchComponent } from './product-search/product-search.component';
+import { RawMaterialSearchComponent } from './raw-material-search/raw-material-search.component';
 
 
 
@@ -25,9 +26,13 @@ import { ProductSearchComponent } from './product-search/product-search.componen
     InfoBoxComponent,
     CustomAutocompleteComponent,
     ProductSearchComponent,
+    RawMaterialSearchComponent,
 
   ],
-  entryComponents: [ConfirmDialogComponent, InfoBoxComponent, ProductSearchComponent],
+  entryComponents: [ConfirmDialogComponent,
+    InfoBoxComponent,
+     ProductSearchComponent,
+     RawMaterialSearchComponent],
   imports: [
     CommonModule,
     MaterialModule

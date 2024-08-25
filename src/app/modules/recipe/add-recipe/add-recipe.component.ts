@@ -36,6 +36,8 @@ import {
   MasterDataVM,
 } from '../../../models/MasterData/MasterData';
 import { AddResultVM, ResultView } from 'src/app/models/ResultView';
+import { MatDialog } from '@angular/material/dialog';
+import { RawMaterialSearchComponent } from 'src/app/shared/components/raw-material-search/raw-material-search.component';
 @Component({
   selector: 'app-add-recipe',
   templateUrl: './add-recipe.component.html',
@@ -69,7 +71,8 @@ export class AddRecipeComponent implements OnInit, OnDestroy, AfterViewInit {
     private changeDetectorRefs: ChangeDetectorRef,
     private recipeService: RecipeService,
     private rawMaterialService: RawMaterialService,
-    private masterDataService: MasterDataService
+    private masterDataService: MasterDataService,
+    public dialog: MatDialog,
   ) {}
 
   ngOnInit() {
@@ -136,17 +139,18 @@ export class AddRecipeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   addRow() {
-    this.rawMaterials.push(
-      this.fb.group({
-        rawMaterialId: [null, Validators.required],
-        rawMaterialQuantity: [null, Validators.required],
-        measureunit: [null, Validators.required],
-      })
-    );
+    // this.rawMaterials.push(
+    //   this.fb.group({
+    //     rawMaterialId: [null, Validators.required],
+    //     rawMaterialQuantity: [null, Validators.required],
+    //     measureunit: [null, Validators.required],
+    //   })
+    // );
 
-    this.dataSource = new MatTableDataSource(this.rawMaterials.controls);
-    this.dataSource.paginator = this.paginator;
-    this.changeDetectorRefs.detectChanges();
+    // this.dataSource = new MatTableDataSource(this.rawMaterials.controls);
+    // this.dataSource.paginator = this.paginator;
+    // this.changeDetectorRefs.detectChanges();
+    this.openDialog()
   }
 
   get rawMaterialIdControl() {
@@ -457,6 +461,43 @@ export class AddRecipeComponent implements OnInit, OnDestroy, AfterViewInit {
           this.rawMaterialList = res.Item;
         })
     );
+  }
+
+  openDialog(): void {
+    const existingItems = this.rawMaterials.controls.map(control => ({
+      id: control.get('rawMaterialId').value,
+      Quantity: control.get('rawMaterialQuantity').value,
+      MeasureUnit: control.get('measureunit').value
+    }));
+
+    // Open the dialog and pass the existing items
+    const dialogRef = this.dialog.open(RawMaterialSearchComponent, {
+      data: {
+        title: "Raw material search",
+        text: "",
+        existingItems: existingItems ?? null
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((selectedItems) => {
+      this.rawMaterials.clear();
+      if (selectedItems && selectedItems.length > 0) {
+        selectedItems.forEach((item: any) => {
+          this.rawMaterials.push(
+            this.fb.group({
+              rawMaterialId: [item.id, Validators.required],
+              rawMaterialQuantity: [item.Quantity, Validators.required],
+              measureunit: [item.MeasureUnit, Validators.required],
+            })
+          );
+        });
+
+        // Update the dataSource and paginator
+        this.dataSource = new MatTableDataSource(this.rawMaterials.controls);
+        this.dataSource.paginator = this.paginator;
+        this.changeDetectorRefs.detectChanges();
+      }
+    });
   }
   selectRawMaterial(value: MatSelectChange, rowIndex: number): void {
     const Id = value.value;

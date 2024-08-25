@@ -32,6 +32,7 @@
     "@types/jwt-decode": "^3.1.0",
     "angular-notifier": "^14.0.0",
     "bootstrap": "^5.3.2",
+    "front-end": "file:",
     "jwt-decode": "^4.0.0",
     "ngx-skeleton-loader": "^9.0.0",
     "ngx-toastr": "^18.0.0",

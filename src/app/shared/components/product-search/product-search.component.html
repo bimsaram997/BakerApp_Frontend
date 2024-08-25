@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>{{ dialogTitle }}</h2>
+<h2 mat-dialog-title class="header">{{ dialogTitle }}</h2>
 <div class="container">
 
   <mat-dialog-content>
@@ -190,7 +190,7 @@
                     Product name
                   </th>
                   <td mat-cell *matCellDef="let element" class="link">
-                    <a (click)="navigateToEditproduct(element.Id)">{{
+                    <a >{{
                       element.Name
                     }}</a>
                   </td>
@@ -280,7 +280,7 @@
     </div>
   </mat-dialog-content>
   <mat-dialog-actions  align="end">
-    <button mat-raised-button
+    <button mat-raised-button [disabled]=" this.selectedId  == null"
     color="primary" (click)="onConfirmClick()">Ok</button>
   </mat-dialog-actions>
 </div>

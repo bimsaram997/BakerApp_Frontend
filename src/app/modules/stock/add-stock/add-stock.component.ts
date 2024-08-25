@@ -141,6 +141,11 @@ export class AddStockComponent {
     });
 
     dialogRef.afterClosed().subscribe((result) => {
+      if(result !== null) {
+        this.stockGroup.reset();
+        this.selectProduct(result);
+
+      }
     });
   }
 
@@ -148,6 +153,7 @@ export class AddStockComponent {
   createFormGroup(): void {
     this.stockGroup = this.fb.group({
       product: [null, Validators.required],
+      productName: [null, Validators.required],
       unit: [null,  Validators.required],
       costCode: [null, Validators.required],
       recipeName:[null, [Validators.required]],
@@ -215,6 +221,7 @@ export class AddStockComponent {
       this.productId =  stock.ProductId;
       this.getRecipeById(stock.RecipeId);
       this.stockGroup.controls['product'].setValue(stock.ProductId);
+      this.stockGroup.controls['productName'].setValue(stock.ProductName);
       this.stockGroup.controls['unit'].setValue(stock.Unit);
       this.stockGroup.controls['costCode'].setValue(stock.CostCode);
       this.stockGroup.controls['addedDate'].setValue(stock.AddedDate);
@@ -357,9 +364,9 @@ export class AddStockComponent {
 
 
 
-  selectProduct(value: MatSelectChange): void {
+  selectProduct(id: number): void {
     this.recipeId = null;
-    this.productId = value.value;
+    this.productId = id;
     this. disableSpecificFields();
     this.checkProductAssociatedWithStock(this.productId);
   }
@@ -444,6 +451,11 @@ export class AddStockComponent {
           )
           .subscribe((product: ResultView<ProductVM>) => {
             if (product != null) {
+              this.stockGroup.controls['product'].setValue(product.Item.Id);
+              this.stockGroup.controls['productName'].setValue(product.Item.Name);
+              this.productId = product.Item.Id;
+
+
              this.stockGroup.controls['unit'].setValue(product.Item.Unit);
              this.stockGroup.controls['costCode'].setValue(product.Item.CostCode);
              this.sellingPrice.setValue(product.Item.SellingPrice);

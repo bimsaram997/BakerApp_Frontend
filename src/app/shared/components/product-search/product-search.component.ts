@@ -115,7 +115,7 @@ export class ProductSearchComponent implements OnInit, OnDestroy{
   }
 
   onConfirmClick(): void {
-    this.dialogRef.close(true);
+    this.dialogRef.close(this.selectedId);
   }
 
   search(): void {
@@ -224,36 +224,7 @@ export class ProductSearchComponent implements OnInit, OnDestroy{
       });
   }
 
-  public handleButtonClick(buttonType: ToolbarButtonType): void {
-    switch (buttonType) {
-      case ToolbarButtonType.New:
-        this.handleNewButton();
-        break;
-      case ToolbarButtonType.Update:
-        this.handleUpdateButton();
-        break;
-      case ToolbarButtonType.Edit:
-        this.navigateToEditproduct(this.id);
-        break;
-      case ToolbarButtonType.Delete:
-        //this.handleUpdateButton();
-        break;
-      default:
-        console.warn(`Unknown button type: ${buttonType}`);
-    }
-  }
 
-  navigateToEditproduct(id: number) {
-    this.router.navigate(['base/product/add', 'view', id]);
-  }
-
-  public handleNewButton(): void {
-    this.router.navigate(['base/product/add', 'add']);
-  }
-
-  private handleUpdateButton(): void {
-    console.log('Update button clicked - Dummy implementation');
-  }
 
   isSelected(id: string): boolean {
     this.id = +id;
@@ -262,22 +233,6 @@ export class ProductSearchComponent implements OnInit, OnDestroy{
 
   checkboxChanged(event: MatCheckboxChange, id: string): void {
     if (event.checked) {
-      const hasEditButton = this.toolBarButtons.includes(
-        ToolbarButtonType.Edit
-      );
-      const hasDeleteButton = this.toolBarButtons.includes(
-        ToolbarButtonType.Delete
-      );
-
-      if (!hasEditButton) {
-        this.toolBarButtons.push(ToolbarButtonType.Edit);
-      }
-      if (!hasDeleteButton) {
-        this.toolBarButtons.push(ToolbarButtonType.Delete);
-      }
-      this.toolbarService.updateCustomButtons(this.toolBarButtons);
-    } else {
-      this.removeSpecificButtons();
     }
     if (this.selectedId === id) {
       this.selectedId = null;
@@ -289,25 +244,12 @@ export class ProductSearchComponent implements OnInit, OnDestroy{
     }
   }
 
-  removeSpecificButtons(): void {
-    const deleteIndex = this.toolBarButtons.indexOf(ToolbarButtonType.Delete);
-    if (deleteIndex !== -1) {
-      this.toolBarButtons.splice(deleteIndex, 1);
-    }
-    const editIndex = this.toolBarButtons.indexOf(ToolbarButtonType.Edit);
-    if (editIndex !== -1) {
-      this.toolBarButtons.splice(editIndex, 1);
-    }
-    this.toolbarService.updateCustomButtons(this.toolBarButtons);
-  }
   toggleAdvancedFilters() {
     this.showAdvancedFilters = !this.showAdvancedFilters;
   }
 
 
   ngOnDestroy(): void {
-    this.toolbarService.updateCustomButtons([]);
-    this.toolbarService.updateToolbarContent('');
     this.toolbarService.unsubscribeAll();
     this.subscription.forEach((subscription: Subscription) => {
       subscription.unsubscribe();

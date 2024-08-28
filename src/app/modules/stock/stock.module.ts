@@ -7,6 +7,7 @@ import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 import { StockRoutingModule } from './stock-routing.module';
 import { StockListComponent } from './stock-list/stock-list.component';
 import { AddStockComponent } from './add-stock/add-stock.component';
+import { GoodRecieveNoteComponent } from './good-recieve-note/good-recieve-note.component';
 
 
 
@@ -14,7 +15,8 @@ import { AddStockComponent } from './add-stock/add-stock.component';
 @NgModule({
   declarations: [
     StockListComponent,
-    AddStockComponent
+    AddStockComponent,
+    GoodRecieveNoteComponent
   ],
   imports: [
     CommonModule,
